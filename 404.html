@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - 页面未找到 | RuiweihanHub</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preload" href="galaxy_background.jpg" as="image" type="image/jpeg">
+    
+    <style>
+        /* 404专用样式 */
+        .error-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .error-content {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.25) 0%, 
+                rgba(255, 255, 255, 0.1) 50%, 
+                rgba(255, 255, 255, 0.05) 100%);
+            backdrop-filter: blur(15px) saturate(180%);
+            -webkit-backdrop-filter: blur(15px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            padding: 60px 40px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            position: relative;
+            overflow: hidden;
+            max-width: 600px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .error-content:hover {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.35) 0%, 
+                rgba(255, 255, 255, 0.2) 50%, 
+                rgba(255, 255, 255, 0.1) 100%);
+            transform: translateY(-5px);
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+
+        .error-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.8), 
+                transparent);
+        }
+
+        .error-number {
+            font-size: 8rem;
+            font-weight: 200;
+            color: transparent;
+            margin: 0;
+            line-height: 1;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            -webkit-text-stroke: 2px #ff4444;
+            text-stroke: 2px #ff4444;
+        }
+
+        /* 浏览器兼容性 */
+        @supports not (-webkit-text-stroke: 2px #ff4444) {
+            .error-number {
+                color: #ff4444;
+                -webkit-text-stroke: none;
+                text-stroke: none;
+            }
+        }
+
+        .error-number::after {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                #ff4444, 
+                transparent);
+            border-radius: 2px;
+        }
+
+        .error-title {
+            font-size: 2.5rem;
+            color: #ffffff;
+            margin: 30px 0 20px;
+            font-weight: 600;
+        }
+
+        .error-description {
+            font-size: 1.2rem;
+            color: #f8f9fa;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .home-btn, .back-btn {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.3) 0%, 
+                rgba(255, 255, 255, 0.2) 50%, 
+                rgba(255, 255, 255, 0.1) 100%);
+            backdrop-filter: blur(15px) saturate(180%);
+            -webkit-backdrop-filter: blur(15px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            padding: 12px 30px;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-block;
+            box-shadow: 
+                0 4px 15px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .home-btn:hover, .back-btn:hover {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.4) 0%, 
+                rgba(255, 255, 255, 0.3) 50%, 
+                rgba(255, 255, 255, 0.2) 100%);
+            transform: translateY(-2px);
+            box-shadow: 
+                0 8px 25px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+
+        .floating-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .particle:nth-child(1) {
+            left: 10%;
+            animation-delay: 0s;
+            animation-duration: 6s;
+        }
+
+        .particle:nth-child(2) {
+            left: 20%;
+            animation-delay: 1s;
+            animation-duration: 8s;
+        }
+
+        .particle:nth-child(3) {
+            left: 70%;
+            animation-delay: 2s;
+            animation-duration: 7s;
+        }
+
+        .particle:nth-child(4) {
+            left: 80%;
+            animation-delay: 3s;
+            animation-duration: 9s;
+        }
+
+        .particle:nth-child(5) {
+            left: 50%;
+            animation-delay: 4s;
+            animation-duration: 6s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            50% {
+                transform: translateY(50vh) rotate(180deg);
+            }
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .error-container {
+                padding: 20px;
+            }
+            
+            .error-content {
+                padding: 40px 30px;
+            }
+            
+            .error-number {
+                font-size: 6rem;
+                -webkit-text-stroke: 1.5px #ff4444;
+                text-stroke: 1.5px #ff4444;
+            }
+            
+            .error-number::after {
+                width: 60px;
+                height: 2px;
+            }
+            
+            .error-title {
+                font-size: 2rem;
+            }
+            
+            .error-description {
+                font-size: 1.1rem;
+            }
+            
+            .error-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .home-btn, .back-btn {
+                width: 100%;
+                max-width: 200px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .error-content {
+                padding: 30px 20px;
+            }
+            
+            .error-number {
+                font-size: 4.5rem;
+                -webkit-text-stroke: 1px #ff4444;
+                text-stroke: 1px #ff4444;
+            }
+            
+            .error-number::after {
+                width: 50px;
+                height: 2px;
+            }
+            
+            .error-title {
+                font-size: 1.5rem;
+            }
+            
+            .error-description {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 立即显示背景图片，无任何延迟 -->
+    <div class="background" style="
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background-color: #000;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-image: url('galaxy_background.jpg');
+        z-index: 1;
+    "></div>
+    
+    <div class="container">
+        <div class="error-container">
+            <div class="error-content">
+                <div class="floating-particles">
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                </div>
+                
+                <h1 class="error-number">404</h1>
+                <h2 class="error-title">页面走丢了</h2>
+                <p class="error-description">
+                    抱歉，您访问的页面不存在或已被移动。<br>
+                    不要担心，让我们帮您找到正确的道路。
+                </p>
+                
+                <div class="error-actions">
+                    <a href="index.html" class="home-btn">返回首页</a>
+                    <button onclick="history.back()" class="back-btn">返回上页</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 2秒延迟加载，避免影响页面渲染
+        (function() {
+            // 2秒后开始预加载背景图片
+            setTimeout(() => {
+                // 创建多个Image对象并行加载
+                for (let i = 0; i < 5; i++) {
+                    const img = new Image();
+                    img.src = 'galaxy_background.jpg';
+                    img.loading = 'eager';
+                }
+            }, 2000);
+            
+            // 添加粒子动画
+            setInterval(() => {
+                const particles = document.querySelectorAll('.particle');
+                particles.forEach((particle, index) => {
+                    const randomDelay = Math.random() * 2;
+                    particle.style.animationDelay = `${randomDelay}s`;
+                });
+            }, 3000);
+        })();
+    </script>
+</body>
+</html>

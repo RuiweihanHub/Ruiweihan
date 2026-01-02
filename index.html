@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RuiweihanHub - 博客</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-logo"></div>
+        <div class="loading-text">RuiweihanHub</div>
+        <div class="loading-poetry" id="loadingPoetry"></div>
+        <div class="loading-dots">
+            <div class="loading-dot"></div>
+            <div class="loading-dot"></div>
+            <div class="loading-dot"></div>
+        </div>
+    </div>
+    
+    <div class="background" id="background"></div>
+    
+    <div class="container">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <div class="header-left">
+                <img src="avatar.png" alt="RuiweihanHub Avatar" class="avatar">
+                <div class="logo">RuiweihanHub</div>
+            </div>
+            <nav class="nav">
+                <a href="#home">首页</a>
+                <a href="#blog">博客</a>
+                <a href="#about">关于</a>
+                <a href="#contact">联系</a>
+            </nav>
+        </header>
+        
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <!-- 英雄区域 -->
+            <section class="hero-section">
+                <h1>欢迎来到我的博客</h1>
+                <p>前端开发者 & 设计师，专注于创造优雅的用户体验和现代化的前端解决方案</p>
+            </section>
+            
+            <!-- 博客文章网格 -->
+            <section class="blog-grid">
+                <article class="blog-post">
+                    <h3 class="post-title">现代CSS布局技术</h3>
+                    <p class="post-date">2025-12-15</p>
+                    <p class="post-excerpt">深入探讨最新的CSS Grid和Flexbox布局技术，以及如何创建响应式的现代网页设计。掌握这些技术将帮助你构建更加灵活和美观的用户界面。</p>
+                    <a href="#" class="read-more">阅读全文</a>
+                </article>
+                
+                <article class="blog-post">
+                    <h3 class="post-title">UI设计哲学思考</h3>
+                    <p class="post-date">2025-12-12</p>
+                    <p class="post-excerpt">设计不仅仅是视觉美观，更重要的是用户体验和功能性的完美结合。分享我在UI设计过程中的思考和方法论。</p>
+                    <a href="#" class="read-more">阅读全文</a>
+                </article>
+                
+                <article class="blog-post">
+                    <h3 class="post-title">JavaScript进阶技巧</h3>
+                    <p class="post-date">2025-12-08</p>
+                    <p class="post-excerpt">从基础语法到高级特性，深入理解现代JavaScript的核心概念，包括闭包、原型链、异步编程等重要概念。</p>
+                    <a href="#" class="read-more">阅读全文</a>
+                </article>
+            </section>
+            
+            <!-- 查看更多按钮 -->
+            <div class="load-more-container">
+                <a href="#" class="load-more-btn">查看更多文章</a>
+            </div>
+        </main>
+        
+        <!-- 底部栏 -->
+        <footer class="footer">
+            <div class="footer-content">
+                <h3>RuiweihanHub</h3>
+                <p>前端开发者 & 设计师</p>
+                <p>专注于创造优雅的用户体验</p>
+                <p>© 2025 All rights reserved.</p>
+                <div class="social-links">
+                    <a href="#">GitHub</a>
+                    <a href="#">微博</a>
+                    <a href="#">邮箱</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // 诗句数组
+        const poetryArray = [
+            { text: "春风得意马蹄疾，一日看尽长安花", author: "——杜甫" },
+            { text: "天若有情天亦老，人间正道是沧桑", author: "——岳飞" },
+            { text: "山重水复疑无路，柳暗花明又一村", author: "——陆游" },
+            { text: "花开堪折直须折，莫待无花空折枝", author: "——白居易" },
+            { text: "人生自古谁无死，留取丹心照汗青", author: "——文天祥" },
+            { text: "桃之夭夭，灼灼其华", author: "——《诗经·桃夭》" },
+            { text: "东篱把酒黄昏后，有暗香盈袖", author: "——秋瑾" },
+            { text: "归去来辞，白云无尽", author: "——李白" },
+            { text: "一日不见，如隔三秋", author: "——辛弃疾" },
+            { text: "春宵一刻值千金，花有清香月有阴", author: "——苏轼" },
+            { text: "路漫漫其修远兮，吾将上下而求索", author: "——屈原" },
+            { text: "举杯邀明月，对影成三人", author: "——李白" },
+            { text: "天生我才必有用，千金散尽还复来", author: "——李白" },
+            { text: "老骥伏枥，志在千里。烈士暮年，壮心不已", author: "——曹操" },
+            { text: "明月几时有，把酒问青天", author: "——苏轼" },
+            { text: "问世间、情为何物，直教生死相许", author: "——元好问" },
+            { text: "但愿人长久，千里共婵娟", author: "——白居易" },
+            { text: "人生得意须尽欢，莫使金樽空对月", author: "——李白" },
+            { text: "云想衣裳花想容，春风拂槛露华浓", author: "——李白" },
+            { text: "落霞与孤鹜齐飞，秋水共长天一色", author: "——王勃" },
+            { text: "青山横北郭，白水绕东城", author: "——李白" },
+            { text: "海上月是天上月，眼前人是心上人", author: "——苏轼" },
+            { text: "流水落花春去也，天上人间", author: "——纳兰性德" }
+        ];
+
+        // 银河背景图片
+        const bgElement = document.getElementById('background');
+        
+        // 设置银河背景图片
+        function setGalaxyBackground() {
+            bgElement.style.backgroundImage = `url('galaxy_background.jpg')`;
+            bgElement.style.backgroundSize = 'cover';
+            bgElement.style.backgroundPosition = 'center';
+            bgElement.style.backgroundRepeat = 'no-repeat';
+        }
+
+        // 随机显示诗句
+        function displayRandomPoetry() {
+            const randomIndex = Math.floor(Math.random() * poetryArray.length);
+            const poetry = poetryArray[randomIndex];
+            const poetryElement = document.getElementById('loadingPoetry');
+            
+            poetryElement.innerHTML = `
+                <div class="poetry-text">${poetry.text}</div>
+                <div class="poetry-author">${poetry.author}</div>
+            `;
+        }
+
+        // 页面加载时设置银河背景和诗句
+        window.onload = function() {
+            // 显示随机诗句
+            displayRandomPoetry();
+            
+            setGalaxyBackground();
+            
+            // 3秒后隐藏加载屏幕
+            setTimeout(function() {
+                const loadingScreen = document.getElementById('loadingScreen');
+                loadingScreen.classList.add('fade-out');
+                
+                // 动画结束后移除加载屏幕
+                setTimeout(function() {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }, 3000);
+        };
+        
+        // 为博客卡片添加动态效果
+        document.querySelectorAll('.blog-post').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const angleY = (x - centerX) / 25;
+                const angleX = (centerY - y) / 25;
+                
+                card.style.transform = `perspective(1000px) rotateX(${angleX}deg) rotateY(${angleY}deg) translateY(-8px)`;
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                // 卡片完全降回到原位
+                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateY(0px)';
+            });
+        });
+
+        // 为顶部和底部栏添加悬浮交互效果
+        const header = document.querySelector('.header');
+        const footer = document.querySelector('.footer');
+
+        // 顶部栏交互效果（一点点轻微的3D效果）
+        if (header) {
+            header.addEventListener('mousemove', (e) => {
+                const rect = header.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                // 非常微小的角度变化，几乎不可察觉
+                const angleY = (x - centerX) / 400;
+                const angleX = (centerY - y) / 400;
+                
+                header.style.transform = `translateX(-50%) translateY(-0.2px) perspective(5000px) rotateX(${angleX}deg) rotateY(${angleY}deg)`;
+            });
+            
+            header.addEventListener('mouseleave', () => {
+                header.style.transform = 'translateX(-50%) translateY(-0.2px)';
+            });
+        }
+
+        // 底部栏交互效果（一点点轻微的3D效果）
+        if (footer) {
+            footer.addEventListener('mousemove', (e) => {
+                const rect = footer.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                // 非常微小的角度变化，几乎不可察觉
+                const angleY = (x - centerX) / 400;
+                const angleX = (centerY - y) / 400;
+                
+                footer.style.transform = `translateY(-0.2px) perspective(5000px) rotateX(${angleX}deg) rotateY(${angleY}deg)`;
+            });
+            
+            footer.addEventListener('mouseleave', () => {
+                footer.style.transform = 'translateY(-0.2px)';
+            });
+        }
+    </script>
+</body>
+</html>
