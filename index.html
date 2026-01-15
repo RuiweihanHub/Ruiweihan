@@ -3,21 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RuiweihanHub - 博客</title>
+    <title>万维 - 博客</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div class="loading-screen" id="loadingScreen">
-        <div class="loading-logo"></div>
-        <div class="loading-text">RuiweihanHub</div>
-        <div class="loading-poetry" id="loadingPoetry"></div>
-        <div class="loading-dots">
-            <div class="loading-dot"></div>
-            <div class="loading-dot"></div>
-            <div class="loading-dot"></div>
-        </div>
-    </div>
+
     
     <div class="background" id="background"></div>
     
@@ -25,14 +15,27 @@
         <!-- 顶部导航栏 -->
         <header class="header">
             <div class="header-left">
-                <img src="avatar.png" alt="RuiweihanHub Avatar" class="avatar">
-                <div class="logo">RuiweihanHub</div>
+                <img src="logo.png" alt="Wanwei" class="logo-img">
             </div>
             <nav class="nav">
                 <a href="#home">首页</a>
                 <a href="#blog">博客</a>
                 <a href="#about">关于</a>
                 <a href="#contact">联系</a>
+                <div class="nav-auth">
+                    <button class="login-btn" id="loginBtn">登录</button>
+                    <div class="user-menu" id="userMenu" style="display: none;">
+                        <div class="user-avatar" id="userAvatarBtn">
+                            <span class="user-name" id="userName">管理员</span>
+                        </div>
+                        <div class="user-dropdown" id="userDropdown">
+                            <a href="cloud.html">📁 云盘</a>
+                            <a href="#profile">👤 个人资料</a>
+                            <a href="#settings">⚙️ 设置</a>
+                            <button class="logout-btn" id="logoutBtn">🚪 退出登录</button>
+                        </div>
+                    </div>
+                </div>
             </nav>
         </header>
         
@@ -40,32 +43,86 @@
         <main class="main-content">
             <!-- 英雄区域 -->
             <section class="hero-section">
-                <h1>欢迎来到我的博客</h1>
-                <p>前端开发者 & 设计师，专注于创造优雅的用户体验和现代化的前端解决方案</p>
+                <h1>欢迎来到万维</h1>
+                <p>专注于创造优雅的用户体验和现代化的前端解决方案</p>
             </section>
             
             <!-- 博客文章网格 -->
-            <section class="blog-grid">
+            <section class="blog-grid" id="blog">
                 <article class="blog-post">
-                    <h3 class="post-title">现代CSS布局技术</h3>
-                    <p class="post-date">2025-12-15</p>
-                    <p class="post-excerpt">深入探讨最新的CSS Grid和Flexbox布局技术，以及如何创建响应式的现代网页设计。掌握这些技术将帮助你构建更加灵活和美观的用户界面。</p>
-                    <a href="#" class="read-more">阅读全文</a>
+                    <h3 class="post-title">Windows激活常见问题解答</h3>
+                    <p class="post-date">2026-01-07</p>
+                    <p class="post-excerpt">整理了Windows系统激活过程中最常见的问题，包括激活失败怎么办、如何转移许可证、正版与盗版的区别等实用解答。</p>
+                    <a href="blog/windows-activation-faq.html" class="read-more">阅读全文</a>
                 </article>
                 
                 <article class="blog-post">
-                    <h3 class="post-title">UI设计哲学思考</h3>
-                    <p class="post-date">2025-12-12</p>
-                    <p class="post-excerpt">设计不仅仅是视觉美观，更重要的是用户体验和功能性的完美结合。分享我在UI设计过程中的思考和方法论。</p>
-                    <a href="#" class="read-more">阅读全文</a>
+                    <h3 class="post-title">KMS激活Windows详解</h3>
+                    <p class="post-date">2026-01-07</p>
+                    <p class="post-excerpt">深入了解KMS密钥管理服务的工作原理，讲解企业如何部署KMS服务器进行批量激活，以及KMS激活的优缺点分析。</p>
+                    <a href="blog/kms-activation.html" class="read-more">阅读全文</a>
                 </article>
                 
                 <article class="blog-post">
-                    <h3 class="post-title">JavaScript进阶技巧</h3>
-                    <p class="post-date">2025-12-08</p>
-                    <p class="post-excerpt">从基础语法到高级特性，深入理解现代JavaScript的核心概念，包括闭包、原型链、异步编程等重要概念。</p>
-                    <a href="#" class="read-more">阅读全文</a>
+                    <h3 class="post-title">使用产品密钥激活Windows</h3>
+                    <p class="post-date">2026-01-07</p>
+                    <p class="post-excerpt">详细介绍25位产品密钥的获取方式、查找方法和输入步骤，教你如何正确使用产品密钥完成Windows系统激活。</p>
+                    <a href="blog/product-key-activation.html" class="read-more">阅读全文</a>
                 </article>
+                
+                <article class="blog-post">
+                    <h3 class="post-title">Windows数字许可证激活详解</h3>
+                    <p class="post-date">2026-01-07</p>
+                    <p class="post-excerpt">数字许可证是微软推出的便捷激活方式，本文详细讲解其原理、激活步骤以及与Microsoft账户绑定的使用方法。</p>
+                    <a href="blog/digital-license-activation.html" class="read-more">阅读全文</a>
+                </article>
+            </section>
+            
+            <!-- 项目展示区域 -->
+            <section class="projects-section">
+                <h2 class="section-title">我的项目</h2>
+                <div class="projects-grid">
+                    <article class="project-card">
+                        <div class="project-icon">
+                            <img src="statistics-logo.png" alt="Statistics Logo" class="project-logo">
+                        </div>
+                        <h3 class="project-title">Statistics</h3>
+                        <p class="project-date">2025-12-18</p>
+                        <p class="project-excerpt">一个挖矿生存游戏，集成了统计分析和数据可视化功能。玩家可以在游戏中收集资源、升级设备，并通过详细的统计图表了解游戏进度。</p>
+                        <div class="project-tags">
+                            <span class="tag">JavaScript</span>
+                            <span class="tag">Canvas</span>
+                            <span class="tag">游戏开发</span>
+                        </div>
+                        <a href="project-statistics.html" class="project-btn">了解项目</a>
+                    </article>
+                    
+                    <article class="project-card">
+                        <div class="project-icon">📱</div>
+                        <h3 class="project-title">TaskFlow</h3>
+                        <p class="project-date">2025-12-10</p>
+                        <p class="project-excerpt">现代化的任务管理应用，支持团队协作、项目跟踪和智能提醒。简洁的界面设计让任务管理变得高效而愉快。</p>
+                        <div class="project-tags">
+                            <span class="tag">React</span>
+                            <span class="tag">TypeScript</span>
+                            <span class="tag">PWA</span>
+                        </div>
+                        <a href="#" class="project-btn">即将推出</a>
+                    </article>
+                    
+                    <article class="project-card">
+                        <div class="project-icon">🎨</div>
+                        <h3 class="project-title">ColorPalette</h3>
+                        <p class="project-date">2025-12-05</p>
+                        <p class="project-excerpt">专业的色彩搭配工具，为设计师提供智能的配色建议。支持多种色彩模式，实时预览和一键导出功能。</p>
+                        <div class="project-tags">
+                            <span class="tag">Vue.js</span>
+                            <span class="tag">色彩理论</span>
+                            <span class="tag">设计工具</span>
+                        </div>
+                        <a href="#" class="project-btn">即将推出</a>
+                    </article>
+                </div>
             </section>
             
             <!-- 查看更多按钮 -->
@@ -77,8 +134,7 @@
         <!-- 底部栏 -->
         <footer class="footer">
             <div class="footer-content">
-                <h3>RuiweihanHub</h3>
-                <p>前端开发者 & 设计师</p>
+                <h3>万维</h3>
                 <p>专注于创造优雅的用户体验</p>
                 <p>© 2025 All rights reserved.</p>
                 <div class="social-links">
@@ -90,74 +146,73 @@
         </footer>
     </div>
 
-    <script>
-        // 诗句数组
-        const poetryArray = [
-            { text: "春风得意马蹄疾，一日看尽长安花", author: "——杜甫" },
-            { text: "天若有情天亦老，人间正道是沧桑", author: "——岳飞" },
-            { text: "山重水复疑无路，柳暗花明又一村", author: "——陆游" },
-            { text: "花开堪折直须折，莫待无花空折枝", author: "——白居易" },
-            { text: "人生自古谁无死，留取丹心照汗青", author: "——文天祥" },
-            { text: "桃之夭夭，灼灼其华", author: "——《诗经·桃夭》" },
-            { text: "东篱把酒黄昏后，有暗香盈袖", author: "——秋瑾" },
-            { text: "归去来辞，白云无尽", author: "——李白" },
-            { text: "一日不见，如隔三秋", author: "——辛弃疾" },
-            { text: "春宵一刻值千金，花有清香月有阴", author: "——苏轼" },
-            { text: "路漫漫其修远兮，吾将上下而求索", author: "——屈原" },
-            { text: "举杯邀明月，对影成三人", author: "——李白" },
-            { text: "天生我才必有用，千金散尽还复来", author: "——李白" },
-            { text: "老骥伏枥，志在千里。烈士暮年，壮心不已", author: "——曹操" },
-            { text: "明月几时有，把酒问青天", author: "——苏轼" },
-            { text: "问世间、情为何物，直教生死相许", author: "——元好问" },
-            { text: "但愿人长久，千里共婵娟", author: "——白居易" },
-            { text: "人生得意须尽欢，莫使金樽空对月", author: "——李白" },
-            { text: "云想衣裳花想容，春风拂槛露华浓", author: "——李白" },
-            { text: "落霞与孤鹜齐飞，秋水共长天一色", author: "——王勃" },
-            { text: "青山横北郭，白水绕东城", author: "——李白" },
-            { text: "海上月是天上月，眼前人是心上人", author: "——苏轼" },
-            { text: "流水落花春去也，天上人间", author: "——纳兰性德" }
-        ];
+    <!-- 登录模态框 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="login-modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">登录</h2>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            
+            <div class="modal-content">
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="username">账号</label>
+                        <input type="text" id="username" name="username" placeholder="请输入账号" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">密码</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    
+                    <div class="form-group" id="confirmPasswordGroup" style="display: none;">
+                        <label for="confirmPassword">确认密码</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword">
+                    </div>
+                    
+                    <div class="form-group" id="nicknameGroup" style="display: none;">
+                        <label for="nickname">昵称</label>
+                        <input type="text" id="nickname" name="nickname">
+                    </div>
+                    
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="rememberMe">
+                            <span class="checkmark"></span>
+                            记住我
+                        </label>
+                        <a href="#" class="forgot-password">忘记密码？</a>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn" id="submitBtn">登录</button>
+                </form>
+                
+                <div class="modal-footer">
+                    <p id="switchText">还没有账号？<a href="#" id="switchToRegister">立即注册</a></p>
+                    <p id="switchToLogin" style="display: none;">已有账号？<a href="#" id="switchToLoginLink">立即登录</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // 银河背景图片
+    <script>
+
+
+        // 背景元素
         const bgElement = document.getElementById('background');
         
-        // 设置银河背景图片
-        function setGalaxyBackground() {
-            bgElement.style.backgroundImage = `url('galaxy_background.jpg')`;
+        // 设置背景图片
+        function setBackground() {
+            bgElement.style.backgroundImage = `url('background.jpg')`;
             bgElement.style.backgroundSize = 'cover';
             bgElement.style.backgroundPosition = 'center';
             bgElement.style.backgroundRepeat = 'no-repeat';
         }
 
-        // 随机显示诗句
-        function displayRandomPoetry() {
-            const randomIndex = Math.floor(Math.random() * poetryArray.length);
-            const poetry = poetryArray[randomIndex];
-            const poetryElement = document.getElementById('loadingPoetry');
-            
-            poetryElement.innerHTML = `
-                <div class="poetry-text">${poetry.text}</div>
-                <div class="poetry-author">${poetry.author}</div>
-            `;
-        }
-
-        // 页面加载时设置银河背景和诗句
+        // 页面加载时设置背景
         window.onload = function() {
-            // 显示随机诗句
-            displayRandomPoetry();
-            
-            setGalaxyBackground();
-            
-            // 3秒后隐藏加载屏幕
-            setTimeout(function() {
-                const loadingScreen = document.getElementById('loadingScreen');
-                loadingScreen.classList.add('fade-out');
-                
-                // 动画结束后移除加载屏幕
-                setTimeout(function() {
-                    loadingScreen.style.display = 'none';
-                }, 500);
-            }, 3000);
+            setBackground();
         };
         
         // 为博客卡片添加动态效果
@@ -229,6 +284,289 @@
                 footer.style.transform = 'translateY(-0.2px)';
             });
         }
+
+        // 登录系统功能
+        class AuthSystem {
+            constructor() {
+                this.isLoggedIn = false;
+                this.currentUser = null;
+                this.init();
+            }
+
+            init() {
+                this.checkAuthStatus();
+                this.bindEvents();
+            }
+
+            checkAuthStatus() {
+                const savedUser = localStorage.getItem('currentUser');
+                if (savedUser) {
+                    this.currentUser = JSON.parse(savedUser);
+                    this.isLoggedIn = true;
+                    this.updateUI();
+                }
+            }
+
+            bindEvents() {
+                const loginBtn = document.getElementById('loginBtn');
+                
+                if (loginBtn) {
+                    // 登录按钮
+                    loginBtn.addEventListener('click', () => {
+                        this.showLoginModal();
+                    });
+                }
+
+                // 关闭模态框
+                document.getElementById('closeModal').addEventListener('click', () => {
+                    this.hideModal();
+                });
+
+                // 点击背景关闭模态框
+                document.getElementById('modalOverlay').addEventListener('click', (e) => {
+                    if (e.target.id === 'modalOverlay') {
+                        this.hideModal();
+                    }
+                });
+
+                // 表单提交
+                document.getElementById('loginForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleSubmit();
+                });
+
+                // 切换登录/注册
+                document.getElementById('switchToRegister').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.switchToRegister();
+                });
+
+                document.getElementById('switchToLoginLink').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.switchToLogin();
+                });
+
+                // 用户菜单 - 点击头像显示下拉菜单
+                document.getElementById('userAvatarBtn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggleUserMenu();
+                });
+
+                // 退出登录
+                document.getElementById('logoutBtn').addEventListener('click', () => {
+                    this.logout();
+                });
+
+                // 点击下拉菜单内部不关闭
+                document.getElementById('userDropdown').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+
+                // 点击其他地方关闭用户菜单
+                document.addEventListener('click', () => {
+                    this.hideUserMenu();
+                });
+            }
+
+            showLoginModal() {
+                const modalOverlay = document.getElementById('modalOverlay');
+                if (modalOverlay) {
+                    modalOverlay.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+
+            hideModal() {
+                document.getElementById('modalOverlay').style.display = 'none';
+                document.body.style.overflow = 'auto';
+                this.resetForm();
+            }
+
+            switchToRegister() {
+                document.getElementById('modalTitle').textContent = '注册';
+                document.getElementById('submitBtn').textContent = '注册';
+                document.getElementById('confirmPasswordGroup').style.display = 'block';
+                document.getElementById('nicknameGroup').style.display = 'block';
+                document.getElementById('switchText').style.display = 'none';
+                document.getElementById('switchToLogin').style.display = 'block';
+                document.getElementById('rememberMe').parentElement.style.display = 'none';
+            }
+
+            switchToLogin() {
+                document.getElementById('modalTitle').textContent = '登录';
+                document.getElementById('submitBtn').textContent = '登录';
+                document.getElementById('confirmPasswordGroup').style.display = 'none';
+                document.getElementById('nicknameGroup').style.display = 'none';
+                document.getElementById('switchText').style.display = 'block';
+                document.getElementById('switchToLogin').style.display = 'none';
+                document.getElementById('rememberMe').parentElement.style.display = 'flex';
+            }
+
+            handleSubmit() {
+                const isRegister = document.getElementById('modalTitle').textContent === '注册';
+                
+                if (isRegister) {
+                    this.register();
+                } else {
+                    this.login();
+                }
+            }
+
+            async login() {
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                // 简单管理员账户验证
+                if (username === 'Administrator' && password === '12345678') {
+                    const user = {
+                        username: username,
+                        nickname: '管理员'
+                    };
+
+                    this.currentUser = user;
+                    this.isLoggedIn = true;
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+
+                    this.updateUI();
+                    this.hideModal();
+                    this.showNotification('登录成功！', 'success');
+                } else {
+                    this.showNotification('账号或密码错误', 'error');
+                }
+            }
+
+            async register() {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const nickname = document.getElementById('nickname').value;
+
+                if (!email || !password || !confirmPassword || !nickname) {
+                    this.showNotification('请填写完整的注册信息', 'error');
+                    return;
+                }
+
+                if (password !== confirmPassword) {
+                    this.showNotification('两次输入的密码不一致', 'error');
+                    return;
+                }
+
+                if (password.length < 6) {
+                    this.showNotification('密码长度不能少于6位', 'error');
+                    return;
+                }
+
+                // 模拟注册成功
+                const user = {
+                    email: email,
+                    nickname: nickname,
+                    registerTime: new Date().toISOString()
+                };
+
+                this.currentUser = user;
+                this.isLoggedIn = true;
+                localStorage.setItem('currentUser', JSON.stringify(user));
+
+                this.updateUI();
+                this.hideModal();
+                this.showNotification('注册成功！', 'success');
+            }
+
+            logout() {
+                localStorage.removeItem('currentUser');
+                sessionStorage.removeItem('currentUser');
+                this.currentUser = null;
+                this.isLoggedIn = false;
+                this.updateUI();
+                this.hideUserMenu();
+                this.showNotification('已退出登录', 'info');
+            }
+
+            updateUI() {
+                const loginBtn = document.getElementById('loginBtn');
+                const userMenu = document.getElementById('userMenu');
+                const userDropdown = document.getElementById('userDropdown');
+                const userName = document.getElementById('userName');
+
+                if (this.isLoggedIn) {
+                    loginBtn.style.display = 'none';
+                    userMenu.style.display = 'block';
+                    userDropdown.style.display = 'none'; // 默认隐藏下拉菜单
+                    userName.textContent = this.currentUser ? this.currentUser.nickname : '管理员';
+                } else {
+                    loginBtn.style.display = 'block';
+                    userMenu.style.display = 'none';
+                }
+            }
+
+            toggleUserMenu() {
+                const dropdown = document.getElementById('userDropdown');
+                const isVisible = dropdown.style.display === 'block';
+                dropdown.style.display = isVisible ? 'none' : 'block';
+            }
+
+            hideUserMenu() {
+                document.getElementById('userDropdown').style.display = 'none';
+            }
+
+            resetForm() {
+                document.getElementById('loginForm').reset();
+                this.switchToLogin();
+            }
+
+            showNotification(message, type = 'info') {
+                // 创建通知元素
+                const notification = document.createElement('div');
+                notification.className = `notification notification-${type}`;
+                notification.textContent = message;
+                
+                // 添加样式
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    color: white;
+                    font-weight: 500;
+                    z-index: 10000;
+                    transform: translateX(100%);
+                    transition: transform 0.3s ease;
+                    max-width: 300px;
+                    word-wrap: break-word;
+                `;
+
+                // 根据类型设置颜色
+                const colors = {
+                    success: '#10B981',
+                    error: '#EF4444',
+                    info: '#3B82F6'
+                };
+                notification.style.backgroundColor = colors[type] || colors.info;
+
+                document.body.appendChild(notification);
+
+                // 显示动画
+                setTimeout(() => {
+                    notification.style.transform = 'translateX(0)';
+                }, 100);
+
+                // 自动隐藏
+                setTimeout(() => {
+                    notification.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 300);
+                }, 3000);
+            }
+        }
+
+        // 页面加载完成后初始化登录系统
+        document.addEventListener('DOMContentLoaded', function() {
+            new AuthSystem();
+        });
     </script>
 </body>
 </html>
