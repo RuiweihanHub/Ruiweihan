@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>云盘 - 万维</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .cloud-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 20px 40px;
+        }
+        
+        .cloud-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        
+        .cloud-header h1 {
+            color: #ffffff;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .cloud-header p {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .file-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .file-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .file-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        .file-name {
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            word-break: break-all;
+            margin-bottom: 8px;
+        }
+        
+        .file-size {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+        }
+        
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(-5px);
+        }
+    </style>
+</head>
+<body>
+    <div class="background" id="background"></div>
+    
+    <div class="container">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <div class="header-left">
+                <img src="../logo.png" alt="Wanwei" class="logo-img">
+            </div>
+            <nav class="nav">
+                <a href="../index.html">首页</a>
+                <a href="../index.html#blog">博客</a>
+                <a href="../index.html#about">关于</a>
+                <a href="../index.html#contact">联系</a>
+                <div class="nav-auth">
+                    <div class="user-menu" id="userMenu">
+                        <div class="user-avatar" id="userAvatarBtn">
+                            <span class="user-name" id="userName">管理员</span>
+                        </div>
+                        <div class="user-dropdown" id="userDropdown">
+                            <a href="cloud.html">📁 云盘</a>
+                            <a href="../index.html#profile">👤 个人资料</a>
+                            <a href="../index.html#settings">⚙️ 设置</a>
+                            <button class="logout-btn" id="logoutBtn">🚪 退出登录</button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        
+        <!-- 云盘内容 -->
+        <main class="main-content">
+            <div class="cloud-container">
+                <a href="../index.html" class="back-btn">← 返回首页</a>
+                
+                <div class="cloud-header">
+                    <h1>📁 云盘</h1>
+                    <p>点击文件即可下载</p>
+                </div>
+                
+                <div class="file-grid" id="fileGrid">
+                    <!-- 文件列表将通过JavaScript动态生成 -->
+                </div>
+            </div>
+        </main>
+        
+        <!-- 底部栏 -->
+        <footer class="footer">
+            <div class="footer-content">
+                <h3>万维</h3>
+                <p>专注于创造优雅的用户体验</p>
+                <p>© 2025 All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // 背景元素
+        const bgElement = document.getElementById('background');
+        
+        // 设置背景图片
+        function setBackground() {
+            bgElement.style.backgroundImage = `url('../background.jpg')`;
+            bgElement.style.backgroundSize = 'cover';
+            bgElement.style.backgroundPosition = 'center';
+            bgElement.style.backgroundRepeat = 'no-repeat';
+        }
+
+        // 页面加载时设置背景
+        window.onload = function() {
+            setBackground();
+        };
+
+        // 文件列表
+        const files = [
+            { name: '测试文档.txt', icon: '📄', size: '28 B' },
+            { name: '代码示例.py', icon: '🐍', size: '34 B' },
+            { name: '配置文件.json', icon: '📋', size: '30 B' }
+        ];
+
+        // 渲染文件列表
+        function renderFiles() {
+            const grid = document.getElementById('fileGrid');
+            grid.innerHTML = files.map(file => `
+                <div class="file-card" onclick="downloadFile('${file.name}')">
+                    <span class="file-icon">${file.icon}</span>
+                    <div class="file-name">${file.name}</div>
+                    <div class="file-size">${file.size}</div>
+                </div>
+            `).join('');
+        }
+
+        // 下载文件
+        function downloadFile(filename) {
+            window.open(`file/${filename}`, '_blank');
+        }
+
+        // 检查登录状态
+        function checkAuth() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (!savedUser) {
+                window.location.href = '../index.html';
+                return;
+            }
+            const user = JSON.parse(savedUser);
+            document.getElementById('userName').textContent = user.nickname || '管理员';
+        }
+
+        // 切换用户菜单
+        function toggleUserMenu() {
+            const dropdown = document.getElementById('userDropdown');
+            const isVisible = dropdown.style.display === 'block';
+            dropdown.style.display = isVisible ? 'none' : 'block';
+        }
+
+        // 隐藏用户菜单
+        function hideUserMenu() {
+            document.getElementById('userDropdown').style.display = 'none';
+        }
+
+        // 退出登录
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            localStorage.removeItem('currentUser');
+            sessionStorage.removeItem('currentUser');
+            window.location.href = '../index.html';
+        });
+
+        // 点击头像显示菜单
+        document.getElementById('userAvatarBtn').addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleUserMenu();
+        });
+
+        // 点击菜单内部不关闭
+        document.getElementById('userDropdown').addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+
+        // 点击其他地方关闭菜单
+        document.addEventListener('click', function() {
+            hideUserMenu();
+        });
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            renderFiles();
+        });
+    </script>
+</body>
+</html>
