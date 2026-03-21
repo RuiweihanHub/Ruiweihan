@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>云盘 - Rui</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>* { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }</style>
+</head>
+<body class="min-h-screen bg-white text-gray-900 flex flex-col">
+  
+  <!-- 顶部导航栏 -->
+  <nav class="w-full px-6 py-4">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-8">
+        <a href="index.html" class="text-xl font-semibold text-gray-900 hover:text-violet-600 transition-colors">Rui</a>
+        <div class="flex items-center gap-6 text-sm">
+          <a href="projects.html" class="text-gray-500 hover:text-gray-900 transition-colors">项目</a>
+          <a href="toolbox.html" class="text-gray-500 hover:text-gray-900 transition-colors">百宝箱</a>
+          <a href="download.html" class="text-gray-500 hover:text-gray-900 transition-colors">下载</a>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <button id="loginBtn" class="px-4 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg hover:bg-gray-800 transition-colors">登录</button>
+        <div id="userMenu" class="hidden relative">
+          <button id="userBtn" class="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+            <span id="userDisplayName" class="text-sm text-gray-700"></span>
+            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+          </button>
+          <div id="dropdown" class="hidden absolute right-0 top-full mt-2 w-32 bg-white rounded-xl shadow-lg border border-gray-100 py-1 overflow-hidden">
+            <a href="cloud.html" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors bg-gray-50">☁️ 云盘</a>
+            <a href="profile.html" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">👤 我的</a>
+            <div class="border-t border-gray-100"></div>
+            <a href="javascript:void(0)" onclick="logout()" class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">退出登录</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 主内容 -->
+  <main class="flex-1 px-6 py-12">
+    <div class="max-w-4xl mx-auto">
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="text-2xl font-semibold text-gray-900">☁️ 我的云盘</h2>
+        <div class="flex gap-3">
+          <button onclick="showTokenModal()" class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">设置GitHub Token</button>
+          <button onclick="uploadFile()" class="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors">上传文件</button>
+        </div>
+      </div>
+      <div class="bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden">
+        <div class="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-100 text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <div class="col-span-6">文件名</div>
+          <div class="col-span-2">大小</div>
+          <div class="col-span-3">修改时间</div>
+          <div class="col-span-1">操作</div>
+        </div>
+        <div id="fileList" class="divide-y divide-gray-100"></div>
+        <div id="emptyState" class="px-6 py-12 text-center text-gray-400">
+          <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
+          <p>暂无文件，点击上传按钮添加文件</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="w-full px-6 py-4">
+    <div class="max-w-6xl mx-auto flex items-center justify-between text-xs text-gray-400">
+      <span>© 2024 Rui</span>
+      <div class="flex items-center gap-6">
+        <a href="https://github.com/RuiweihanHub" target="_blank" class="hover:text-gray-600 transition-colors">GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Token弹窗 -->
+  <div id="tokenModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden">
+      <div class="p-6 border-b border-gray-100">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-gray-900">设置GitHub Token</h2>
+          <button onclick="closeTokenModal()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"><svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+        </div>
+      </div>
+      <div class="p-6 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">Token</label>
+          <input id="githubToken" type="password" placeholder="ghp_xxxx..." class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-300 focus:bg-white transition-colors" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">仓库名称</label>
+          <input id="repoName" type="text" placeholder="用户名/仓库名" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-300 focus:bg-white transition-colors" />
+        </div>
+        <button onclick="saveToken()" class="w-full py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="fileInput" class="hidden" onchange="handleFileUpload(event)" />
+
+  <script>
+    const loginBtn = document.getElementById('loginBtn');
+    const userMenu = document.getElementById('userMenu');
+    const userBtn = document.getElementById('userBtn');
+    const dropdown = document.getElementById('dropdown');
+    const userDisplayName = document.getElementById('userDisplayName');
+
+    function checkLogin() {
+      const sessionUser = sessionStorage.getItem('rui_user') || localStorage.getItem('rui_user_remember');
+      if (sessionUser) {
+        loginBtn.classList.add('hidden');
+        userMenu.classList.remove('hidden');
+        userDisplayName.textContent = sessionUser;
+        loadFiles();
+      }
+    }
+    checkLogin();
+
+    userBtn.addEventListener('click', (e) => { e.stopPropagation(); dropdown.classList.toggle('hidden'); });
+    document.addEventListener('click', () => { dropdown.classList.add('hidden'); });
+
+    function logout() { sessionStorage.removeItem('rui_user'); localStorage.removeItem('rui_user_remember'); localStorage.removeItem('rui_user_expire'); location.reload(); }
+
+    function showTokenModal() {
+      document.getElementById('tokenModal').classList.remove('hidden');
+      document.getElementById('tokenModal').classList.add('flex');
+      document.getElementById('githubToken').value = localStorage.getItem('github_token') || '';
+      document.getElementById('repoName').value = localStorage.getItem('github_repo') || '';
+    }
+    function closeTokenModal() { document.getElementById('tokenModal').classList.add('hidden'); document.getElementById('tokenModal').classList.remove('flex'); }
+
+    function saveToken() {
+      const token = document.getElementById('githubToken').value.trim();
+      const repo = document.getElementById('repoName').value.trim();
+      if (!token || !repo) { alert('请填写完整信息'); return; }
+      localStorage.setItem('github_token', token);
+      localStorage.setItem('github_repo', repo);
+      closeTokenModal();
+      alert('保存成功！');
+      loadFiles();
+    }
+
+    function uploadFile() {
+      const token = localStorage.getItem('github_token');
+      if (!token) { showTokenModal(); return; }
+      document.getElementById('fileInput').click();
+    }
+
+    async function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const token = localStorage.getItem('github_token');
+      const repo = localStorage.getItem('github_repo');
+      const user = sessionStorage.getItem('rui_user') || localStorage.getItem('rui_user_remember');
+      if (!token || !repo) { alert('请先设置GitHub Token'); showTokenModal(); return; }
+      
+      // 显示上传中
+      document.getElementById('emptyState').innerHTML = '<div class="text-center"><div class="animate-spin w-8 h-8 border-2 border-gray-300 border-t-gray-600 rounded-full mx-auto mb-3"></div>上传中...</div>';
+      document.getElementById('emptyState').classList.remove('hidden');
+      
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          // 使用 ArrayBuffer 和 Base64 编码
+          const base64 = arrayBufferToBase64(reader.result);
+          const path = `users/${user}/${file.name}`;
+          
+          // 先检查文件是否存在，获取sha
+          let sha = null;
+          const checkRes = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+            headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+          });
+          if (checkRes.ok) {
+            const existingFile = await checkRes.json();
+            sha = existingFile.sha;
+          }
+          
+          const body = { 
+            message: `Upload ${file.name}`, 
+            content: base64 
+          };
+          if (sha) body.sha = sha;
+          
+          const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+            method: 'PUT',
+            headers: { 
+              'Authorization': `token ${token}`, 
+              'Accept': 'application/vnd.github.v3+json',
+              'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify(body)
+          });
+          
+          if (res.ok) { 
+            alert('上传成功！'); 
+            loadFiles(); 
+          } else { 
+            const data = await res.json(); 
+            alert('上传失败：' + (data.message || '未知错误'));
+            document.getElementById('emptyState').innerHTML = '<svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg><p>暂无文件，点击上传按钮添加文件</p>';
+          }
+        } catch (err) { 
+          alert('上传失败：' + err.message); 
+          document.getElementById('emptyState').innerHTML = '<svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg><p>暂无文件，点击上传按钮添加文件</p>';
+        }
+      };
+      reader.readAsArrayBuffer(file);
+      event.target.value = '';
+    }
+    
+    function arrayBufferToBase64(buffer) {
+      let binary = '';
+      const bytes = new Uint8Array(buffer);
+      for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return btoa(binary);
+    }
+
+    async function loadFiles() {
+      const token = localStorage.getItem('github_token');
+      const repo = localStorage.getItem('github_repo');
+      const user = sessionStorage.getItem('rui_user') || localStorage.getItem('rui_user_remember');
+      if (!token || !repo || !user) return;
+      
+      try {
+        const res = await fetch(`https://api.github.com/repos/${repo}/contents/users/${user}`, {
+          headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+        });
+        if (res.ok) {
+          const files = await res.json();
+          if (files && files.length > 0) {
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('fileList').innerHTML = files.map(file => `
+              <div class="grid grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-gray-50 transition-colors">
+                <div class="col-span-6 flex items-center gap-3">
+                  <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                  <span class="text-sm text-gray-700">${file.name}</span>
+                </div>
+                <div class="col-span-2 text-sm text-gray-500">${formatSize(file.size)}</div>
+                <div class="col-span-3 text-sm text-gray-500">-</div>
+                <div class="col-span-1 flex gap-2">
+                  <a href="${file.download_url}" target="_blank" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                  </a>
+                  <button onclick="deleteFile('${file.name}', '${file.sha}')" class="text-gray-400 hover:text-red-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                  </button>
+                </div>
+              </div>
+            `).join('');
+          } else {
+            document.getElementById('emptyState').classList.remove('hidden');
+            document.getElementById('fileList').innerHTML = '';
+          }
+        } else {
+          document.getElementById('emptyState').classList.remove('hidden');
+        }
+      } catch (err) { 
+        console.error('加载文件失败:', err);
+        document.getElementById('emptyState').classList.remove('hidden');
+      }
+    }
+    
+    async function deleteFile(filename, sha) {
+      if (!confirm('确定要删除 ' + filename + ' 吗？')) return;
+      
+      const token = localStorage.getItem('github_token');
+      const repo = localStorage.getItem('github_repo');
+      const user = sessionStorage.getItem('rui_user') || localStorage.getItem('rui_user_remember');
+      
+      try {
+        const res = await fetch(`https://api.github.com/repos/${repo}/contents/users/${user}/${filename}`, {
+          method: 'DELETE',
+          headers: { 
+            'Authorization': `token ${token}`, 
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json' 
+          },
+          body: JSON.stringify({ 
+            message: `Delete ${filename}`, 
+            sha: sha 
+          })
+        });
+        
+        if (res.ok) {
+          alert('删除成功！');
+          loadFiles();
+        } else {
+          const data = await res.json();
+          alert('删除失败：' + (data.message || '未知错误'));
+        }
+      } catch (err) {
+        alert('删除失败：' + err.message);
+      }
+    }
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+    }
+  </script>
+</body>
+</html>
