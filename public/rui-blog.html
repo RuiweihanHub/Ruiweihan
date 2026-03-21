@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rui - 个人博客</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  </style>
+</head>
+<body class="min-h-screen bg-white text-gray-900 flex flex-col">
+  
+  <!-- 顶部导航栏 -->
+  <nav class="w-full px-6 py-4">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-8">
+        <a href="#" onclick="showHome()" class="text-xl font-semibold text-gray-900 hover:text-violet-600 transition-colors">Rui</a>
+        <div class="flex items-center gap-6 text-sm">
+          <a href="#" onclick="showPage('projects')" class="text-gray-500 hover:text-gray-900 transition-colors">项目</a>
+          <a href="#" onclick="showPage('toolbox')" class="text-gray-500 hover:text-gray-900 transition-colors">百宝箱</a>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <button id="loginBtn" class="px-4 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg hover:bg-gray-800 transition-colors">登录</button>
+        <div id="userMenu" class="hidden relative">
+          <button id="userBtn" class="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+            <span id="userDisplayName" class="text-sm text-gray-700"></span>
+            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+          </button>
+          <div id="dropdown" class="hidden absolute right-0 top-full mt-2 w-32 bg-white rounded-xl shadow-lg border border-gray-100 py-1 overflow-hidden">
+            <a href="#" onclick="showPage('cloud')" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /></svg>
+              云盘
+            </a>
+            <a href="#" onclick="showPage('profile')" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+              我的
+            </a>
+            <div class="border-t border-gray-100"></div>
+            <a href="#" onclick="logout()" class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+              退出登录
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 公告栏 -->
+  <div class="w-full px-6 py-2">
+    <div class="max-w-6xl mx-auto flex items-center justify-center">
+      <a href="#" class="inline-flex items-center gap-2 text-xs text-gray-500 hover:text-gray-700 transition-colors">
+        <span>🚀</span>
+        <span>Wei语言公布最新Aurora版本，提升性能超300倍！</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- 首页 -->
+  <main id="mainContent" class="flex-1 flex flex-col items-center justify-center px-6 py-12">
+    <div class="text-center mb-8">
+      <h1 class="text-5xl font-medium mb-3 tracking-tight text-gray-900">Rui</h1>
+      <p class="text-gray-400 text-base">写作 · 思考 · 生活</p>
+    </div>
+
+    <div class="w-full max-w-2xl mb-10">
+      <div class="relative group">
+        <div class="absolute inset-0 bg-gradient-to-r from-violet-500/10 to-purple-500/10 rounded-2xl blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500"></div>
+        <div class="relative flex items-center bg-gray-50 border border-gray-200 rounded-2xl overflow-hidden focus-within:border-gray-300 focus-within:bg-white transition-all duration-300 shadow-sm">
+          <svg class="w-5 h-5 text-gray-400 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          <input id="searchInput" type="text" placeholder="搜索项目..." class="flex-1 bg-transparent px-4 py-4 text-sm text-gray-900 placeholder-gray-400 outline-none" />
+          <button onclick="handleSearch()" class="mr-3 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors">搜索</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 四个快捷入口 -->
+    <div class="w-full max-w-2xl">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <button onclick="showPage('projects')" class="flex flex-col items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-100 hover:border-gray-200 transition-all duration-300 group">
+          <span class="text-2xl mb-2">📁</span>
+          <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900">项目</span>
+        </button>
+        <button onclick="showPage('toolbox')" class="flex flex-col items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-100 hover:border-gray-200 transition-all duration-300 group">
+          <span class="text-2xl mb-2">📦</span>
+          <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900">百宝箱</span>
+        </button>
+        <button onclick="showPage('cloud')" class="flex flex-col items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-100 hover:border-gray-200 transition-all duration-300 group">
+          <span class="text-2xl mb-2">☁️</span>
+          <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900">云盘</span>
+        </button>
+        <button onclick="showPage('profile')" class="flex flex-col items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-100 hover:border-gray-200 transition-all duration-300 group">
+          <span class="text-2xl mb-2">👤</span>
+          <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900">我的</span>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- 项目页面 -->
+  <div id="projectsPage" class="hidden flex-1 px-6 py-12">
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-8">🔥 热门项目</h2>
+      
+      <div class="space-y-4">
+        <div class="p-5 bg-gray-50 rounded-xl border border-gray-100 hover:border-gray-200 transition-colors flex items-center justify-between">
+          <div class="flex items-center gap-4"><span class="text-2xl">⚡</span><div><h3 class="text-base font-medium text-gray-900">Wei Aurora</h3><p class="text-sm text-gray-500">高性能编程语言框架</p></div></div>
+          <a href="#" class="text-sm text-gray-500 hover:text-gray-700">查看 →</a>
+        </div>
+
+        <div class="p-5 bg-gray-50 rounded-xl border border-gray-100 hover:border-gray-200 transition-colors flex items-center justify-between">
+          <div class="flex items-center gap-4"><span class="text-2xl">📊</span><div><h3 class="text-base font-medium text-gray-900">Statistics</h3><p class="text-sm text-gray-500">数据统计分析工具</p></div></div>
+          <a href="#" class="text-sm text-gray-500 hover:text-gray-700">查看 →</a>
+        </div>
+
+        <div class="p-5 bg-gray-50 rounded-xl border border-gray-100 hover:border-gray-200 transition-colors flex items-center justify-between">
+          <div class="flex items-center gap-4"><span class="text-2xl">🎮</span><div><h3 class="text-base font-medium text-gray-900">Dev Fanle Studio</h3><p class="text-sm text-gray-500">游戏开发工作室</p></div></div>
+          <a href="#" class="text-sm text-gray-500 hover:text-gray-700">查看 →</a>
+        </div>
+
+        <div class="p-5 bg-gray-50 rounded-xl border border-gray-100 hover:border-gray-200 transition-colors flex items-center justify-between">
+          <div class="flex items-center gap-4"><span class="text-2xl">🏯</span><div><h3 class="text-base font-medium text-gray-900">北京旅游一键通</h3><p class="text-sm text-gray-500">北京旅游攻略助手</p></div></div>
+          <a href="#" class="text-sm text-gray-500 hover:text-gray-700">查看 →</a>
+        </div>
+
+        <div class="p-5 bg-gray-50 rounded-xl border border-gray-100 hover:border-gray-200 transition-colors flex items-center justify-between">
+          <div class="flex items-center gap-4"><span class="text-2xl">🚀</span><div><h3 class="text-base font-medium text-gray-900">To!Go</h3><p class="text-sm text-gray-500">出行规划应用</p></div></div>
+          <a href="#" class="text-sm text-gray-500 hover:text-gray-700">查看 →</a>
+        </div>
+
+        <div class="p-5 bg-gradient-to-r from-violet-50 to-purple-50 rounded-xl border border-violet-100 hover:border-violet-200 transition-colors flex items-center justify-between">
+          <div class="flex items-center gap-4"><span class="text-2xl">🧩</span><div><h3 class="text-base font-medium text-gray-900">七巧板Studio</h3><p class="text-sm text-gray-500">创意拼图游戏工作室</p></div></div>
+          <button onclick="supportProject('七巧板Studio')" class="px-4 py-2 bg-violet-500 text-white text-sm font-medium rounded-lg hover:bg-violet-600 transition-colors">支持项目开发！</button>
+        </div>
+
+        <div class="p-5 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-100 hover:border-blue-200 transition-colors flex items-center justify-between">
+          <div class="flex items-center gap-4"><span class="text-2xl">🔢</span><div><h3 class="text-base font-medium text-gray-900">Cπ（Cpi）</h3><p class="text-sm text-gray-500">数学计算引擎</p></div></div>
+          <button onclick="supportProject('Cπ')" class="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-colors">支持项目开发！</button>
+        </div>
+
+        <div class="p-5 bg-gray-50 rounded-xl border border-gray-100 border-dashed flex items-center justify-center">
+          <div class="text-center text-gray-400"><span class="text-2xl">✨</span><p class="text-sm mt-1">敬请期待</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 百宝箱页面 -->
+  <div id="toolboxPage" class="hidden flex-1 px-6 py-12">
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-8">📦 百宝箱</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <button onclick="showPage('eaglercraft')" class="p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border border-green-100 hover:border-green-200 transition-all duration-300 text-left group">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center text-white text-xl">⛏️</div>
+            <div>
+              <h3 class="text-base font-medium text-gray-900 group-hover:text-green-700">Eaglercraft</h3>
+              <p class="text-sm text-gray-500">在线玩MC 1.12</p>
+            </div>
+          </div>
+        </button>
+        <div class="p-6 bg-gray-50 rounded-2xl border border-gray-100 border-dashed flex items-center justify-center">
+          <div class="text-center text-gray-400"><span class="text-2xl">🎁</span><p class="text-sm mt-1">更多工具即将上线</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Eaglercraft 详情页 -->
+  <div id="eaglercraftPage" class="hidden flex-1 px-6 py-12">
+    <div class="max-w-4xl mx-auto">
+      <button onclick="showPage('toolbox')" class="flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-6 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+        返回百宝箱
+      </button>
+      
+      <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border border-green-100 p-8 mb-6">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center text-white text-3xl">⛏️</div>
+          <div>
+            <h2 class="text-2xl font-semibold text-gray-900">Eaglercraft</h2>
+            <p class="text-gray-500">在线体验 Minecraft 1.12</p>
+          </div>
+        </div>
+        
+        <div class="mb-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-3">🎮 游戏简介</h3>
+          <p class="text-gray-600 mb-4">Eaglercraft 是一个基于 WebGL 的 Minecraft 1.12 网页版实现。你可以在浏览器中直接体验经典的 Minecraft 游戏内容，无需下载安装任何客户端。</p>
+          
+          <h3 class="text-lg font-medium text-gray-900 mb-3">✨ 功能特点</h3>
+          <ul class="list-disc list-inside text-gray-600 space-y-1 mb-4">
+            <li>完全免费，无需账号</li>
+            <li>支持单人游戏和多人联机</li>
+            <li>原版 Minecraft 1.12 游戏内容</li>
+            <li>支持键盘和鼠标操作</li>
+            <li>自动保存游戏进度</li>
+          </ul>
+          
+          <h3 class="text-lg font-medium text-gray-900 mb-3">📋 操作说明</h3>
+          <div class="bg-white/50 rounded-xl p-4 mb-4">
+            <div class="grid grid-cols-2 gap-4 text-sm">
+              <div><span class="font-medium text-gray-900">WASD</span> <span class="text-gray-500">- 移动</span></div>
+              <div><span class="font-medium text-gray-900">空格</span> <span class="text-gray-500">- 跳跃</span></div>
+              <div><span class="font-medium text-gray-900">鼠标移动</span> <span class="text-gray-500">- 视角</span></div>
+              <div><span class="font-medium text-gray-900">左键</span> <span class="text-gray-500">- 攻击/破坏</span></div>
+              <div><span class="font-medium text-gray-900">右键</span> <span class="text-gray-500">- 放置/使用</span></div>
+              <div><span class="font-medium text-gray-900">E</span> <span class="text-gray-500">- 打开背包</span></div>
+              <div><span class="font-medium text-gray-900">1-9</span> <span class="text-gray-500">- 切换物品</span></div>
+              <div><span class="font-medium text-gray-900">Shift</span> <span class="text-gray-500">- 潜行</span></div>
+            </div>
+          </div>
+          
+          <h3 class="text-lg font-medium text-gray-900 mb-3">⚠️ 注意事项</h3>
+          <ul class="list-disc list-inside text-gray-600 space-y-1">
+            <li>首次加载可能需要较长时间，请耐心等待</li>
+            <li>建议使用 Chrome 或 Edge 浏览器</li>
+            <li>游戏进度保存在浏览器本地，清除缓存会丢失</li>
+            <li>如遇黑屏，请尝试刷新页面</li>
+          </ul>
+        </div>
+        
+        <div class="flex items-center gap-4">
+          <button onclick="window.location.href='EC1.12.html'" class="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-medium rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all shadow-lg shadow-green-500/25">
+            🚀 启动游戏
+          </button>
+          <span class="text-sm text-gray-500">版本: 1.12.2</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 云盘页面 -->
+  <div id="cloudPage" class="hidden flex-1 px-6 py-12">
+    <div class="max-w-4xl mx-auto">
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="text-2xl font-semibold text-gray-900">☁️ 我的云盘</h2>
+        <div class="flex gap-3">
+          <button onclick="showTokenModal()" class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">设置GitHub Token</button>
+          <button onclick="uploadFile()" class="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors">上传文件</button>
+        </div>
+      </div>
+      <div class="bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden">
+        <div class="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-100 text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <div class="col-span-6">文件名</div>
+          <div class="col-span-2">大小</div>
+          <div class="col-span-3">修改时间</div>
+          <div class="col-span-1">操作</div>
+        </div>
+        <div id="fileList" class="divide-y divide-gray-100"></div>
+        <div id="emptyState" class="px-6 py-12 text-center text-gray-400">
+          <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
+          <p>暂无文件</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 我的页面 -->
+  <div id="profilePage" class="hidden flex-1 px-6 py-12">
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-8">👤 我的</h2>
+      <div class="bg-gray-50 rounded-2xl border border-gray-100 p-6">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="w-16 h-16 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center text-white text-2xl font-semibold"><span id="profileInitial">R</span></div>
+          <div>
+            <h3 id="profileName" class="text-lg font-medium text-gray-900"></h3>
+            <p class="text-sm text-gray-500">个人账户</p>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between py-3 border-b border-gray-200">
+            <span class="text-sm text-gray-600">账户类型</span>
+            <span class="text-sm text-gray-900">普通用户</span>
+          </div>
+          <div class="flex items-center justify-between py-3 border-b border-gray-200">
+            <span class="text-sm text-gray-600">存储空间</span>
+            <span class="text-sm text-gray-900">0 MB / 100 MB</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 搜索结果页面 -->
+  <div id="searchPage" class="hidden flex-1 px-6 py-12">
+    <div class="max-w-4xl mx-auto">
+      <div class="flex items-center gap-4 mb-8">
+        <button onclick="showHome()" class="text-gray-400 hover:text-gray-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
+        <h2 class="text-2xl font-semibold text-gray-900">搜索结果：<span id="searchQuery"></span></h2>
+      </div>
+      <div id="searchResults" class="space-y-4"></div>
+    </div>
+  </div>
+
+  <footer class="w-full px-6 py-4">
+    <div class="max-w-6xl mx-auto flex items-center justify-between text-xs text-gray-400">
+      <span>© 2024 Rui</span>
+      <div class="flex items-center gap-6">
+        <a href="https://github.com/RuiweihanHub" target="_blank" class="hover:text-gray-600 transition-colors">GitHub</a>
+        <a href="#" class="hover:text-gray-600 transition-colors">Twitter</a>
+        <a href="#" class="hover:text-gray-600 transition-colors">Email</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 登录弹窗 -->
+  <div id="modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden">
+      <div class="p-6 border-b border-gray-100">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-gray-900">登录</h2>
+          <button id="closeBtn" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"><svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+        </div>
+      </div>
+      <form id="authForm" class="p-6 space-y-4">
+        <div id="errorMsg" class="hidden p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-600"></div>
+        <div id="successMsg" class="hidden p-3 bg-green-50 border border-green-100 rounded-lg text-sm text-green-600"></div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">用户名</label>
+          <input id="username" type="text" placeholder="请输入用户名" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-300 focus:bg-white transition-colors" required />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">密码</label>
+          <input id="password" type="password" placeholder="请输入密码" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-300 focus:bg-white transition-colors" required />
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="rememberMe" class="w-4 h-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500" />
+          <label for="rememberMe" class="text-sm text-gray-600">保持登录（7天）</label>
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 disabled:opacity-50 transition-colors">登录</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Token弹窗 -->
+  <div id="tokenModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden">
+      <div class="p-6 border-b border-gray-100">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-gray-900">设置GitHub Token</h2>
+          <button onclick="closeTokenModal()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"><svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+        </div>
+      </div>
+      <div class="p-6 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">Token</label>
+          <input id="githubToken" type="password" placeholder="ghp_xxxx..." class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-300 focus:bg-white transition-colors" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">仓库名称</label>
+          <input id="repoName" type="text" placeholder="cloud-storage" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-300 focus:bg-white transition-colors" />
+        </div>
+        <button onclick="saveToken()" class="w-full py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 支持项目弹窗 -->
+  <div id="supportModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden">
+      <div class="p-6 border-b border-gray-100">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-gray-900">支持项目开发</h2>
+          <button onclick="closeSupportModal()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"><svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+        </div>
+      </div>
+      <div class="p-6 text-center">
+        <span class="text-4xl">💖</span>
+        <h3 id="supportProjectName" class="text-lg font-medium text-gray-900 mt-4 mb-2"></h3>
+        <p class="text-sm text-gray-500 mb-6">感谢您支持开源项目开发！</p>
+        <p class="text-xs text-gray-400">敬请期待更多功能...</p>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="fileInput" class="hidden" onchange="handleFileUpload(event)" />
+
+  <script>
+    const USERS = { 'Xvjiarui': 'o7dyuk', 'Ruiweihan': '6052ni', 'Administrator': '1u98e9' };
+    const PROJECTS = [
+      { name: 'Wei Aurora', icon: '⚡', desc: '高性能编程语言框架' },
+      { name: 'Statistics', icon: '📊', desc: '数据统计分析工具' },
+      { name: 'Dev Fanle Studio', icon: '🎮', desc: '游戏开发工作室' },
+      { name: '北京旅游一键通', icon: '🏯', desc: '北京旅游攻略助手' },
+      { name: 'To!Go', icon: '🚀', desc: '出行规划应用' },
+      { name: '七巧板Studio', icon: '🧩', desc: '创意拼图游戏工作室' },
+      { name: 'Cπ', icon: '🔢', desc: '数学计算引擎' }
+    ];
+
+    function hashPassword(password) {
+      let hash = 0;
+      for (let i = 0; i < password.length; i++) { hash = ((hash << 5) - hash) + password.charCodeAt(i); hash = hash & hash; }
+      return Math.abs(hash).toString(36);
+    }
+
+    const modal = document.getElementById('modal');
+    const loginBtn = document.getElementById('loginBtn');
+    const userMenu = document.getElementById('userMenu');
+    const userBtn = document.getElementById('userBtn');
+    const dropdown = document.getElementById('dropdown');
+    const closeBtn = document.getElementById('closeBtn');
+    const authForm = document.getElementById('authForm');
+    const errorMsg = document.getElementById('errorMsg');
+    const successMsg = document.getElementById('successMsg');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const searchInput = document.getElementById('searchInput');
+
+    function checkLogin() {
+      const sessionUser = sessionStorage.getItem('rui_user');
+      const rememberedUser = localStorage.getItem('rui_user_remember');
+      if (sessionUser) showLoggedInState(sessionUser);
+      else if (rememberedUser) {
+        const expireTime = localStorage.getItem('rui_user_expire');
+        if (expireTime && Date.now() < parseInt(expireTime)) { sessionStorage.setItem('rui_user', rememberedUser); showLoggedInState(rememberedUser); }
+        else { localStorage.removeItem('rui_user_remember'); localStorage.removeItem('rui_user_expire'); }
+      }
+    }
+    checkLogin();
+
+    function showLoggedInState(username) {
+      loginBtn.classList.add('hidden');
+      userMenu.classList.remove('hidden');
+      document.getElementById('userDisplayName').textContent = username;
+      document.getElementById('profileName').textContent = username;
+      document.getElementById('profileInitial').textContent = username.charAt(0).toUpperCase();
+    }
+
+    loginBtn.addEventListener('click', () => { modal.classList.remove('hidden'); modal.classList.add('flex'); });
+    closeBtn.addEventListener('click', () => { modal.classList.add('hidden'); modal.classList.remove('flex'); errorMsg.classList.add('hidden'); });
+    userBtn.addEventListener('click', (e) => { e.stopPropagation(); dropdown.classList.toggle('hidden'); });
+    document.addEventListener('click', () => { dropdown.classList.add('hidden'); });
+
+    authForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value;
+      const rememberMe = document.getElementById('rememberMe').checked;
+      if (!username || !password) { showError('用户名和密码不能为空'); return; }
+      if (USERS[username] && USERS[username] === hashPassword(password)) {
+        sessionStorage.setItem('rui_user', username);
+        if (rememberMe) { localStorage.setItem('rui_user_remember', username); localStorage.setItem('rui_user_expire', (Date.now() + 7 * 24 * 60 * 60 * 1000).toString()); }
+        showSuccess('登录成功！');
+        setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); showLoggedInState(username); }, 500);
+      } else { showError('用户名或密码错误'); }
+    });
+
+    function showPage(page) {
+      const pages = ['mainContent', 'cloudPage', 'profilePage', 'projectsPage', 'toolboxPage', 'searchPage', 'eaglercraftPage'];
+      pages.forEach(p => document.getElementById(p).classList.add('hidden'));
+      document.getElementById(page + 'Page').classList.remove('hidden');
+      if (page === 'cloud') loadFiles();
+    }
+
+    function showHome() { showPage('mainContent'); }
+    function logout() { sessionStorage.removeItem('rui_user'); localStorage.removeItem('rui_user_remember'); localStorage.removeItem('rui_user_expire'); location.reload(); }
+
+    function supportProject(name) {
+      document.getElementById('supportProjectName').textContent = name;
+      document.getElementById('supportModal').classList.remove('hidden');
+      document.getElementById('supportModal').classList.add('flex');
+    }
+    function closeSupportModal() { document.getElementById('supportModal').classList.add('hidden'); document.getElementById('supportModal').classList.remove('flex'); }
+
+    // 搜索功能 - 搜索项目
+    searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch(); });
+
+    function handleSearch() {
+      const query = searchInput.value.trim().toLowerCase();
+      if (!query) return;
+
+      // 搜索项目
+      const results = PROJECTS.filter(p => p.name.toLowerCase().includes(query) || p.desc.includes(query));
+      
+      // 搜索百宝箱
+      if (query.includes('百宝箱') || query.includes('toolbox') || query.includes('eaglercraft') || query.includes('mc')) {
+        showPage(query.includes('eaglercraft') || query.includes('mc') ? 'eaglercraft' : 'toolbox');
+        return;
+      }
+
+      if (results.length > 0) {
+        document.getElementById('searchQuery').textContent = searchInput.value;
+        document.getElementById('searchResults').innerHTML = results.map(p => `
+          <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 flex items-center gap-4">
+            <span class="text-2xl">${p.icon}</span>
+            <div>
+              <h3 class="text-sm font-medium text-gray-900">${p.name}</h3>
+              <p class="text-xs text-gray-500">${p.desc}</p>
+            </div>
+          </div>
+        `).join('');
+        showPage('search');
+      } else {
+        document.getElementById('searchQuery').textContent = searchInput.value;
+        document.getElementById('searchResults').innerHTML = '<div class="p-4 bg-gray-50 rounded-xl border border-gray-100"><p class="text-sm text-gray-500">未找到相关项目</p></div>';
+        showPage('search');
+      }
+    }
+
+    function showTokenModal() {
+      document.getElementById('tokenModal').classList.remove('hidden');
+      document.getElementById('tokenModal').classList.add('flex');
+      document.getElementById('githubToken').value = localStorage.getItem('github_token') || '';
+      document.getElementById('repoName').value = localStorage.getItem('github_repo') || 'rui-cloud-storage';
+    }
+    function closeTokenModal() { document.getElementById('tokenModal').classList.add('hidden'); document.getElementById('tokenModal').classList.remove('flex'); }
+    function saveToken() {
+      const token = document.getElementById('githubToken').value.trim();
+      const repo = document.getElementById('repoName').value.trim();
+      if (!token || !repo) { alert('请填写完整信息'); return; }
+      localStorage.setItem('github_token', token);
+      localStorage.setItem('github_repo', repo);
+      closeTokenModal();
+      alert('保存成功！');
+      loadFiles();
+    }
+
+    function uploadFile() { const token = localStorage.getItem('github_token'); if (!token) { showTokenModal(); return; } document.getElementById('fileInput').click(); }
+
+    async function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const token = localStorage.getItem('github_token');
+      const repo = localStorage.getItem('github_repo');
+      const user = sessionStorage.getItem('rui_user') || localStorage.getItem('rui_user_remember');
+      if (!token || !repo) { showTokenModal(); return; }
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const content = btoa(unescape(encodeURIComponent(reader.result)));
+          const path = `users/${user}/${file.name}`;
+          const res = await fetch(`https://api.github.com/repos/${repo.split('/')[0]}/${repo.split('/')[1] || repo}/contents/${path}`, { method: 'PUT', headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ message: `Upload ${file.name}`, content }) });
+          if (res.ok) { alert('上传成功！'); loadFiles(); } else { const data = await res.json(); alert('上传失败：' + (data.message || '未知错误')); }
+        } catch (err) { alert('上传失败：' + err.message); }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    async function loadFiles() {
+      const token = localStorage.getItem('github_token');
+      const repo = localStorage.getItem('github_repo');
+      const user = sessionStorage.getItem('rui_user') || localStorage.getItem('rui_user_remember');
+      if (!token || !repo) return;
+      try {
+        const res = await fetch(`https://api.github.com/repos/${repo.split('/')[0]}/${repo.split('/')[1] || repo}/contents/users/${user}`, { headers: { 'Authorization': `token ${token}` } });
+        if (res.ok) {
+          const files = await res.json();
+          if (files && files.length > 0) {
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('fileList').innerHTML = files.map(file => `<div class="grid grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-gray-50 transition-colors"><div class="col-span-6 flex items-center gap-3"><svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg><span class="text-sm text-gray-700">${file.name}</span></div><div class="col-span-2 text-sm text-gray-500">${formatSize(file.size)}</div><div class="col-span-3 text-sm text-gray-500">-</div><div class="col-span-1"><a href="${file.download_url}" target="_blank" class="text-gray-400 hover:text-gray-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg></a></div></div>`).join('');
+          }
+        }
+      } catch (err) { console.error('加载文件失败:', err); }
+    }
+
+    function formatSize(bytes) { if (bytes < 1024) return bytes + ' B'; if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'; return (bytes / 1024 / 1024).toFixed(1) + ' MB'; }
+
+    function showError(msg) { errorMsg.textContent = msg; errorMsg.classList.remove('hidden'); successMsg.classList.add('hidden'); }
+    function showSuccess(msg) { successMsg.textContent = msg; successMsg.classList.remove('hidden'); errorMsg.classList.add('hidden'); }
+  </script>
+</body>
+</html>
