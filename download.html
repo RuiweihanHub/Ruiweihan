@@ -193,7 +193,12 @@
   <!-- 引入用户管理系统 -->
   <script src="auth.js?v=2.1"></script>
   <script>
-    const LOCAL_USERS = { 'Xvjiarui': 'o7dyuk', 'Ruiweihan': '6052ni', 'Administrator': '1u98e9' };
+    // 本地用户数据（包含 uid）
+    const LOCAL_USERS_DATA = { 
+      'Xvjiarui': { hash: 'o7dyuk', uid: '000002' }, 
+      'Ruiweihan': { hash: '6052ni', uid: '000001' }, 
+      'Administrator': { hash: '1u98e9', uid: 'Administrator' }
+    };
 
     function hashPassword(password) {
       let hash = 0;
@@ -214,14 +219,11 @@
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
 
+    // 使用统一的登录状态检查
     function checkLogin() {
-      const sessionUser = sessionStorage.getItem('rui_user');
-      const rememberedUser = localStorage.getItem('rui_user_remember');
-      if (sessionUser) showLoggedInState(sessionUser);
-      else if (rememberedUser) {
-        const expireTime = localStorage.getItem('rui_user_expire');
-        if (expireTime && Date.now() < parseInt(expireTime)) { sessionStorage.setItem('rui_user', rememberedUser); showLoggedInState(rememberedUser); }
-        else { localStorage.removeItem('rui_user_remember'); localStorage.removeItem('rui_user_expire'); }
+      const loginState = syncLoginState();
+      if (loginState.isLoggedIn) {
+        showLoggedInState(loginState.username);
       }
     }
     checkLogin();
@@ -243,15 +245,33 @@
       const password = passwordInput.value;
       const rememberMe = document.getElementById('rememberMe').checked;
       if (!username || !password) { showError('用户名和密码不能为空'); return; }
-      if (LOCAL_USERS[username] && LOCAL_USERS[username] === hashPassword(password)) {
+      
+      const userData = LOCAL_USERS_DATA[username];
+      if (userData && userData.hash === hashPassword(password)) {
+        const uid = userData.uid;
         sessionStorage.setItem('rui_user', username);
-        if (rememberMe) { localStorage.setItem('rui_user_remember', username); localStorage.setItem('rui_user_expire', (Date.now() + 7 * 24 * 60 * 60 * 1000).toString()); }
+        sessionStorage.setItem('rui_uid', uid);
+        // 始终存储到 localStorage 以便跨页面同步
+        localStorage.setItem('rui_user_remember', username);
+        localStorage.setItem('rui_uid_remember', uid);
+        if (rememberMe) { 
+          localStorage.setItem('rui_user_expire', (Date.now() + 7 * 24 * 60 * 60 * 1000).toString()); 
+        } else {
+          localStorage.setItem('rui_user_expire', (Date.now() + 1 * 60 * 60 * 1000).toString());
+        }
         showSuccess('登录成功！');
         setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); showLoggedInState(username); }, 500);
       } else { showError('用户名或密码错误'); }
     });
 
-    function logout() { sessionStorage.removeItem('rui_user'); localStorage.removeItem('rui_user_remember'); localStorage.removeItem('rui_user_expire'); location.reload(); }
+    function logout() { 
+      sessionStorage.removeItem('rui_user'); 
+      sessionStorage.removeItem('rui_uid');
+      localStorage.removeItem('rui_user_remember'); 
+      localStorage.removeItem('rui_uid_remember');
+      localStorage.removeItem('rui_user_expire'); 
+      location.reload(); 
+    }
     function showError(msg) { errorMsg.textContent = msg; errorMsg.classList.remove('hidden'); successMsg.classList.add('hidden'); }
     function showSuccess(msg) { successMsg.textContent = msg; successMsg.classList.remove('hidden'); errorMsg.classList.add('hidden'); }
   </script>

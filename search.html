@@ -70,8 +70,15 @@
     </div>
   </div>
 
+  <!-- 引入用户管理系统 -->
+  <script src="auth.js?v=2.1"></script>
   <script>
-    const LOCAL_USERS = { 'Xvjiarui': 'o7dyuk', 'Ruiweihan': '6052ni', 'Administrator': '1u98e9' };
+    // 本地用户数据（包含 uid）
+    const LOCAL_USERS_DATA = { 
+      'Xvjiarui': { hash: 'o7dyuk', uid: '000002' }, 
+      'Ruiweihan': { hash: '6052ni', uid: '000001' }, 
+      'Administrator': { hash: '1u98e9', uid: 'Administrator' }
+    };
     function hashPassword(p) { let h=0; for(let i=0;i<p.length;i++){h=((h<<5)-h)+p.charCodeAt(i);h=h&h;} return Math.abs(h).toString(36); }
 
     // 搜索数据
@@ -120,12 +127,15 @@
       }
     }
 
-    // 登录功能
+    // 登录功能 - 使用统一的登录状态检查
     const authButtons = document.getElementById('authButtons');
-    const sessionUser = sessionStorage.getItem('rui_user');
-    const rememberedUser = localStorage.getItem('rui_user_remember');
-    if (sessionUser) showLogin(sessionUser);
-    else if (rememberedUser && Date.now() < parseInt(localStorage.getItem('rui_user_expire'))) showLogin(rememberedUser);
+    function checkLogin() {
+      const loginState = syncLoginState();
+      if (loginState.isLoggedIn) {
+        showLogin(loginState.username);
+      }
+    }
+    checkLogin();
 
     function showLogin(u) { authButtons.classList.add('hidden'); document.getElementById('userMenu').classList.remove('hidden'); document.getElementById('userDisplayName').textContent = u; }
 
@@ -138,14 +148,32 @@
       e.preventDefault();
       const u = document.getElementById('username').value.trim();
       const p = document.getElementById('password').value;
-      if (LOCAL_USERS[u] && LOCAL_USERS[u] === hashPassword(p)) {
+      const rememberMe = document.getElementById('rememberMe').checked;
+      
+      const userData = LOCAL_USERS_DATA[u];
+      if (userData && userData.hash === hashPassword(p)) {
+        const uid = userData.uid;
         sessionStorage.setItem('rui_user', u);
-        if (document.getElementById('rememberMe').checked) { localStorage.setItem('rui_user_remember', u); localStorage.setItem('rui_user_expire', (Date.now() + 7*24*60*60*1000).toString()); }
+        sessionStorage.setItem('rui_uid', uid);
+        localStorage.setItem('rui_user_remember', u);
+        localStorage.setItem('rui_uid_remember', uid);
+        if (rememberMe) { 
+          localStorage.setItem('rui_user_expire', (Date.now() + 7*24*60*60*1000).toString()); 
+        } else {
+          localStorage.setItem('rui_user_expire', (Date.now() + 1*60*60*1000).toString());
+        }
         location.reload();
       } else { document.getElementById('errorMsg').textContent = '用户名或密码错误'; document.getElementById('errorMsg').classList.remove('hidden'); }
     };
 
-    function logout() { sessionStorage.removeItem('rui_user'); localStorage.removeItem('rui_user_remember'); localStorage.removeItem('rui_user_expire'); location.reload(); }
+    function logout() { 
+      sessionStorage.removeItem('rui_user'); 
+      sessionStorage.removeItem('rui_uid');
+      localStorage.removeItem('rui_user_remember'); 
+      localStorage.removeItem('rui_uid_remember');
+      localStorage.removeItem('rui_user_expire'); 
+      location.reload(); 
+    }
   </script>
 </body>
 </html>

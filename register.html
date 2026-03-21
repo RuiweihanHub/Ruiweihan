@@ -181,7 +181,7 @@
   
   <script>
     // 本地备用用户（快速检查）
-    const LOCAL_USERS = { 'Xvjiarui': true, 'Ruiweihan': true, 'Administrator': true };
+    const LOCAL_USERNAMES = { 'Xvjiarui': true, 'Ruiweihan': true, 'Administrator': true };
 
     // 步骤状态
     let currentStep = 1;
@@ -282,7 +282,7 @@
         return;
       }
       
-      if (LOCAL_USERS[username]) {
+      if (LOCAL_USERNAMES[username]) {
         errorEl.textContent = '该用户名已被使用';
         errorEl.classList.remove('hidden');
         return;
