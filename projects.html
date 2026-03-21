@@ -211,7 +211,7 @@
   </div>
 
   <!-- 引入用户管理系统 -->
-  <script src="auth.js"></script>
+  <script src="auth.js?v=2.1"></script>
   <script>
     const LOCAL_USERS = { 'Xvjiarui': 'o7dyuk', 'Ruiweihan': '6052ni', 'Administrator': '1u98e9' };
     function hashPassword(p) { let h=0; for(let i=0;i<p.length;i++){h=((h<<5)-h)+p.charCodeAt(i);h=h&h;} return Math.abs(h).toString(36); }

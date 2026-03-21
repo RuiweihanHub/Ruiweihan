@@ -1,11 +1,19 @@
 /**
- * Rui Hub 用户管理系统 v2.0
+ * Rui Hub 用户管理系统 v2.1
  * 支持 UID 系统
  * 
  * UID 格式：
  * - Administrator: 特殊管理员UID（保持 Administrator）
  * - 普通用户: 6位数字，如 000001, 000002, ...
+ * 
+ * 更新日志 v2.1:
+ * - 增强跨页面登录状态同步
+ * - 添加更详细的调试日志
  */
+
+// 版本号（用于防止缓存）
+const AUTH_VERSION = '2.1';
+console.log('auth.js 版本:', AUTH_VERSION, '加载时间:', new Date().toLocaleString());
 
 // GitHub 配置
 const AUTH_CONFIG = {
@@ -791,20 +799,29 @@ function getCurrentUser() {
   return login;
 }
 
-// 统一的登录状态验证和同步 - 简化版
+// 统一的登录状态验证和同步 - 增强版
 function syncLoginState() {
-  // 直接从 localStorage 读取（跨页面共享）
-  const user = localStorage.getItem('rui_user_remember');
-  const uid = localStorage.getItem('rui_uid_remember');
+  // 先检查 sessionStorage（当前会话）
+  const sessionUser = sessionStorage.getItem('rui_user');
+  const sessionUid = sessionStorage.getItem('rui_uid');
+  
+  if (sessionUser && sessionUid) {
+    console.log('syncLoginState: 从 sessionStorage 读取', sessionUser);
+    return { username: sessionUser, uid: sessionUid, isLoggedIn: true };
+  }
+  
+  // 再检查 localStorage（跨页面共享）
+  const localUser = localStorage.getItem('rui_user_remember');
+  const localUid = localStorage.getItem('rui_uid_remember');
   const expire = localStorage.getItem('rui_user_expire');
   
-  // 调试输出
-  console.log('syncLoginState:', { user, uid, expire, now: Date.now() });
+  console.log('syncLoginState localStorage:', { localUser, localUid, expire, now: Date.now() });
   
-  if (user && uid) {
+  if (localUser && localUid) {
     // 检查是否过期
-    if (expire && Date.now() > parseInt(expire)) {
-      // 已过期
+    const expireTime = parseInt(expire || '0');
+    if (expire && expireTime > 0 && Date.now() > expireTime) {
+      // 已过期，清除所有登录数据
       console.log('登录已过期');
       localStorage.removeItem('rui_user_remember');
       localStorage.removeItem('rui_uid_remember');
@@ -813,14 +830,15 @@ function syncLoginState() {
       sessionStorage.removeItem('rui_uid');
       return { username: null, uid: null, isLoggedIn: false };
     }
-    // 同步到 sessionStorage
-    sessionStorage.setItem('rui_user', user);
-    sessionStorage.setItem('rui_uid', uid);
-    console.log('登录有效:', user);
-    return { username: user, uid: uid, isLoggedIn: true };
+    
+    // 有效登录，同步到 sessionStorage
+    sessionStorage.setItem('rui_user', localUser);
+    sessionStorage.setItem('rui_uid', localUid);
+    console.log('登录有效，已同步到 sessionStorage:', localUser);
+    return { username: localUser, uid: localUid, isLoggedIn: true };
   }
   
-  console.log('未登录');
+  console.log('未找到登录信息');
   return { username: null, uid: null, isLoggedIn: false };
 }
 
