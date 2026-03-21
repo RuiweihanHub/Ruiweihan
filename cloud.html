@@ -262,10 +262,13 @@
         const uid = LOCAL_USERS_DATA[username].uid;
         sessionStorage.setItem('rui_user', username);
         sessionStorage.setItem('rui_uid', uid);
+        // 始终存储到 localStorage 以便跨页面同步
+        localStorage.setItem('rui_user_remember', username);
+        localStorage.setItem('rui_uid_remember', uid);
         if (remember) {
-          localStorage.setItem('rui_user_remember', username);
-          localStorage.setItem('rui_uid_remember', uid);
           localStorage.setItem('rui_user_expire', (Date.now() + 7 * 24 * 60 * 60 * 1000).toString());
+        } else {
+          localStorage.setItem('rui_user_expire', (Date.now() + 1 * 60 * 60 * 1000).toString());
         }
         closeLoginModal();
         showToast('登录成功');
@@ -280,10 +283,13 @@
         if (result.success) {
           sessionStorage.setItem('rui_user', result.user.username);
           sessionStorage.setItem('rui_uid', result.user.uid);
+          // 始终存储到 localStorage 以便跨页面同步
+          localStorage.setItem('rui_user_remember', result.user.username);
+          localStorage.setItem('rui_uid_remember', result.user.uid);
           if (remember) {
-            localStorage.setItem('rui_user_remember', result.user.username);
-            localStorage.setItem('rui_uid_remember', result.user.uid);
             localStorage.setItem('rui_user_expire', (Date.now() + 7 * 24 * 60 * 60 * 1000).toString());
+          } else {
+            localStorage.setItem('rui_user_expire', (Date.now() + 1 * 60 * 60 * 1000).toString());
           }
           closeLoginModal();
           showToast('登录成功');
