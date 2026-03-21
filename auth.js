@@ -791,44 +791,36 @@ function getCurrentUser() {
   return login;
 }
 
-// 统一的登录状态验证和同步
+// 统一的登录状态验证和同步 - 简化版
 function syncLoginState() {
-  const sessionUser = sessionStorage.getItem('rui_user');
-  const sessionUid = sessionStorage.getItem('rui_uid');
-  const rememberedUser = localStorage.getItem('rui_user_remember');
-  const rememberedUid = localStorage.getItem('rui_uid_remember');
-  const expireTime = localStorage.getItem('rui_user_expire');
+  // 直接从 localStorage 读取（跨页面共享）
+  const user = localStorage.getItem('rui_user_remember');
+  const uid = localStorage.getItem('rui_uid_remember');
+  const expire = localStorage.getItem('rui_user_expire');
   
-  // 如果 sessionStorage 有数据，直接使用
-  if (sessionUser && sessionUid) {
-    return { username: sessionUser, uid: sessionUid, isLoggedIn: true };
-  }
+  // 调试输出
+  console.log('syncLoginState:', { user, uid, expire, now: Date.now() });
   
-  // 如果 localStorage 有记住的数据
-  if (rememberedUser && rememberedUid) {
-    // 检查是否有过期时间
-    if (expireTime) {
-      // 有过期时间，检查是否过期
-      if (Date.now() < parseInt(expireTime)) {
-        // 未过期，同步到 sessionStorage
-        sessionStorage.setItem('rui_user', rememberedUser);
-        sessionStorage.setItem('rui_uid', rememberedUid);
-        return { username: rememberedUser, uid: rememberedUid, isLoggedIn: true };
-      } else {
-        // 已过期，清理数据
-        localStorage.removeItem('rui_user_remember');
-        localStorage.removeItem('rui_uid_remember');
-        localStorage.removeItem('rui_user_expire');
-      }
-    } else {
-      // 没有过期时间（用户没勾选记住登录），默认当天有效
-      // 同步到 sessionStorage 以便跨页面使用
-      sessionStorage.setItem('rui_user', rememberedUser);
-      sessionStorage.setItem('rui_uid', rememberedUid);
-      return { username: rememberedUser, uid: rememberedUid, isLoggedIn: true };
+  if (user && uid) {
+    // 检查是否过期
+    if (expire && Date.now() > parseInt(expire)) {
+      // 已过期
+      console.log('登录已过期');
+      localStorage.removeItem('rui_user_remember');
+      localStorage.removeItem('rui_uid_remember');
+      localStorage.removeItem('rui_user_expire');
+      sessionStorage.removeItem('rui_user');
+      sessionStorage.removeItem('rui_uid');
+      return { username: null, uid: null, isLoggedIn: false };
     }
+    // 同步到 sessionStorage
+    sessionStorage.setItem('rui_user', user);
+    sessionStorage.setItem('rui_uid', uid);
+    console.log('登录有效:', user);
+    return { username: user, uid: uid, isLoggedIn: true };
   }
   
+  console.log('未登录');
   return { username: null, uid: null, isLoggedIn: false };
 }
 
