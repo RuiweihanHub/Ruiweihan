@@ -150,7 +150,7 @@ const DEFAULT_USERS = {
 };
 
 // 本地缓存用户（用于GitHub不可用时）
-const LOCAL_USERS = {
+const AUTH_LOCAL_USERS = {
   users: [
     { uid: 'Administrator', username: 'Administrator', passwordHash: hashPasswordSync('admin123'), role: 'admin' },
     { uid: '000001', username: 'Ruiweihan', passwordHash: hashPasswordSync('rui123'), role: 'admin' },
@@ -330,7 +330,7 @@ class RuiAuth {
     
     // 如果 GitHub 获取失败，使用本地缓存
     if (!this.users) {
-      const localUser = LOCAL_USERS.users.find(u => 
+      const localUser = AUTH_LOCAL_USERS.users.find(u => 
         (u.username === usernameOrUid || u.uid === usernameOrUid) && 
         u.passwordHash === hashedPassword
       );
@@ -388,7 +388,7 @@ class RuiAuth {
     }
     
     if (!this.users) {
-      return LOCAL_USERS.users.some(u => u.username === username);
+      return AUTH_LOCAL_USERS.users.some(u => u.username === username);
     }
     
     return this.findUserIndexByUsername(username) !== -1;
@@ -510,7 +510,7 @@ class RuiAuth {
     }
 
     if (!this.users) {
-      const localUser = LOCAL_USERS.users.find(u => u.username === uidOrUsername || u.uid === uidOrUsername);
+      const localUser = AUTH_LOCAL_USERS.users.find(u => u.username === uidOrUsername || u.uid === uidOrUsername);
       return localUser ? { uid: localUser.uid, username: localUser.username, role: localUser.role } : null;
     }
 
@@ -657,7 +657,7 @@ class RuiAuth {
     }
 
     if (!this.users) {
-      return { success: true, users: LOCAL_USERS.users.map(u => ({ uid: u.uid, username: u.username, role: u.role })) };
+      return { success: true, users: AUTH_LOCAL_USERS.users.map(u => ({ uid: u.uid, username: u.username, role: u.role })) };
     }
 
     return { 
@@ -862,7 +862,7 @@ window.clearLoginState = clearLoginState;
 window.getCurrentUser = getCurrentUser;
 window.hashPasswordSync = hashPasswordSync;
 window.AUTH_CONFIG = AUTH_CONFIG;
-window.LOCAL_USERS = LOCAL_USERS;
+window.AUTH_LOCAL_USERS = AUTH_LOCAL_USERS;
 window.syncLoginState = syncLoginState;
 window.isLoggedIn = isLoggedIn;
 window.getLoggedInUser = getLoggedInUser;
