@@ -499,7 +499,13 @@
       `}).join('');
     }
 
-    // 打开资源详情
+    // 获取文件扩展名
+    function getFileExt(fileName) {
+      if (!fileName) return '';
+      return fileName.split('.').pop().toLowerCase();
+    }
+
+    // 打开资源详情 - 在线预览
     function openResource(id) {
       const r = allResources.find(res => res.id === id);
       if (!r) return;
@@ -508,18 +514,18 @@
 
       let contentHtml = '';
 
-      // 视频类型
+      // ====== 视频文件类型 - 直接在线播放 ======
       if (r.resourceType === '视频' && r.fileUrl) {
         contentHtml += `
           <div class="mb-4 rounded-xl overflow-hidden bg-black">
-            <video controls class="w-full max-h-[400px]" src="${r.fileUrl}">
+            <video controls preload="metadata" class="w-full" style="max-height:450px;" src="${r.fileUrl}">
               你的浏览器不支持视频播放
             </video>
           </div>
         `;
       }
 
-      // 视频链接类型
+      // ====== 视频链接类型 - Bilibili/YouTube嵌入播放 ======
       if (r.resourceType === '链接' && r.link) {
         let embedUrl = r.link;
         // Bilibili
@@ -553,6 +559,65 @@
         }
       }
 
+      // ====== 文档类型 - 在线预览 ======
+      if (r.resourceType === '文档' && r.fileUrl) {
+        const ext = getFileExt(r.fileName);
+        
+        // PDF - 浏览器原生支持，直接iframe预览
+        if (ext === 'pdf') {
+          contentHtml += `
+            <div class="mb-4 rounded-xl overflow-hidden border border-gray-200" style="height:600px;">
+              <iframe src="${r.fileUrl}" style="width:100%;height:100%;border:none;"></iframe>
+            </div>
+          `;
+        }
+        // Word / PPT / Excel - 用微软 Office Online Viewer 在线预览
+        else if (['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'].includes(ext)) {
+          const viewerUrl = 'https://view.officeapps.live.com/op/view.aspx?src=' + encodeURIComponent(r.fileUrl);
+          contentHtml += `
+            <div class="mb-4 rounded-xl overflow-hidden border border-gray-200" style="height:600px;">
+              <iframe src="${viewerUrl}" style="width:100%;height:100%;border:none;"></iframe>
+            </div>
+          `;
+        }
+        // TXT / MD - 直接读取内容展示
+        else if (['txt', 'md'].includes(ext)) {
+          contentHtml += `
+            <div class="mb-4">
+              <div id="textContent" class="p-5 bg-gray-50 rounded-xl border border-gray-200 text-sm text-gray-700 whitespace-pre-wrap max-h-[500px] overflow-y-auto font-mono leading-relaxed">
+                加载中...
+              </div>
+            </div>
+          `;
+          // 异步加载文本内容
+          fetch(r.fileUrl).then(res => res.text()).then(text => {
+            const el = document.getElementById('textContent');
+            if (el) el.textContent = text;
+          }).catch(() => {
+            const el = document.getElementById('textContent');
+            if (el) el.textContent = '内容加载失败';
+          });
+        }
+        // 图片类型
+        else if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(ext)) {
+          contentHtml += `
+            <div class="mb-4 rounded-xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center p-4">
+              <img src="${r.fileUrl}" alt="${escapeHtml(r.title)}" class="max-w-full max-h-[500px] rounded-lg" />
+            </div>
+          `;
+        }
+        // 其他格式 - 提示下载
+        else {
+          contentHtml += `
+            <div class="mb-4 p-6 bg-gray-50 rounded-xl border border-gray-200 text-center">
+              <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              <p class="text-gray-500 text-sm">此格式暂不支持在线预览</p>
+            </div>
+          `;
+        }
+      }
+
+      // 资源信息
       contentHtml += `
         <div class="space-y-3">
           <p class="text-gray-600">${escapeHtml(r.description)}</p>
@@ -569,13 +634,17 @@
         </div>
       `;
 
-      // 下载按钮（有文件URL的情况）
-      if (r.fileUrl && r.resourceType === '文档') {
+      // 底部操作栏 - 下载按钮
+      if (r.fileUrl) {
         contentHtml += `
-          <div class="mt-4 pt-4 border-t border-gray-100">
-            <a href="${r.fileUrl}" target="_blank" download class="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors text-sm font-medium">
+          <div class="mt-4 pt-4 border-t border-gray-100 flex items-center gap-3">
+            <a href="${r.fileUrl}" target="_blank" download class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors text-sm font-medium">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-              下载文件
+              下载
+            </a>
+            <a href="${r.fileUrl}" target="_blank" class="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors text-sm font-medium">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+              新窗口打开
             </a>
           </div>
         `;
