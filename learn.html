@@ -7,11 +7,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>学习中心 - Rui Hub</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://unpkg.com/docx-preview@0.3.2/dist/docx-preview.js"></script>
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdn.tailwindcss.com" defer></script>
   <style>
     * { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     .fade-in { animation: fadeIn 0.3s ease-out; }
@@ -32,6 +28,9 @@
     .quiz-option.selected { border-color: #111827; background: #f3f4f6; }
     .quiz-option.correct { border-color: #16a34a; background: #f0fdf4; color: #16a34a; }
     .quiz-option.wrong { border-color: #dc2626; background: #fef2f2; color: #dc2626; }
+    .preview-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; color: #9ca3af; }
+    .preview-loading .spinner { width: 36px; height: 36px; border: 3px solid #e5e7eb; border-top-color: #111827; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body class="min-h-screen bg-white text-gray-900 flex flex-col">
@@ -88,7 +87,6 @@
 
   <!-- 主内容 -->
   <main id="mainContent" class="hidden flex-1 max-w-5xl mx-auto w-full px-6 py-8">
-    <!-- 页面标题 -->
     <div class="mb-8 flex items-center justify-between">
       <div>
         <div class="flex items-center gap-3 mb-2">
@@ -111,7 +109,6 @@
       </div>
     </div>
 
-    <!-- 分类标签 -->
     <div class="flex flex-wrap gap-2 mb-6">
       <button onclick="filterCategory('')" class="category-tab active px-4 py-2 text-sm rounded-xl border border-gray-200 transition-all">全部</button>
       <button onclick="filterCategory('文档')" class="category-tab px-4 py-2 text-sm rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all">文档</button>
@@ -123,7 +120,6 @@
       <button onclick="filterCategory('其他')" class="category-tab px-4 py-2 text-sm rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all">其他</button>
     </div>
 
-    <!-- 搜索 -->
     <div class="mb-6">
       <div class="relative">
         <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
@@ -131,11 +127,8 @@
       </div>
     </div>
 
-    <!-- 资源列表 -->
     <div id="resourceList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div class="col-span-2 text-center py-16 text-gray-400">
-        <p>加载中...</p>
-      </div>
+      <div class="col-span-2 text-center py-16 text-gray-400"><p>加载中...</p></div>
     </div>
   </main>
 
@@ -176,11 +169,7 @@
           <div class="flex-1">
             <label class="block text-sm font-medium text-gray-700 mb-1.5">分类</label>
             <select id="resourceCategory" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none">
-              <option value="编程">编程</option>
-              <option value="数学">数学</option>
-              <option value="物理">物理</option>
-              <option value="英语">英语</option>
-              <option value="其他">其他</option>
+              <option value="编程">编程</option><option value="数学">数学</option><option value="物理">物理</option><option value="英语">英语</option><option value="其他">其他</option>
             </select>
           </div>
           <div class="flex-1">
@@ -252,10 +241,42 @@
 
   <script src="auth-v2.js"></script>
   <script>
-    if (typeof pdfjsLib !== 'undefined') {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    // ====== 懒加载库管理 ======
+    const LibCache = {};
+    function loadScript(url, globalName) {
+      if (LibCache[url]) return LibCache[url];
+      if (globalName && window[globalName]) return Promise.resolve(window[globalName]);
+      const p = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = url;
+        s.onload = () => { LibCache[url] = true; resolve(window[globalName]); };
+        s.onerror = () => reject(new Error('加载失败: ' + url));
+        document.head.appendChild(s);
+      });
+      LibCache[url] = p;
+      return p;
+    }
+    function loadPdfJs() {
+      if (window.pdfjsLib && window.pdfjsLib.getDocument) return Promise.resolve(window.pdfjsLib);
+      return loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js', 'pdfjsLib').then(lib => {
+        lib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        return lib;
+      });
+    }
+    function loadDocxPreview() {
+      if (window.docx && window.docx.renderAsync) return Promise.resolve(window.docx);
+      return loadScript('https://unpkg.com/docx-preview@0.3.2/dist/docx-preview.js', 'docx');
+    }
+    function loadXlsx() {
+      if (window.XLSX && window.XLSX.read) return Promise.resolve(window.XLSX);
+      return loadScript('https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js', 'XLSX');
+    }
+    function loadJsZip() {
+      if (window.JSZip && window.JSZip.loadAsync) return Promise.resolve(window.JSZip);
+      return loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js', 'JSZip');
     }
 
+    // ====== 配置 ======
     const LEARN_REPO = 'RuiweihanHub/ruiuser';
     const LEARN_FILE = 'learn.json';
     const LEARN_FOLDER = 'learn-files';
@@ -269,8 +290,8 @@
     let currentCategory = '';
     let selectedFile = null;
     let currentPdfDoc = null;
-    let currentPdfPage = 1;
 
+    // ====== 工具函数 ======
     function toBase64(arrayBuffer) {
       const bytes = new Uint8Array(arrayBuffer);
       let binary = '';
@@ -307,8 +328,19 @@
       if (diff < 604800000) return Math.floor(diff / 86400000) + '天前';
       return date.toLocaleDateString('zh-CN');
     }
+    function showLoading(container, msg) {
+      container.innerHTML = '<div class="preview-loading"><div class="spinner"></div><p>' + (msg || '加载中...') + '</p></div>';
+    }
+    function showError(container, msg, url) {
+      let html = '<div class="flex flex-col items-center justify-center h-full text-gray-400">';
+      html += '<svg class="w-16 h-16 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>';
+      html += '<p class="mb-4">' + escapeHtml(msg) + '</p>';
+      if (url) html += '<a href="' + url + '" target="_blank" download class="px-6 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800">下载文件</a>';
+      html += '</div>';
+      container.innerHTML = html;
+    }
 
-    // ========== 登录 ==========
+    // ====== 登录 ======
     function checkLogin() {
       const loginState = syncLoginState();
       if (loginState.isLoggedIn) {
@@ -373,7 +405,7 @@
       location.reload();
     }
 
-    // ========== 上传模式 ==========
+    // ====== 上传模式 ======
     function toggleUploadMode() {
       const mode = document.getElementById('uploadType').value;
       const fileArea = document.getElementById('fileUploadArea');
@@ -419,7 +451,7 @@
       });
     }
 
-    // ========== 资源加载与渲染 ==========
+    // ====== 资源加载与渲染 ======
     async function loadResources() {
       try {
         const res = await fetch(`https://api.github.com/repos/${LEARN_REPO}/contents/${LEARN_FILE}?ref=main&_=${Date.now()}`, {
@@ -449,7 +481,7 @@
       resources.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       const container = document.getElementById('resourceList');
       if (resources.length === 0) {
-        container.innerHTML = `<div class="col-span-2 text-center py-16 text-gray-400"><p>暂无学习资源</p><p class="text-sm mt-1">MA 至 SU 成员可以上传资源</p></div>`;
+        container.innerHTML = '<div class="col-span-2 text-center py-16 text-gray-400"><p>暂无学习资源</p><p class="text-sm mt-1">MA 至 SU 成员可以上传资源</p></div>';
         return;
       }
       const typeIcons = {
@@ -476,7 +508,7 @@
               <div class="flex items-center gap-2 flex-wrap text-xs text-gray-400">
                 <span class="px-2 py-0.5 rounded-full ${colors.bg} ${colors.text} font-medium">${r.resourceType}</span>
                 <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">${r.category}</span>
-                ${fileSizeStr ? `<span>${fileSizeStr}</span>` : ''}
+                ${fileSizeStr ? '<span>' + fileSizeStr + '</span>' : ''}
                 <span>${r.author}</span>
                 <span>${formatTime(r.createdAt)}</span>
               </div>
@@ -486,7 +518,7 @@
       }).join('');
     }
 
-    // ========== 全屏预览 ==========
+    // ====== 全屏预览 ======
     function openResource(id) {
       const r = allResources.find(res => res.id === id);
       if (!r) return;
@@ -495,41 +527,49 @@
       const body = document.getElementById('previewBody');
       body.innerHTML = '';
       currentPdfDoc = null;
+      document.getElementById('previewPageInfo').classList.add('hidden');
 
       // 视频
       if (r.resourceType === '视频' && r.fileUrl) {
-        body.innerHTML = `<video controls preload="metadata" class="w-full h-full" style="min-height:80vh;background:#000;" src="${r.fileUrl}">浏览器不支持视频播放</video>`;
+        body.innerHTML = '<video controls preload="metadata" class="w-full h-full" style="min-height:80vh;background:#000;" src="' + r.fileUrl + '">浏览器不支持视频播放</video>';
       }
       // 链接视频
       else if (r.resourceType === '链接' && r.link) {
         let embedUrl = r.link;
         if (r.link.includes('bilibili.com/video/')) {
           const m = r.link.match(/\/video\/(BV[a-zA-Z0-9]+)/);
-          if (m) embedUrl = `https://player.bilibili.com/player.html?bvid=${m[1]}&autoplay=0`;
+          if (m) embedUrl = 'https://player.bilibili.com/player.html?bvid=' + m[1] + '&autoplay=0';
         } else if (r.link.includes('youtube.com/watch')) {
           const m = r.link.match(/[?&]v=([^&]+)/);
-          if (m) embedUrl = `https://www.youtube.com/embed/${m[1]}`;
+          if (m) embedUrl = 'https://www.youtube.com/embed/' + m[1];
         } else if (r.link.includes('youtu.be/')) {
           const m = r.link.match(/youtu\.be\/([^?]+)/);
-          if (m) embedUrl = `https://www.youtube.com/embed/${m[1]}`;
+          if (m) embedUrl = 'https://www.youtube.com/embed/' + m[1];
         }
         if (embedUrl !== r.link) {
-          body.innerHTML = `<iframe src="${embedUrl}" class="w-full border-0" style="height:90vh;" allowfullscreen></iframe>`;
+          body.innerHTML = '<iframe src="' + embedUrl + '" class="w-full border-0" style="height:90vh;" allowfullscreen></iframe>';
         } else {
-          body.innerHTML = `<div class="flex items-center justify-center h-full"><a href="${r.link}" target="_blank" class="px-6 py-3 bg-gray-900 text-white rounded-xl hover:bg-gray-800 font-medium">打开视频链接</a></div>`;
+          body.innerHTML = '<div class="flex items-center justify-center h-full"><a href="' + r.link + '" target="_blank" class="px-6 py-3 bg-gray-900 text-white rounded-xl hover:bg-gray-800 font-medium">打开视频链接</a></div>';
         }
       }
       // 文档
       else if (r.resourceType === '文档' && r.fileUrl) {
         const ext = getFileExt(r.fileName);
         if (ext === 'pdf') {
-          renderPdfPreview(r.fileUrl, body);
+          showLoading(body, '正在加载PDF预览组件...');
+          loadPdfJs().then(() => renderPdfPreview(r.fileUrl, body)).catch(() => showError(body, 'PDF预览组件加载失败', r.fileUrl));
         } else if (['doc', 'docx'].includes(ext)) {
-          renderDocxPreview(r.fileUrl, body);
+          showLoading(body, '正在加载Word预览组件...');
+          loadDocxPreview().then(() => renderDocxPreview(r.fileUrl, body)).catch(() => {
+            // 回退到JSZip提取文本
+            loadJsZip().then(() => renderDocxText(r.fileUrl, body)).catch(() => showError(body, 'Word文档预览加载失败', r.fileUrl));
+          });
         } else if (['xls', 'xlsx', 'csv'].includes(ext)) {
-          renderXlsxPreview(r.fileUrl, body);
+          showLoading(body, '正在加载表格预览组件...');
+          loadXlsx().then(() => renderXlsxPreview(r.fileUrl, body)).catch(() => showError(body, '表格预览组件加载失败', r.fileUrl));
         } else if (['ppt', 'pptx'].includes(ext)) {
-          renderPptxPreview(r.fileUrl, body);
+          showLoading(body, '正在加载PPT预览...');
+          loadJsZip().then(() => renderPptxPreview(r.fileUrl, body)).catch(() => showError(body, 'PPT预览加载失败', r.fileUrl));
         } else if (['txt', 'md'].includes(ext)) {
           body.innerHTML = '<div class="max-w-4xl mx-auto p-8"><div id="textContent" class="text-sm text-gray-700 whitespace-pre-wrap font-mono leading-relaxed">加载中...</div></div>';
           fetch(r.fileUrl).then(res => res.text()).then(text => {
@@ -540,9 +580,9 @@
             if (el) el.textContent = '内容加载失败';
           });
         } else if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(ext)) {
-          body.innerHTML = `<div class="flex items-center justify-center min-h-full p-8"><img src="${r.fileUrl}" class="max-w-full rounded-lg" /></div>`;
+          body.innerHTML = '<div class="flex items-center justify-center min-h-full p-8"><img src="' + r.fileUrl + '" class="max-w-full rounded-lg" /></div>';
         } else {
-          body.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-gray-400"><svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg><p>该格式暂不支持在线预览</p><a href="' + r.fileUrl + '" target="_blank" download class="mt-4 px-6 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800">下载文件</a></div>';
+          showError(body, '该格式暂不支持在线预览', r.fileUrl);
         }
       }
 
@@ -550,26 +590,23 @@
       document.getElementById('previewOverlay').classList.add('flex');
     }
 
-    // PDF.js渲染 - 自建预览
+    // ====== PDF自建预览 (pdf.js 懒加载) ======
     async function renderPdfPreview(url, container) {
-      if (typeof pdfjsLib === 'undefined') {
-        container.innerHTML = '<div class="flex items-center justify-center h-full text-gray-400">PDF预览组件加载失败，请刷新重试</div>';
-        return;
-      }
       try {
+        const pdfjsLib = window.pdfjsLib;
         const loadingTask = pdfjsLib.getDocument(url);
         currentPdfDoc = await loadingTask.promise;
         const totalPages = currentPdfDoc.numPages;
-        document.getElementById('previewPageInfo').textContent = `共 ${totalPages} 页`;
+        document.getElementById('previewPageInfo').textContent = '共 ' + totalPages + ' 页';
         document.getElementById('previewPageInfo').classList.remove('hidden');
 
-        // 一次性渲染所有页面
+        container.innerHTML = '';
         for (let i = 1; i <= totalPages; i++) {
           const page = await currentPdfDoc.getPage(i);
           const containerWidth = container.clientWidth - 48;
           const viewport = page.getViewport({ scale: 1 });
-          const scale = containerWidth / viewport.width;
-          const scaledViewport = page.getViewport({ scale: Math.max(scale, 1.2) });
+          const scale = Math.max(containerWidth / viewport.width, 1.5);
+          const scaledViewport = page.getViewport({ scale });
 
           const pageDiv = document.createElement('div');
           pageDiv.className = 'preview-page rounded-lg overflow-hidden max-w-4xl mx-auto';
@@ -583,22 +620,22 @@
           await page.render({ canvasContext: ctx, viewport: scaledViewport }).promise;
         }
       } catch (err) {
-        container.innerHTML = '<div class="flex items-center justify-center h-full text-gray-400">PDF加载失败</div>';
+        showError(container, 'PDF加载失败', url);
       }
     }
 
-    // ====== Word文档自建预览（docx-preview） ======
+    // ====== Word自建预览 (docx-preview 懒加载) ======
     async function renderDocxPreview(url, container) {
-      container.innerHTML = '<div class="flex items-center justify-center h-full text-gray-400">加载中...</div>';
       try {
         const response = await fetch(url);
         const blob = await response.blob();
-        if (typeof docx !== 'undefined' && docx.renderAsync) {
+        const docxLib = window.docx;
+        if (docxLib && docxLib.renderAsync) {
           container.innerHTML = '';
           const wrapper = document.createElement('div');
-          wrapper.className = 'max-w-4xl mx-auto p-4';
+          wrapper.className = 'max-w-4xl mx-auto p-4 bg-white';
           container.appendChild(wrapper);
-          await docx.renderAsync(blob, wrapper, null, {
+          await docxLib.renderAsync(blob, wrapper, null, {
             className: 'docx-wrapper',
             inWrapper: true,
             ignoreWidth: false,
@@ -610,123 +647,107 @@
             trimXmlDeclaration: true,
             debug: false
           });
-          // 给docx渲染的内容加点样式
-          wrapper.querySelectorAll('section').forEach(sec => {
-            sec.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
-            sec.style.marginBottom = '16px';
-            sec.style.borderRadius = '8px';
-            sec.style.overflow = 'hidden';
-          });
+          // 修正docx-preview渲染样式
+          const style = document.createElement('style');
+          style.textContent = '.docx-wrapper{background:#fff!important;padding:20px!important} .docx-wrapper section{box-shadow:0 1px 4px rgba(0,0,0,0.08)!important;margin-bottom:16px!important;border-radius:8px!important;overflow:hidden!important}';
+          wrapper.prepend(style);
         } else {
-          // 如果docx-preview库没加载成功，回退到提取纯文本
-          fallbackDocxPreview(url, container);
+          renderDocxText(url, container);
         }
       } catch (err) {
-        fallbackDocxPreview(url, container);
+        // 回退到纯文本提取
+        loadJsZip().then(() => renderDocxText(url, container)).catch(() => showError(container, 'Word文档预览失败', url));
       }
     }
 
-    // Word文档回退方案 - 用JSZip提取document.xml纯文本
-    async function fallbackDocxPreview(url, container) {
+    // Word纯文本回退方案
+    async function renderDocxText(url, container) {
       try {
         const response = await fetch(url);
         const blob = await response.blob();
-        // docx本质是zip，用JSZip解压提取文字
-        if (typeof JSZip !== 'undefined') {
-          const zip = await JSZip.loadAsync(blob);
-          const docXml = await zip.file('word/document.xml')?.async('string');
-          if (docXml) {
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(docXml, 'application/xml');
-            const paragraphs = xmlDoc.getElementsByTagName('w:t');
-            let text = '';
-            for (let i = 0; i < paragraphs.length; i++) {
-              text += paragraphs[i].textContent;
-              // 检查是否是段落结束
-              const parent = paragraphs[i].parentNode;
-              if (parent && parent.tagName === 'w:r') {
-                const grandParent = parent.parentNode;
-                if (grandParent && grandParent.tagName === 'w:p') {
-                  text += '\n';
-                }
-              }
+        const JSZipLib = window.JSZip;
+        if (!JSZipLib) { showError(container, '文档预览组件加载失败', url); return; }
+        const zip = await JSZipLib.loadAsync(blob);
+        const docXml = await zip.file('word/document.xml')?.async('string');
+        if (docXml) {
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(docXml, 'application/xml');
+          const paragraphs = xmlDoc.getElementsByTagName('w:t');
+          let text = '';
+          for (let i = 0; i < paragraphs.length; i++) {
+            text += paragraphs[i].textContent;
+            const parent = paragraphs[i].parentNode;
+            if (parent && parent.tagName === 'w:r') {
+              const grandParent = parent.parentNode;
+              if (grandParent && grandParent.tagName === 'w:p') text += '\n';
             }
-            container.innerHTML = `<div class="max-w-4xl mx-auto p-8"><div class="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">${escapeHtml(text) || '文档内容为空'}</div></div>`;
-            return;
           }
+          container.innerHTML = '<div class="max-w-4xl mx-auto p-8 bg-white rounded-xl"><div class="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">' + (escapeHtml(text) || '文档内容为空') + '</div></div>';
+        } else {
+          showError(container, 'Word文档内容为空', url);
         }
-        container.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-gray-400"><p>Word文档预览加载失败</p><a href="' + url + '" target="_blank" download class="mt-4 px-6 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800">下载查看</a></div>';
       } catch (e) {
-        container.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-gray-400"><p>Word文档预览加载失败</p><a href="' + url + '" target="_blank" download class="mt-4 px-6 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800">下载查看</a></div>';
+        showError(container, 'Word文档预览失败', url);
       }
     }
 
-    // ====== Excel自建预览（SheetJS） ======
+    // ====== Excel自建预览 (SheetJS 懒加载) ======
     async function renderXlsxPreview(url, container) {
-      container.innerHTML = '<div class="flex items-center justify-center h-full text-gray-400">加载中...</div>';
       try {
         const response = await fetch(url);
         const arrayBuffer = await response.arrayBuffer();
-        if (typeof XLSX !== 'undefined') {
-          const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-          const sheetNames = workbook.SheetNames;
+        const XLSXLib = window.XLSX;
+        if (!XLSXLib) { showError(container, '表格预览组件加载失败', url); return; }
+        const workbook = XLSXLib.read(arrayBuffer, { type: 'array' });
+        const sheetNames = workbook.SheetNames;
 
-          let html = '<div class="max-w-6xl mx-auto p-4">';
+        let html = '<div class="max-w-6xl mx-auto p-4">';
 
-          // 工作表标签
-          if (sheetNames.length > 1) {
-            html += '<div class="flex gap-1 mb-4 flex-wrap">';
-            sheetNames.forEach((name, i) => {
-              html += `<button onclick="switchSheet('${i}')" class="sheet-tab px-4 py-2 text-sm rounded-lg ${i === 0 ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} transition-colors">${escapeHtml(name)}</button>`;
-            });
-            html += '</div>';
-          }
-
-          // 渲染所有工作表
+        if (sheetNames.length > 1) {
+          html += '<div class="flex gap-1 mb-4 flex-wrap">';
           sheetNames.forEach((name, i) => {
-            const sheet = workbook.Sheets[name];
-            const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-            if (jsonData.length === 0) return;
+            html += '<button onclick="switchSheet(\'' + i + '\')" class="sheet-tab px-4 py-2 text-sm rounded-lg ' + (i === 0 ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200') + ' transition-colors">' + escapeHtml(name) + '</button>';
+          });
+          html += '</div>';
+        }
 
-            html += `<div class="sheet-content ${i !== 0 ? 'hidden' : ''}" data-sheet="${i}">`;
-            html += `<h3 class="text-sm font-medium text-gray-500 mb-2">${escapeHtml(name)}</h3>`;
-            html += '<div class="overflow-auto rounded-xl border border-gray-200"><table class="w-full text-sm">';
+        sheetNames.forEach((name, i) => {
+          const sheet = workbook.Sheets[name];
+          const jsonData = XLSXLib.utils.sheet_to_json(sheet, { header: 1 });
+          if (jsonData.length === 0) return;
 
-            jsonData.forEach((row, ri) => {
-              html += `<tr class="${ri === 0 ? 'bg-gray-50 font-medium text-gray-900' : 'text-gray-700'}">`;
-              if (ri === 0) {
-                // 表头
-                row.forEach(cell => { html += `<td class="px-4 py-3 border-b border-gray-200 whitespace-nowrap">${escapeHtml(String(cell ?? ''))}</td>`; });
-              } else {
-                row.forEach(cell => { html += `<td class="px-4 py-2.5 border-b border-gray-100 whitespace-nowrap">${escapeHtml(String(cell ?? ''))}</td>`; });
-              }
-              html += '</tr>';
+          html += '<div class="sheet-content ' + (i !== 0 ? 'hidden' : '') + '" data-sheet="' + i + '">';
+          html += '<h3 class="text-sm font-medium text-gray-500 mb-2">' + escapeHtml(name) + '</h3>';
+          html += '<div class="overflow-auto rounded-xl border border-gray-200"><table class="w-full text-sm">';
+
+          jsonData.forEach((row, ri) => {
+            const isHeader = ri === 0;
+            html += '<tr class="' + (isHeader ? 'bg-gray-50 font-medium text-gray-900' : 'text-gray-700') + '">';
+            row.forEach(cell => {
+              const tag = isHeader ? 'th' : 'td';
+              html += '<' + tag + ' class="px-4 py-3 border-b border-gray-100 whitespace-nowrap">' + escapeHtml(String(cell ?? '')) + '</' + tag + '>';
             });
-
-            html += '</table></div></div>';
+            html += '</tr>';
           });
 
-          html += '</div>';
-          container.innerHTML = html;
+          html += '</table></div></div>';
+        });
 
-          // 保存workbook到全局以切换工作表
-          window._xlsxWorkbook = workbook;
-        } else {
-          container.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-gray-400"><p>表格预览组件加载失败</p><a href="' + url + '" target="_blank" download class="mt-4 px-6 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800">下载查看</a></div>';
-        }
+        html += '</div>';
+        container.innerHTML = html;
+        window._xlsxWorkbook = workbook;
       } catch (err) {
-        container.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-gray-400"><p>表格加载失败</p><a href="' + url + '" target="_blank" download class="mt-4 px-6 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800">下载查看</a></div>';
+        showError(container, '表格加载失败', url);
       }
     }
 
-    // 切换Excel工作表
     function switchSheet(index) {
       document.querySelectorAll('.sheet-content').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('.sheet-tab').forEach(el => {
         el.classList.remove('bg-gray-900', 'text-white');
         el.classList.add('bg-gray-100', 'text-gray-700');
       });
-      const target = document.querySelector(`.sheet-content[data-sheet="${index}"]`);
+      const target = document.querySelector('.sheet-content[data-sheet="' + index + '"]');
       if (target) target.classList.remove('hidden');
       const tabs = document.querySelectorAll('.sheet-tab');
       if (tabs[index]) {
@@ -735,16 +756,15 @@
       }
     }
 
-    // ====== PPT自建预览 ======
+    // ====== PPT自建预览 (JSZip 懒加载) ======
     async function renderPptxPreview(url, container) {
-      container.innerHTML = '<div class="flex items-center justify-center h-full text-gray-400">加载中...</div>';
       try {
-        // pptx是zip格式，用JSZip提取每页幻灯片的文字和布局
         const response = await fetch(url);
         const blob = await response.blob();
+        const JSZipLib = window.JSZip;
+        if (!JSZipLib) { showError(container, 'PPT预览组件加载失败', url); return; }
 
-        // 尝试用JSZip解析
-        const zip = await JSZip.loadAsync(blob);
+        const zip = await JSZipLib.loadAsync(blob);
         const slideFiles = Object.keys(zip.files)
           .filter(f => f.match(/ppt\/slides\/slide\d+\.xml/))
           .sort((a, b) => {
@@ -769,30 +789,27 @@
               if (text) slideTexts.push(text);
             }
 
-            html += `
-              <div class="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm" style="aspect-ratio:16/9;">
-                <div class="flex flex-col justify-center h-full">
-                  <p class="text-xs text-gray-400 mb-3">第 ${i + 1} 页</p>
-                  ${slideTexts.length > 0 ? slideTexts.map((t, idx) => `<p class="${idx === 0 ? 'text-xl font-bold text-gray-900 mb-3' : 'text-sm text-gray-600 mb-1'}">${escapeHtml(t)}</p>`).join('') : '<p class="text-gray-300 text-center">（本页无文字内容）</p>'}
-                </div>
-              </div>`;
+            html += '<div class="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm" style="aspect-ratio:16/9;">';
+            html += '<div class="flex flex-col justify-center h-full">';
+            html += '<p class="text-xs text-gray-400 mb-3">第 ' + (i + 1) + ' 页</p>';
+            if (slideTexts.length > 0) {
+              slideTexts.forEach((t, idx) => {
+                if (idx === 0) html += '<p class="text-xl font-bold text-gray-900 mb-3">' + escapeHtml(t) + '</p>';
+                else html += '<p class="text-sm text-gray-600 mb-1">' + escapeHtml(t) + '</p>';
+              });
+            } else {
+              html += '<p class="text-gray-300 text-center">（本页无文字内容）</p>';
+            }
+            html += '</div></div>';
           }
 
           html += '</div>';
           container.innerHTML = html;
         } else {
-          container.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-gray-400"><p>PPT内容解析失败</p><a href="' + url + '" target="_blank" download class="mt-4 px-6 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800">下载查看</a></div>';
+          showError(container, 'PPT内容解析失败', url);
         }
       } catch (err) {
-        // JSZip可能没加载，用script动态加载
-        if (typeof JSZip === 'undefined') {
-          const script = document.createElement('script');
-          script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
-          script.onload = () => renderPptxPreview(url, container);
-          document.head.appendChild(script);
-        } else {
-          container.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-gray-400"><p>PPT加载失败</p><a href="' + url + '" target="_blank" download class="mt-4 px-6 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800">下载查看</a></div>';
-        }
+        showError(container, 'PPT加载失败', url);
       }
     }
 
@@ -801,9 +818,11 @@
       document.getElementById('previewOverlay').classList.remove('flex');
       document.getElementById('previewPageInfo').classList.add('hidden');
       currentPdfDoc = null;
+      // 清空预览内容释放内存
+      document.getElementById('previewBody').innerHTML = '';
     }
 
-    // ========== 分类过滤 ==========
+    // ====== 分类过滤 ======
     function filterCategory(cat) {
       currentCategory = cat;
       document.querySelectorAll('.category-tab').forEach(btn => {
@@ -815,7 +834,7 @@
       renderResources();
     }
 
-    // ========== 上传 ==========
+    // ====== 上传 ======
     function showUploadModal() {
       selectedFile = null;
       document.getElementById('resourceTitle').value = '';
@@ -857,13 +876,13 @@
           document.getElementById('uploadFileName').textContent = selectedFile.name;
           const arrayBuffer = await selectedFile.arrayBuffer();
           const base64Content = toBase64(arrayBuffer);
-          const filePath = `${LEARN_FOLDER}/${currentUser.uid}_${Date.now()}_${selectedFile.name}`;
+          const filePath = LEARN_FOLDER + '/' + currentUser.uid + '_' + Date.now() + '_' + selectedFile.name;
           document.getElementById('uploadPercent').textContent = '50%';
           document.getElementById('uploadBar').style.width = '50%';
-          const uploadRes = await fetch(`https://api.github.com/repos/${LEARN_REPO}/contents/${filePath}`, {
+          const uploadRes = await fetch('https://api.github.com/repos/' + LEARN_REPO + '/contents/' + filePath, {
             method: 'PUT',
-            headers: { 'Authorization': `token ${getToken()}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: `Upload: ${title}`, content: base64Content })
+            headers: { 'Authorization': 'token ' + getToken(), 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: 'Upload: ' + title, content: base64Content })
           });
           if (uploadRes.ok) {
             const uploadData = await uploadRes.json();
@@ -877,20 +896,20 @@
         const newResource = { id: 'learn_' + Date.now(), title, description: desc, category, resourceType, fileUrl, fileName, fileSize, link: uploadType === 'link' ? link : '', author: currentUser.username, authorUid: currentUser.uid, createdAt: new Date().toISOString(), downloads: 0 };
         allResources.unshift(newResource);
         let sha = null;
-        const getRes = await fetch(`https://api.github.com/repos/${LEARN_REPO}/contents/${LEARN_FILE}?ref=main`, { headers: { 'Authorization': `token ${getToken()}`, 'Accept': 'application/vnd.github.v3+json' } });
+        const getRes = await fetch('https://api.github.com/repos/' + LEARN_REPO + '/contents/' + LEARN_FILE + '?ref=main', { headers: { 'Authorization': 'token ' + getToken(), 'Accept': 'application/vnd.github.v3+json' } });
         if (getRes.ok) { const d = await getRes.json(); sha = d.sha; }
-        const body = { message: `Add: ${title}`, content: toBase64(new TextEncoder().encode(JSON.stringify(allResources, null, 2))) };
+        const body = { message: 'Add: ' + title, content: toBase64(new TextEncoder().encode(JSON.stringify(allResources, null, 2))) };
         if (sha) body.sha = sha;
-        const res = await fetch(`https://api.github.com/repos/${LEARN_REPO}/contents/${LEARN_FILE}`, { method: 'PUT', headers: { 'Authorization': `token ${getToken()}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const res = await fetch('https://api.github.com/repos/' + LEARN_REPO + '/contents/' + LEARN_FILE, { method: 'PUT', headers: { 'Authorization': 'token ' + getToken(), 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         if (res.ok) { closeUploadModal(); renderResources(); } else { throw new Error('保存失败'); }
       } catch (err) { alert('上传失败: ' + err.message); } finally { submitBtn.disabled = false; submitBtn.textContent = '上传'; }
     }
 
-    // ========== 考试系统 ==========
+    // ====== 考试系统 ======
     async function loadExams() {
       try {
-        const res = await fetch(`https://api.github.com/repos/${LEARN_REPO}/contents/${EXAM_FILE}?ref=main&_=${Date.now()}`, {
-          headers: { 'Authorization': `token ${getToken()}`, 'Accept': 'application/vnd.github.v3+json' }
+        const res = await fetch('https://api.github.com/repos/' + LEARN_REPO + '/contents/' + EXAM_FILE + '?ref=main&_=' + Date.now(), {
+          headers: { 'Authorization': 'token ' + getToken(), 'Accept': 'application/vnd.github.v3+json' }
         });
         if (res.ok) { const data = await res.json(); allExams = JSON.parse(fromBase64(data.content)); }
         else { allExams = []; }
@@ -912,59 +931,25 @@
       const canCreate = UPLOAD_USERS.includes(currentUser?.username) || UPLOAD_USERS.includes(currentUser?.uid);
 
       if (allExams.length === 0 && !canCreate) {
-        container.innerHTML = `
-          <div class="text-center py-16 text-gray-400">
-            <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-            <p>暂无考试</p>
-          </div>`;
+        container.innerHTML = '<div class="text-center py-16 text-gray-400"><svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg><p>暂无考试</p></div>';
         return;
       }
 
       let html = '';
       if (canCreate) {
-        html += `
-          <div class="mb-6 p-5 bg-gray-50 rounded-2xl border border-gray-200">
-            <h3 class="font-semibold text-gray-900 mb-4">创建考试</h3>
-            <div class="space-y-3">
-              <input id="examTitle" type="text" placeholder="考试名称（如：第一章测试）" class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400">
-              <select id="examCategory" class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm">
-                <option value="编程">编程</option><option value="数学">数学</option><option value="物理">物理</option><option value="英语">英语</option><option value="其他">其他</option>
-              </select>
-              <div id="questionsContainer">
-                <div class="question-item bg-white rounded-xl p-4 border border-gray-200 space-y-3">
-                  <div class="flex items-center justify-between">
-                    <span class="text-sm font-medium text-gray-700">第 1 题</span>
-                    <button onclick="removeQuestion(this)" class="text-xs text-red-500 hover:text-red-700">删除</button>
-                  </div>
-                  <input type="text" placeholder="题目" class="q-title w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none">
-                  <input type="text" placeholder="选项A" class="q-a w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none">
-                  <input type="text" placeholder="选项B" class="q-b w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none">
-                  <input type="text" placeholder="选项C" class="q-c w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none">
-                  <input type="text" placeholder="选项D" class="q-d w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none">
-                  <select class="q-answer w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm">
-                    <option value="A">正确答案: A</option><option value="B">正确答案: B</option><option value="C">正确答案: C</option><option value="D">正确答案: D</option>
-                  </select>
-                </div>
-              </div>
-              <button onclick="addQuestion()" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-xl border border-gray-200 transition-colors">+ 添加题目</button>
-              <button onclick="createExam()" class="px-5 py-2.5 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-colors text-sm font-medium w-full">创建考试</button>
-            </div>
-          </div>`;
+        html += '<div class="mb-6 p-5 bg-gray-50 rounded-2xl border border-gray-200"><h3 class="font-semibold text-gray-900 mb-4">创建考试</h3><div class="space-y-3">';
+        html += '<input id="examTitle" type="text" placeholder="考试名称（如：第一章测试）" class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400">';
+        html += '<select id="examCategory" class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm"><option value="编程">编程</option><option value="数学">数学</option><option value="物理">物理</option><option value="英语">英语</option><option value="其他">其他</option></select>';
+        html += '<div id="questionsContainer"><div class="question-item bg-white rounded-xl p-4 border border-gray-200 space-y-3"><div class="flex items-center justify-between"><span class="text-sm font-medium text-gray-700">第 1 题</span><button onclick="removeQuestion(this)" class="text-xs text-red-500 hover:text-red-700">删除</button></div><input type="text" placeholder="题目" class="q-title w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none"><input type="text" placeholder="选项A" class="q-a w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none"><input type="text" placeholder="选项B" class="q-b w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none"><input type="text" placeholder="选项C" class="q-c w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none"><input type="text" placeholder="选项D" class="q-d w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none"><select class="q-answer w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm"><option value="A">正确答案: A</option><option value="B">正确答案: B</option><option value="C">正确答案: C</option><option value="D">正确答案: D</option></select></div></div>';
+        html += '<button onclick="addQuestion()" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-xl border border-gray-200 transition-colors">+ 添加题目</button>';
+        html += '<button onclick="createExam()" class="px-5 py-2.5 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-colors text-sm font-medium w-full">创建考试</button>';
+        html += '</div></div>';
       }
 
       if (allExams.length > 0) {
         html += '<h3 class="font-semibold text-gray-900 mb-4">可用考试</h3><div class="space-y-3">';
         allExams.forEach(exam => {
-          html += `
-            <div class="p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-gray-300 cursor-pointer transition-colors" onclick="startExam('${exam.id}')">
-              <div class="flex items-center justify-between">
-                <div>
-                  <h4 class="font-medium text-gray-900">${escapeHtml(exam.title)}</h4>
-                  <p class="text-xs text-gray-400 mt-1">${exam.category} | ${exam.questions.length} 题 | 创建者: ${exam.author}</p>
-                </div>
-                <button class="px-4 py-2 bg-gray-900 text-white text-xs font-medium rounded-lg hover:bg-gray-800">开始考试</button>
-              </div>
-            </div>`;
+          html += '<div class="p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-gray-300 cursor-pointer transition-colors" onclick="startExam(\'' + exam.id + '\')"><div class="flex items-center justify-between"><div><h4 class="font-medium text-gray-900">' + escapeHtml(exam.title) + '</h4><p class="text-xs text-gray-400 mt-1">' + exam.category + ' | ' + exam.questions.length + ' 题 | 创建者: ' + exam.author + '</p></div><button class="px-4 py-2 bg-gray-900 text-white text-xs font-medium rounded-lg hover:bg-gray-800">开始考试</button></div></div>';
         });
         html += '</div>';
       }
@@ -977,27 +962,14 @@
       const count = container.children.length + 1;
       const div = document.createElement('div');
       div.className = 'question-item bg-white rounded-xl p-4 border border-gray-200 space-y-3';
-      div.innerHTML = `
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-gray-700">第 ${count} 题</span>
-          <button onclick="removeQuestion(this)" class="text-xs text-red-500 hover:text-red-700">删除</button>
-        </div>
-        <input type="text" placeholder="题目" class="q-title w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none">
-        <input type="text" placeholder="选项A" class="q-a w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none">
-        <input type="text" placeholder="选项B" class="q-b w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none">
-        <input type="text" placeholder="选项C" class="q-c w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none">
-        <input type="text" placeholder="选项D" class="q-d w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none">
-        <select class="q-answer w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm">
-          <option value="A">正确答案: A</option><option value="B">正确答案: B</option><option value="C">正确答案: C</option><option value="D">正确答案: D</option>
-        </select>`;
+      div.innerHTML = '<div class="flex items-center justify-between"><span class="text-sm font-medium text-gray-700">第 ' + count + ' 题</span><button onclick="removeQuestion(this)" class="text-xs text-red-500 hover:text-red-700">删除</button></div><input type="text" placeholder="题目" class="q-title w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none"><input type="text" placeholder="选项A" class="q-a w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none"><input type="text" placeholder="选项B" class="q-b w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none"><input type="text" placeholder="选项C" class="q-c w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none"><input type="text" placeholder="选项D" class="q-d w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none"><select class="q-answer w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm"><option value="A">正确答案: A</option><option value="B">正确答案: B</option><option value="C">正确答案: C</option><option value="D">正确答案: D</option></select>';
       container.appendChild(div);
     }
 
     function removeQuestion(btn) {
-      const item = btn.closest('.question-item');
-      item.remove();
+      btn.closest('.question-item').remove();
       document.querySelectorAll('.question-item').forEach((el, i) => {
-        el.querySelector('span').textContent = `第 ${i + 1} 题`;
+        el.querySelector('span').textContent = '第 ' + (i + 1) + ' 题';
       });
     }
 
@@ -1014,9 +986,7 @@
         const c = item.querySelector('.q-c').value.trim();
         const d = item.querySelector('.q-d').value.trim();
         const answer = item.querySelector('.q-answer').value;
-        if (q && a && b && c && d) {
-          questions.push({ question: q, options: { A: a, B: b, C: c, D: d }, answer });
-        }
+        if (q && a && b && c && d) questions.push({ question: q, options: { A: a, B: b, C: c, D: d }, answer });
       });
       if (questions.length === 0) { alert('请至少添加一道完整题目'); return; }
 
@@ -1025,48 +995,31 @@
 
       try {
         let sha = null;
-        const getRes = await fetch(`https://api.github.com/repos/${LEARN_REPO}/contents/${EXAM_FILE}?ref=main`, { headers: { 'Authorization': `token ${getToken()}`, 'Accept': 'application/vnd.github.v3+json' } });
+        const getRes = await fetch('https://api.github.com/repos/' + LEARN_REPO + '/contents/' + EXAM_FILE + '?ref=main', { headers: { 'Authorization': 'token ' + getToken(), 'Accept': 'application/vnd.github.v3+json' } });
         if (getRes.ok) { const d = await getRes.json(); sha = d.sha; }
-        const body = { message: `Create exam: ${title}`, content: toBase64(new TextEncoder().encode(JSON.stringify(allExams, null, 2))) };
+        const body = { message: 'Create exam: ' + title, content: toBase64(new TextEncoder().encode(JSON.stringify(allExams, null, 2))) };
         if (sha) body.sha = sha;
-        const res = await fetch(`https://api.github.com/repos/${LEARN_REPO}/contents/${EXAM_FILE}`, { method: 'PUT', headers: { 'Authorization': `token ${getToken()}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const res = await fetch('https://api.github.com/repos/' + LEARN_REPO + '/contents/' + EXAM_FILE, { method: 'PUT', headers: { 'Authorization': 'token ' + getToken(), 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         if (res.ok) { alert('考试创建成功！'); renderExamList(); } else { throw new Error('保存失败'); }
       } catch (err) { alert('创建失败: ' + err.message); allExams.shift(); }
     }
 
-    // 开始考试
     function startExam(examId) {
       const exam = allExams.find(e => e.id === examId);
       if (!exam) return;
-      const userAnswers = {};
       const container = document.getElementById('examContent');
 
-      let html = `
-        <div class="mb-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-xl font-bold text-gray-900">${escapeHtml(exam.title)}</h3>
-            <span class="text-sm text-gray-400">${exam.questions.length} 题</span>
-          </div>
-          <div class="space-y-6">`;
+      let html = '<div class="mb-6"><div class="flex items-center justify-between mb-4"><h3 class="text-xl font-bold text-gray-900">' + escapeHtml(exam.title) + '</h3><span class="text-sm text-gray-400">' + exam.questions.length + ' 题</span></div><div class="space-y-6">';
 
       exam.questions.forEach((q, i) => {
-        html += `
-          <div class="bg-gray-50 rounded-2xl p-5 border border-gray-200">
-            <p class="font-medium text-gray-900 mb-4">${i + 1}. ${escapeHtml(q.question)}</p>
-            <div class="space-y-2">
-              ${['A', 'B', 'C', 'D'].map(letter => `
-                <button onclick="selectAnswer('${examId}', ${i}, '${letter}')" id="q${i}_${letter}" class="quiz-option w-full text-left px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-700 flex items-center gap-3">
-                  <span class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center text-xs font-medium flex-shrink-0">${letter}</span>
-                  <span>${escapeHtml(q.options[letter])}</span>
-                </button>
-              `).join('')}
-            </div>
-          </div>`;
+        html += '<div class="bg-gray-50 rounded-2xl p-5 border border-gray-200"><p class="font-medium text-gray-900 mb-4">' + (i + 1) + '. ' + escapeHtml(q.question) + '</p><div class="space-y-2">';
+        ['A', 'B', 'C', 'D'].forEach(letter => {
+          html += '<button onclick="selectAnswer(\'' + examId + '\',' + i + ',\'' + letter + '\')" id="q' + i + '_' + letter + '" class="quiz-option w-full text-left px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-700 flex items-center gap-3"><span class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center text-xs font-medium flex-shrink-0">' + letter + '</span><span>' + escapeHtml(q.options[letter]) + '</span></button>';
+        });
+        html += '</div></div>';
       });
 
-      html += `</div></div>
-        <button onclick="submitExam('${examId}')" class="w-full py-3 bg-gray-900 text-white font-medium rounded-xl hover:bg-gray-800 transition-colors text-sm">提交答卷</button>`;
-
+      html += '</div></div><button onclick="submitExam(\'' + examId + '\')" class="w-full py-3 bg-gray-900 text-white font-medium rounded-xl hover:bg-gray-800 transition-colors text-sm">提交答卷</button>';
       container.innerHTML = html;
       window._examAnswers = {};
       window._examSubmitted = false;
@@ -1076,10 +1029,10 @@
       if (window._examSubmitted) return;
       window._examAnswers[qIndex] = letter;
       ['A', 'B', 'C', 'D'].forEach(l => {
-        const el = document.getElementById(`q${qIndex}_${l}`);
+        const el = document.getElementById('q' + qIndex + '_' + l);
         if (el) el.classList.remove('selected');
       });
-      const el = document.getElementById(`q${qIndex}_${letter}`);
+      const el = document.getElementById('q' + qIndex + '_' + letter);
       if (el) el.classList.add('selected');
     }
 
@@ -1093,7 +1046,7 @@
       exam.questions.forEach((q, i) => {
         const userAns = window._examAnswers[i];
         ['A', 'B', 'C', 'D'].forEach(l => {
-          const el = document.getElementById(`q${i}_${l}`);
+          const el = document.getElementById('q' + i + '_' + l);
           if (!el) return;
           if (l === q.answer) el.classList.add('correct');
           if (userAns === l && l !== q.answer) el.classList.add('wrong');
@@ -1104,15 +1057,7 @@
       const total = exam.questions.length;
       const score = Math.round((correct / total) * 100);
 
-      const resultHtml = `
-        <div class="mt-6 p-5 rounded-2xl border ${score >= 60 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}">
-          <div class="text-center">
-            <p class="text-4xl font-bold ${score >= 60 ? 'text-green-600' : 'text-red-600'}">${score}</p>
-            <p class="text-sm text-gray-600 mt-1">正确 ${correct}/${total} 题</p>
-            <p class="text-sm ${score >= 60 ? 'text-green-600' : 'text-red-600'} mt-2">${score >= 60 ? '恭喜通过！' : '继续加油！'}</p>
-          </div>
-        </div>
-        <button onclick="renderExamList()" class="w-full mt-4 py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors text-sm">返回考试列表</button>`;
+      const resultHtml = '<div class="mt-6 p-5 rounded-2xl border ' + (score >= 60 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200') + '"><div class="text-center"><p class="text-4xl font-bold ' + (score >= 60 ? 'text-green-600' : 'text-red-600') + '">' + score + '</p><p class="text-sm text-gray-600 mt-1">正确 ' + correct + '/' + total + ' 题</p><p class="text-sm ' + (score >= 60 ? 'text-green-600' : 'text-red-600') + ' mt-2">' + (score >= 60 ? '恭喜通过！' : '继续加油！') + '</p></div></div><button onclick="renderExamList()" class="w-full mt-4 py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors text-sm">返回考试列表</button>';
 
       document.getElementById('examContent').insertAdjacentHTML('beforeend', resultHtml);
     }
