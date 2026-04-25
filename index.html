@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>瑞微涵 Ruiweihan</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;background:#f8fafc;color:#1f2937}
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:linear-gradient(135deg,#4f46e5,#7c3aed,#a855f7);position:relative;overflow:hidden;padding:40px 20px}
+.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.hero-logo{width:80px;height:80px;background:rgba(255,255,255,.2);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:40px;backdrop-filter:blur(10px);border:2px solid rgba(255,255,255,.3);margin-bottom:24px;position:relative;z-index:1}
+.hero h1{font-size:42px;font-weight:800;color:#fff;margin-bottom:8px;position:relative;z-index:1;letter-spacing:-1px}
+.hero p{font-size:18px;color:rgba(255,255,255,.85);max-width:500px;line-height:1.6;position:relative;z-index:1}
+.hero-buttons{display:flex;gap:16px;margin-top:32px;position:relative;z-index:1;flex-wrap:wrap;justify-content:center}
+.btn{padding:14px 32px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;transition:all .2s;cursor:pointer;border:none}
+.btn-white{background:#fff;color:#4f46e5;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+.btn-white:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.2)}
+.btn-outline{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.5)}
+.btn-outline:hover{background:rgba(255,255,255,.1);border-color:#fff}
+
+.features{padding:80px 20px;max-width:1100px;margin:0 auto}
+.features h2{text-align:center;font-size:28px;font-weight:800;margin-bottom:12px;color:#1f2937}
+.features .subtitle{text-align:center;font-size:16px;color:#6b7280;margin-bottom:48px}
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}
+.feature-card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:28px;transition:all .2s}
+.feature-card:hover{box-shadow:0 10px 25px -5px rgba(0,0,0,.1);transform:translateY(-4px);border-color:#c7d2fe}
+.feature-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:16px}
+.feature-card h3{font-size:18px;font-weight:700;margin-bottom:8px;color:#1f2937}
+.feature-card p{font-size:14px;color:#6b7280;line-height:1.6}
+
+.stats{background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:60px 20px;text-align:center}
+.stats h2{font-size:28px;font-weight:800;color:#fff;margin-bottom:32px}
+.stats-grid{display:flex;justify-content:center;gap:48px;flex-wrap:wrap}
+.stat-item .number{font-size:36px;font-weight:800;color:#fff}
+.stat-item .label{font-size:14px;color:rgba(255,255,255,.7);margin-top:4px}
+
+.cta{padding:80px 20px;text-align:center;background:#fff}
+.cta h2{font-size:28px;font-weight:800;margin-bottom:12px;color:#1f2937}
+.cta p{font-size:16px;color:#6b7280;margin-bottom:32px}
+.cta .btn{background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;box-shadow:0 4px 14px rgba(79,70,229,.4)}
+.cta .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(79,70,229,.5)}
+
+footer{padding:24px;text-align:center;font-size:13px;color:#9ca3af;border-top:1px solid #e5e7eb}
+</style>
+</head>
+<body>
+<section class="hero">
+  <div class="hero-logo">💬</div>
+  <h1>瑞微涵 Ruiweihan</h1>
+  <p>安全、智能、有趣的AI聊天平台。多模型对话，R币经济体系，等级成长，更多精彩等你探索。</p>
+  <div class="hero-buttons">
+    <a href="chat.html" class="btn btn-white">开始聊天</a>
+    <a href="qiqiaob.html" class="btn btn-outline">Qiqiaob 工作台</a>
+  </div>
+</section>
+
+<section class="features">
+  <h2>核心功能</h2>
+  <p class="subtitle">为每一个对话场景打造专业体验</p>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="feature-icon" style="background:#ede9fe">🤖</div>
+      <h3>多AI角色对话</h3>
+      <p>AI助手、创意写手、代码专家、翻译官、心理咨询师，5大角色覆盖你的所有需求，每个角色都有专属系统提示和专业回答风格。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:#fce7f3">🧧</div>
+      <h3>R币 & 红包</h3>
+      <p>独特的R币经济体系，支持红包收发、余额管理。聊天互动赚取R币，开启更多高级功能。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:#dbeafe">📊</div>
+      <h3>等级 & PRO</h3>
+      <p>从LV0到LV9的等级成长体系，LV7+解锁PRO会员特权。聊天越多，经验越多，等级越高。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:#d1fae5">🔐</div>
+      <h3>安全注册</h3>
+      <p>邮箱验证、密码强度检测、图形验证码、两步验证(2FA)，全方位保障账户安全。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:#fef3c7">😊</div>
+      <h3>微信风格聊天</h3>
+      <p>表情面板、语音消息、位置分享、消息撤回、已读回执、名片分享，熟悉的微信体验。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:#e0e7ff">🛠️</div>
+      <h3>Qiqiaob 工作台</h3>
+      <p>Agent智能助手、模型微调、模型训练，一站式AI开发工具，从对话到创造。</p>
+    </div>
+  </div>
+</section>
+
+<section class="stats">
+  <h2>平台数据</h2>
+  <div class="stats-grid">
+    <div class="stat-item"><div class="number">5+</div><div class="label">AI角色</div></div>
+    <div class="stat-item"><div class="number">128bit</div><div class="label">加密保护</div></div>
+    <div class="stat-item"><div class="number">24/7</div><div class="label">在线服务</div></div>
+    <div class="stat-item"><div class="number">100R</div><div class="label">新用户赠币</div></div>
+  </div>
+</section>
+
+<section class="cta">
+  <h2>准备好开始了吗？</h2>
+  <p>注册即送100R币，开启你的AI对话之旅</p>
+  <a href="chat.html" class="btn">立即体验</a>
+</section>
+
+<footer>© 2024-2026 Ruiweihan · All rights reserved</footer>
+</body>
+</html>
