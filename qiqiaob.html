@@ -3,424 +3,991 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Qiqiaob 工作台 - 瑞微涵</title>
+<title>Qiqiaob - Rui Hub</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;background:#f8fafc;color:#1f2937}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:#fff;border-bottom:1px solid #e5e7eb;position:sticky;top:0;z-index:100}
-.topbar-left{display:flex;align-items:center;gap:12px}
-.topbar-logo{font-size:24px}
-.topbar h1{font-size:18px;font-weight:800}
-.topbar a{font-size:14px;color:#4f46e5;text-decoration:none;font-weight:600}
-
-.tabs{display:flex;padding:16px 24px;gap:8px;background:#fff;border-bottom:1px solid #e5e7eb}
-.tab{padding:10px 20px;border-radius:10px;font-size:14px;font-weight:600;color:#6b7280;cursor:pointer;transition:all .2s;border:2px solid transparent}
-.tab:hover{background:#f3f4f6}
-.tab.active{background:#eef2ff;color:#4f46e5;border-color:#c7d2fe}
-
-.panel{display:none;padding:24px;max-width:900px;margin:0 auto}
-.panel.active{display:block;animation:fadeIn .3s}
-
-.card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:24px;margin-bottom:16px}
-.card h3{font-size:16px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
-.card p{font-size:14px;color:#6b7280;line-height:1.6;margin-bottom:12px}
-
-textarea,input[type=text],input[type=number],select{width:100%;padding:10px 14px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;font-family:inherit;transition:all .2s;outline:none;background:#fff}
-textarea:focus,input:focus,select:focus{border-color:#4f46e5;box-shadow:0 0 0 3px rgba(79,70,229,.1)}
-textarea{resize:vertical;min-height:100px}
-
-.btn{padding:10px 20px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
-.btn-primary{background:#4f46e5;color:#fff}
-.btn-primary:hover{background:#4338ca}
-.btn-secondary{background:#f3f4f6;color:#4b5563}
-.btn-secondary:hover{background:#e5e7eb}
-.btn-success{background:#10b981;color:#fff}
-.btn-danger{background:#ef4444;color:#fff}
-.btn:disabled{opacity:.5;cursor:not-allowed}
-
-.form-group{margin-bottom:16px}
-.form-group label{display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px}
-
-.slider-group{display:flex;align-items:center;gap:12px}
-.slider-group input[type=range]{flex:1;accent-color:#4f46e5}
-.slider-group .value{font-size:13px;font-weight:600;color:#4f46e5;min-width:40px;text-align:right}
-
-.agent-files{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:12px}
-.agent-file{padding:12px;border:1px solid #e5e7eb;border-radius:10px;cursor:pointer;transition:all .15s}
-.agent-file:hover{border-color:#4f46e5;background:#f5f3ff}
-.agent-file .name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.agent-file .size{font-size:11px;color:#9ca3af}
-
-.train-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:12px}
-.train-card{padding:16px;border:2px solid #e5e7eb;border-radius:12px;text-align:center;cursor:pointer;transition:all .15s}
-.train-card:hover{border-color:#4f46e5;background:#f5f3ff}
-.train-card.selected{border-color:#4f46e5;background:#eef2ff}
-.train-card .icon{font-size:32px;margin-bottom:8px}
-.train-card .name{font-size:13px;font-weight:600}
-
-.result-box{background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-top:12px;font-size:13px;line-height:1.8;max-height:400px;overflow-y:auto;white-space:pre-wrap}
-
-.download-btns{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
-
-.nav-back{display:flex;align-items:center;gap:6px;padding:8px 16px;font-size:14px;color:#6b7280;cursor:pointer;text-decoration:none}
-.nav-back:hover{color:#4f46e5}
-
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+*{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans SC',sans-serif;box-sizing:border-box}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+.md-body{font-size:14px;line-height:1.8;color:#334155}
+.md-body h1{font-size:18px;font-weight:700;color:#111827;margin:16px 0 6px}
+.md-body h2{font-size:16px;font-weight:600;color:#1f2937;margin:14px 0 5px;padding-bottom:4px;border-bottom:1px solid #f3f4f6}
+.md-body h3{font-size:14px;font-weight:600;color:#374151;margin:10px 0 4px}
+.md-body p{margin:4px 0}
+.md-body ul,.md-body ol{margin:4px 0;padding-left:20px}
+.md-body ul{list-style:disc}.md-body ol{list-style:decimal}
+.md-body li{margin:2px 0;line-height:1.7}
+.md-body strong{font-weight:600;color:#111827}
+.md-body code:not(pre code){background:#f3f4f6;padding:1px 6px;border-radius:4px;font-size:12px;color:#7c3aed;font-family:'SF Mono',SFMono-Regular,Consolas,'Liberation Mono',Menlo,monospace}
+.md-body pre{margin:8px 0;border-radius:12px;overflow:hidden;position:relative}
+.md-body pre code{display:block;padding:16px!important;font-size:13px;line-height:1.5;overflow-x:auto;font-family:'SF Mono',SFMono-Regular,Consolas,'Liberation Mono',Menlo,monospace}
+.md-body .copy-btn{position:absolute;top:6px;right:6px;padding:4px 10px;background:rgba(255,255,255,.08);color:#94a3b8;border:none;border-radius:6px;font-size:11px;cursor:pointer;opacity:0;transition:opacity .2s}
+.md-body pre:hover .copy-btn{opacity:1}
+.md-body .copy-btn:hover{background:rgba(255,255,255,.15);color:#e2e8f0}
+.md-body blockquote{border-left:3px solid #8b5cf6;padding:4px 12px;margin:8px 0;background:#faf5ff;border-radius:0 6px 6px 0;color:#475569;font-size:13px}
+.md-body hr{border:none;border-top:1px solid #f3f4f6;margin:12px 0}
+.file-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;font-size:11px;font-weight:500;color:#16a34a;margin:1px 2px;cursor:pointer}
+.file-badge:hover{background:#dcfce7}
+.step-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:#f9fafb;border:1px solid #f3f4f6;margin-bottom:3px;font-size:13px}
+.step-item.running{border-color:#c4b5fd;background:#f5f3ff}
+.step-item.done{border-color:#86efac;background:#f0fdf4}
+.step-spin{animation:spin 1s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg-anim{animation:fadeUp .2s ease-out}
+input[type=range]{appearance:none;height:4px;background:#e5e7eb;border-radius:2px;outline:none}
+input[type=range]::-webkit-slider-thumb{appearance:none;width:14px;height:14px;background:#8b5cf6;border-radius:50%;cursor:pointer}
+.file-item{padding:6px 10px;cursor:pointer;border-radius:8px;display:flex;align-items:center;gap:6px;font-size:13px;color:#6b7280;transition:all .15s}
+.file-item:hover{background:#f3f4f6}
+.file-item.active{background:#ede9fe;color:#6d28d9;font-weight:500}
+#workspaceEditor{font-family:'SF Mono',SFMono-Regular,Consolas,'Liberation Mono',Menlo,monospace;font-size:13px;tab-size:4;line-height:1.6;resize:none;background:#0d1117;color:#c9d1d9;caret-color:#58a6ff}
+#workspaceEditor::selection{background:#264f78}
+.train-row textarea{width:100%;padding:6px 8px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;resize:vertical;min-height:50px;font-family:inherit;transition:border-color .15s}
+.train-row textarea:focus{outline:none;border-color:#8b5cf6;background:#fff}
+.progress-bar{height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,#8b5cf6,#6d28d9);border-radius:3px;transition:width .3s}
 </style>
 </head>
-<body>
+<body class="h-screen bg-white text-gray-900 flex flex-col overflow-hidden">
 
-<div class="topbar">
-  <div class="topbar-left">
-    <span class="topbar-logo">🛠️</span>
-    <h1>Qiqiaob 工作台</h1>
+<!-- 顶部导航 -->
+<nav class="w-full px-6 py-3 bg-white border-b border-gray-100 flex items-center justify-between flex-shrink-0">
+  <div class="flex items-center gap-3">
+    <a href="index.html" class="text-lg font-semibold text-gray-900 hover:text-violet-600 transition-colors">Rui</a>
+    <span class="text-xs text-gray-300">/</span>
+    <span class="text-sm text-gray-500">Qiqiaob</span>
   </div>
-  <a href="index.html">← 返回首页</a>
-</div>
-
-<div class="tabs">
-  <div class="tab active" onclick="switchQTab(this,'agent')">🤖 Agent</div>
-  <div class="tab" onclick="switchQTab(this,'tuning')">🎛️ 模型微调</div>
-  <div class="tab" onclick="switchQTab(this,'training')">🎓 模型训练</div>
-</div>
-
-<!-- Agent Panel -->
-<div class="panel active" id="panel-agent">
-  <div class="card">
-    <h3>🤖 Agent 智能助手</h3>
-    <p>上传文件到Agent云空间，AI将基于文件内容智能回答你的问题。</p>
-    <div class="form-group">
-      <label>上传文件</label>
-      <input type="file" id="agentFileInput" multiple onchange="handleAgentUpload(this.files)">
+  <div class="flex items-center gap-3">
+    <div class="flex bg-gray-100 rounded-lg p-0.5">
+      <button id="tabAgent" onclick="switchPage('agent')" class="px-3.5 py-1.5 text-xs font-medium rounded-md bg-gray-900 text-white transition-all">Agent</button>
+      <button id="tabTune" onclick="switchPage('tune')" class="px-3.5 py-1.5 text-xs font-medium rounded-md text-gray-500 hover:text-gray-700 transition-all">模型微调</button>
+      <button id="tabTrain" onclick="switchPage('train')" class="px-3.5 py-1.5 text-xs font-medium rounded-md text-gray-500 hover:text-gray-700 transition-all">模型训练</button>
     </div>
-    <div class="agent-files" id="agentFiles"></div>
-  </div>
-
-  <div class="card">
-    <h3>💬 与Agent对话</h3>
-    <div class="form-group">
-      <label>选择文件上下文</label>
-      <select id="agentFileSelect"><option value="">无文件上下文</option></select>
-    </div>
-    <div class="form-group">
-      <label>提问</label>
-      <textarea id="agentQuestion" placeholder="向Agent提问..."></textarea>
-    </div>
-    <button class="btn btn-primary" onclick="askAgent()">提问</button>
-    <div class="result-box" id="agentResult" style="display:none"></div>
-  </div>
-</div>
-
-<!-- Tuning Panel -->
-<div class="panel" id="panel-tuning">
-  <div class="card">
-    <h3>🎛️ 模型微调</h3>
-    <p>调整API参数以获得不同的对话风格和输出效果。</p>
-    <div class="form-group">
-      <label>模型</label>
-      <select id="tuneModel">
-        <option value="gpt-4o-mini">gpt-4o-mini</option>
-        <option value="gpt-4o">gpt-4o</option>
-        <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Temperature (创造性): <span id="tempVal">0.7</span></label>
-      <div class="slider-group">
-        <input type="range" id="tuneTemp" min="0" max="2" step="0.1" value="0.7" oninput="document.getElementById('tempVal').textContent=this.value">
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Max Tokens: <span id="tokensVal">1024</span></label>
-      <div class="slider-group">
-        <input type="range" id="tuneTokens" min="128" max="4096" step="128" value="1024" oninput="document.getElementById('tokensVal').textContent=this.value">
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Top P: <span id="topPVal">1</span></label>
-      <div class="slider-group">
-        <input type="range" id="tuneTopP" min="0" max="1" step="0.1" value="1" oninput="document.getElementById('topPVal').textContent=this.value">
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Frequency Penalty: <span id="freqVal">0</span></label>
-      <div class="slider-group">
-        <input type="range" id="tuneFreq" min="-2" max="2" step="0.1" value="0" oninput="document.getElementById('freqVal').textContent=this.value">
-      </div>
-    </div>
-    <div class="form-group">
-      <label>System Prompt</label>
-      <textarea id="tuneSystemPrompt" rows="3" placeholder="设定AI的角色和行为...">你是瑞微涵AI助手。</textarea>
+    <div class="flex items-center gap-1 px-2.5 py-1 bg-gray-50 border border-gray-200 rounded-full">
+      <span class="text-xs">🪙</span>
+      <span id="rCoinDisplay" class="text-xs font-semibold text-gray-700">100</span>
+      <span class="text-xs text-gray-400">R</span>
     </div>
   </div>
+</nav>
 
-  <div class="card">
-    <h3>🧪 测试对话</h3>
-    <div class="form-group">
-      <textarea id="tuneInput" placeholder="输入测试消息..."></textarea>
+<!-- ========== Agent 页 ========== -->
+<div id="page-agent" class="flex-1 flex flex-col min-h-0">
+  <div class="bg-white border-b border-gray-100 px-6 py-3 flex-shrink-0">
+    <div class="max-w-5xl mx-auto flex gap-2 items-end">
+      <textarea id="agentInput" class="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400 focus:bg-white transition-all resize-none" rows="1" placeholder="描述你的任务，Agent 会自主规划并创建文件..."></textarea>
+      <button id="agentSendBtn" onclick="runAgent()" class="px-4 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex-shrink-0">发送</button>
     </div>
-    <button class="btn btn-primary" onclick="testTuning()">测试</button>
-    <div class="result-box" id="tuneResult" style="display:none"></div>
+    <div class="max-w-5xl mx-auto text-xs text-gray-400 mt-1">Enter 发送 · Shift+Enter 换行 · 每次消耗 5R币</div>
   </div>
-</div>
-
-<!-- Training Panel -->
-<div class="panel" id="panel-training">
-  <div class="card">
-    <h3>🎓 模型训练</h3>
-    <p>通过少样本学习(Few-Shot)训练模型，让AI学会你期望的回答方式。选择训练数据卡片，设置示例对话，然后训练。</p>
-    <div class="form-group">
-      <label>选择训练场景</label>
-      <div class="train-cards" id="trainCards">
-        <div class="train-card selected" onclick="selectTrainCard(this,'greeting')">
-          <div class="icon">👋</div>
-          <div class="name">打招呼</div>
-        </div>
-        <div class="train-card" onclick="selectTrainCard(this,'customer')">
-          <div class="icon">🏢</div>
-          <div class="name">客服</div>
-        </div>
-        <div class="train-card" onclick="selectTrainCard(this,'teaching')">
-          <div class="icon">📚</div>
-          <div class="name">教学</div>
-        </div>
-        <div class="train-card" onclick="selectTrainCard(this,'creative')">
-          <div class="icon">🎨</div>
-          <div class="name">创意</div>
+  <div class="flex-1 flex min-h-0 overflow-hidden">
+    <div class="w-52 bg-gray-50/50 border-r border-gray-100 flex flex-col flex-shrink-0">
+      <div class="px-3 py-2.5 border-b border-gray-100 flex items-center justify-between">
+        <span class="text-xs font-semibold text-gray-500">☁️ 云空间</span>
+        <div class="flex gap-1">
+          <button onclick="createNewFile()" class="w-5 h-5 rounded hover:bg-gray-200 flex items-center justify-center text-gray-500 text-xs transition-colors" title="新建文件">+</button>
+          <button onclick="clearWorkspace()" class="w-5 h-5 rounded hover:bg-red-100 flex items-center justify-center text-gray-400 text-[10px] transition-colors" title="清空">✕</button>
         </div>
       </div>
+      <div id="fileTree" class="flex-1 overflow-y-auto p-1.5"></div>
     </div>
-  </div>
-
-  <div class="card">
-    <h3>📝 示例对话 (Few-Shot)</h3>
-    <p>添加示例对话来引导模型学习。至少添加2组对话效果最佳。</p>
-    <div id="fewShotExamples">
-      <div class="form-group" style="border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin-bottom:8px">
-        <label>用户输入 1</label>
-        <input type="text" id="shot_user_1" value="你好" placeholder="用户说的话">
-        <label style="margin-top:8px">AI回复 1</label>
-        <input type="text" id="shot_ai_1" value="你好呀！我是你的AI助手，很高兴认识你～有什么我可以帮助你的吗？😊" placeholder="AI应该怎么回">
+    <div class="flex-1 flex flex-col min-h-0 min-w-0">
+      <div class="bg-white border-b border-gray-100 px-4 py-1 flex items-center gap-1 flex-shrink-0">
+        <button id="wsTabChat" onclick="switchWorkspace('chat')" class="px-3 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-700">💬 对话</button>
+        <button id="wsTabEdit" onclick="switchWorkspace('edit')" class="px-3 py-1 text-xs font-medium rounded-md text-gray-400 hover:text-gray-600">📝 编辑</button>
+        <button id="wsTabPreview" onclick="switchWorkspace('preview')" class="px-3 py-1 text-xs font-medium rounded-md text-gray-400 hover:text-gray-600 hidden">👁 预览</button>
+        <span id="editingFileName" class="ml-2 text-xs text-gray-400 hidden"></span>
       </div>
-      <div class="form-group" style="border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin-bottom:8px">
-        <label>用户输入 2</label>
-        <input type="text" id="shot_user_2" value="你是谁" placeholder="用户说的话">
-        <label style="margin-top:8px">AI回复 2</label>
-        <input type="text" id="shot_ai_2" value="我是瑞微涵AI助手，一个友好而专业的智能助手！我可以帮你聊天、回答问题、写代码等等。试试和我聊点什么吧～✨" placeholder="AI应该怎么回">
+      <div id="wsChat" class="flex-1 overflow-y-auto p-5">
+        <div class="flex flex-col items-center justify-center h-full text-gray-400" id="agentEmpty">
+          <div class="text-5xl mb-3">🤖</div>
+          <div class="text-base font-medium text-gray-600">给 Agent 一个任务</div>
+          <div class="text-sm mt-1 text-gray-400">Agent 会自主拆解任务、创建文件、编辑代码</div>
+          <div class="mt-5 flex flex-wrap justify-center gap-2">
+            <button onclick="quickTask('帮我写一个Python计算器程序')" class="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-600 hover:bg-gray-100 hover:border-gray-300 transition-all">🐍 Python计算器</button>
+            <button onclick="quickTask('创建一个酷炫的HTML个人主页')" class="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-600 hover:bg-gray-100 hover:border-gray-300 transition-all">🌐 HTML主页</button>
+            <button onclick="quickTask('写一个Todo List网页')" class="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-600 hover:bg-gray-100 hover:border-gray-300 transition-all">📋 Todo List</button>
+          </div>
+        </div>
       </div>
-    </div>
-    <button class="btn btn-secondary" onclick="addFewShot()" style="margin-top:8px">+ 添加更多示例</button>
-  </div>
-
-  <div class="card">
-    <h3>🚀 训练 & 测试</h3>
-    <div class="form-group">
-      <label>测试输入</label>
-      <input type="text" id="trainTestInput" placeholder="输入测试消息，看看训练效果" value="嗨">
-    </div>
-    <button class="btn btn-primary" id="btnTrain" onclick="trainAndTest()">🎯 训练并测试</button>
-    <div class="result-box" id="trainResult" style="display:none"></div>
-    <div class="download-btns" id="trainDownloads" style="display:none">
-      <button class="btn btn-success" onclick="downloadTraining('json')">📥 下载 JSON</button>
-      <button class="btn btn-primary" onclick="downloadTraining('txt')">📥 下载 TXT</button>
-      <button class="btn btn-secondary" onclick="downloadTraining('md')">📥 下载 Markdown</button>
+      <div id="wsEdit" class="flex-1 flex flex-col min-h-0 hidden">
+        <div class="flex-1 overflow-hidden">
+          <textarea id="workspaceEditor" class="w-full h-full p-4 border-none focus:outline-none" placeholder="选择左侧文件进行编辑，或新建文件..."></textarea>
+        </div>
+        <div class="bg-[#161b22] border-t border-gray-800 px-4 py-2 flex items-center justify-between flex-shrink-0">
+          <span id="editorStatus" class="text-xs text-gray-500">未选择文件</span>
+          <div class="flex gap-2">
+            <button onclick="saveCurrentFile()" class="px-3 py-1 bg-violet-600 text-white text-xs font-medium rounded-md hover:bg-violet-700 transition-colors">保存</button>
+            <button onclick="deleteCurrentFile()" class="px-3 py-1 bg-white/5 text-gray-400 text-xs font-medium rounded-md hover:bg-white/10 hover:text-red-400 transition-colors">删除</button>
+          </div>
+        </div>
+      </div>
+      <div id="wsPreview" class="flex-1 flex flex-col min-h-0 hidden">
+        <div class="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200 flex-shrink-0">
+          <span id="previewTitle" class="text-xs text-gray-500">预览</span>
+          <div class="flex gap-2">
+            <button onclick="openPreviewNewTab()" class="px-2 py-1 text-xs text-gray-500 hover:text-gray-700 bg-white border border-gray-200 rounded-md transition-colors">新窗口打开</button>
+            <button onclick="refreshPreview()" class="px-2 py-1 text-xs text-gray-500 hover:text-gray-700 bg-white border border-gray-200 rounded-md transition-colors">刷新</button>
+          </div>
+        </div>
+        <iframe id="previewFrame" class="flex-1 w-full border-none bg-white" sandbox="allow-scripts allow-same-origin"></iframe>
+      </div>
     </div>
   </div>
 </div>
+
+<!-- ========== 模型微调页 ========== -->
+<div id="page-tune" class="flex-1 overflow-y-auto min-h-0 hidden">
+  <div class="max-w-5xl mx-auto p-6 flex gap-6">
+    <div class="flex-1 min-w-0">
+      <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden mb-5">
+        <div class="px-5 py-4 border-b border-gray-100 font-semibold text-gray-900 text-sm">⚙️ API 参数调整</div>
+        <div class="p-5">
+          <div class="mb-4">
+            <label class="block text-xs font-medium text-gray-600 mb-1">基础模型</label>
+            <select id="tuneModel" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400">
+              <option value="gpt-4o-mini">GPT-4o Mini</option>
+              <option value="gpt-4o">GPT-4o</option>
+              <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+              <option value="deepseek-chat">DeepSeek Chat</option>
+              <option value="deepseek-coder">DeepSeek Coder</option>
+              <option value="claude-3-haiku">Claude 3 Haiku</option>
+              <option value="qwen-turbo">Qwen Turbo</option>
+            </select>
+          </div>
+          <div class="mb-4">
+            <label class="block text-xs font-medium text-gray-600 mb-1">System Prompt</label>
+            <textarea id="tuneSystemPrompt" rows="3" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400 resize-y" placeholder="定义AI的角色，如：你是一个Python专家..."></textarea>
+          </div>
+          <div class="space-y-3">
+            <div class="flex items-center gap-3"><span class="text-xs font-medium text-gray-600 w-28">Temperature</span><input type="range" id="tuneTemp" min="0" max="200" value="70" class="flex-1" oninput="document.getElementById('tuneTempVal').textContent=(this.value/100).toFixed(2)"><span id="tuneTempVal" class="text-xs font-semibold text-gray-700 w-8 text-right">0.70</span></div>
+            <div class="flex items-center gap-3"><span class="text-xs font-medium text-gray-600 w-28">Top P</span><input type="range" id="tuneTopP" min="0" max="100" value="100" class="flex-1" oninput="document.getElementById('tuneTopPVal').textContent=(this.value/100).toFixed(2)"><span id="tuneTopPVal" class="text-xs font-semibold text-gray-700 w-8 text-right">1.00</span></div>
+            <div class="flex items-center gap-3"><span class="text-xs font-medium text-gray-600 w-28">Max Tokens</span><input type="range" id="tuneMaxTokens" min="256" max="8192" value="4096" step="256" class="flex-1" oninput="document.getElementById('tuneMaxTokensVal').textContent=this.value"><span id="tuneMaxTokensVal" class="text-xs font-semibold text-gray-700 w-8 text-right">4096</span></div>
+            <div class="flex items-center gap-3"><span class="text-xs font-medium text-gray-600 w-28">Frequency Penalty</span><input type="range" id="tuneFreqPen" min="0" max="200" value="0" class="flex-1" oninput="document.getElementById('tuneFreqPenVal').textContent=(this.value/100).toFixed(2)"><span id="tuneFreqPenVal" class="text-xs font-semibold text-gray-700 w-8 text-right">0.00</span></div>
+            <div class="flex items-center gap-3"><span class="text-xs font-medium text-gray-600 w-28">Presence Penalty</span><input type="range" id="tunePresPen" min="0" max="200" value="0" class="flex-1" oninput="document.getElementById('tunePresPenVal').textContent=(this.value/100).toFixed(2)"><span id="tunePresPenVal" class="text-xs font-semibold text-gray-700 w-8 text-right">0.00</span></div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-gray-100 flex gap-2 items-end">
+            <input id="presetName" class="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400" placeholder="预设名称">
+            <button onclick="savePreset()" class="px-3 py-2 bg-gray-900 text-white text-xs font-medium rounded-xl hover:bg-gray-800 transition-colors">保存</button>
+            <select id="presetSelect" onchange="loadPreset()" class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400">
+              <option value="">加载预设...</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="w-[380px] flex-shrink-0 flex flex-col">
+      <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden flex-1 flex flex-col min-h-[500px]">
+        <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+          <span class="text-sm font-semibold text-gray-900">🧪 实时测试</span>
+          <span class="text-xs text-gray-400">2R/次</span>
+        </div>
+        <div id="tuneChatArea" class="flex-1 overflow-y-auto p-4 space-y-3">
+          <div class="text-center py-8 text-gray-400 text-sm">调整参数后测试效果</div>
+        </div>
+        <div class="p-3 border-t border-gray-100 flex gap-2">
+          <input id="tuneTestInput" class="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400" placeholder="输入测试消息..." onkeydown="if(event.key==='Enter')tuneTest()">
+          <button onclick="tuneTest()" class="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors">发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 模型训练页 ========== -->
+<div id="page-train" class="flex-1 overflow-y-auto min-h-0 hidden">
+  <div class="max-w-5xl mx-auto p-6">
+    <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden mb-5">
+      <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+        <span class="text-sm font-semibold text-gray-900">📝 训练数据</span>
+        <div class="flex gap-2">
+          <button onclick="addTrainRow()" class="px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg hover:bg-gray-800 transition-colors">+ 添加对话</button>
+          <button onclick="document.getElementById('trainFileInput').click()" class="px-3 py-1.5 bg-gray-50 text-gray-600 text-xs font-medium rounded-lg hover:bg-gray-100 border border-gray-200 transition-colors">📁 导入</button>
+          <input type="file" id="trainFileInput" accept=".jsonl,.json,.csv" class="hidden" onchange="handleTrainFileUpload(event)">
+        </div>
+      </div>
+      <div class="p-5">
+        <div id="trainRowsContainer"></div>
+        <div id="trainEmptyState" class="text-center py-10 text-gray-400">
+          <div class="text-3xl mb-2">💬</div>
+          <div class="text-sm font-medium text-gray-500">暂无训练数据</div>
+          <div class="text-xs mt-1">添加多组对话数据，训练你自己的AI角色</div>
+        </div>
+        <div class="mt-3 flex items-center justify-between">
+          <span id="trainRowCount" class="text-xs text-gray-400">0 条对话</span>
+          <div class="flex gap-2">
+            <button onclick="loadTrainSample()" class="px-2.5 py-1 bg-gray-50 text-gray-600 text-xs rounded-lg hover:bg-gray-100 border border-gray-200 transition-colors">加载示例</button>
+            <button onclick="exportDataset()" class="px-2.5 py-1 bg-gray-50 text-gray-600 text-xs rounded-lg hover:bg-gray-100 border border-gray-200 transition-colors">导出JSONL</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden mb-5">
+      <div class="px-5 py-4 border-b border-gray-100">
+        <span class="text-sm font-semibold text-gray-900">⚙️ 训练配置</span>
+      </div>
+      <div class="p-5">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">模型名称</label>
+            <input id="trainModelName" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400" placeholder="给你的AI起个名字" value="我的助手">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">基础模型</label>
+            <select id="trainBaseModel" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400">
+              <option value="gpt-4o-mini">GPT-4o Mini</option>
+              <option value="gpt-4o">GPT-4o</option>
+              <option value="deepseek-chat">DeepSeek Chat</option>
+            </select>
+          </div>
+          <div class="col-span-2">
+            <label class="block text-xs font-medium text-gray-600 mb-1">角色设定 (System Prompt)</label>
+            <textarea id="trainSysPrompt" rows="2" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400 resize-y" placeholder="描述你的AI的性格和角色，比如：你是一个活泼开朗的聊天伙伴..."></textarea>
+          </div>
+        </div>
+        <div class="mt-4 flex items-center gap-4">
+          <button onclick="startTraining()" id="startTrainBtn" class="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors">🚀 开始训练</button>
+          <span class="text-xs text-gray-400">消耗 20R币</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="trainProgressSection" class="bg-white rounded-2xl border border-gray-200 overflow-hidden mb-5 hidden">
+      <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+        <span class="text-sm font-semibold text-gray-900">🏋️ 训练进度</span>
+        <span id="trainStatusText" class="text-xs text-gray-400">准备中...</span>
+      </div>
+      <div class="p-5">
+        <div class="progress-bar mb-3"><div id="trainProgressBar" class="progress-bar-fill" style="width:0%"></div></div>
+        <div id="trainLog" class="bg-gray-50 rounded-xl p-3 text-xs text-gray-500 font-mono max-h-[150px] overflow-y-auto space-y-1"></div>
+      </div>
+    </div>
+
+    <div id="trainResultSection" class="hidden">
+      <div class="grid grid-cols-2 gap-5">
+        <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col min-h-[400px]">
+          <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+            <span class="text-sm font-semibold text-gray-900">💬 对话测试</span>
+            <span class="text-xs text-gray-400">2R/次</span>
+          </div>
+          <div id="trainedChatArea" class="flex-1 overflow-y-auto p-4 space-y-3">
+            <div class="text-center py-6 text-gray-400 text-sm">跟你的AI对话试试！</div>
+          </div>
+          <div class="p-3 border-t border-gray-100 flex gap-2">
+            <input id="trainedTestInput" class="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400" placeholder="跟你的AI说话..." onkeydown="if(event.key==='Enter')testTrainedModel()">
+            <button onclick="testTrainedModel()" class="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors">发送</button>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+          <div class="px-5 py-4 border-b border-gray-100">
+            <span class="text-sm font-semibold text-gray-900">📦 模型管理</span>
+          </div>
+          <div class="p-5">
+            <div id="trainedModelInfo" class="mb-4"></div>
+            <div class="space-y-2">
+              <button onclick="downloadTrainedModel()" class="w-full px-4 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors flex items-center justify-center gap-2">📥 下载模型 (JSONL)</button>
+              <button onclick="downloadAsChatWidget()" class="w-full px-4 py-2.5 bg-violet-600 text-white text-sm font-medium rounded-xl hover:bg-violet-700 transition-colors flex items-center justify-center gap-2">🌐 下载聊天页面 (HTML)</button>
+              <button onclick="downloadAsAPIConfig()" class="w-full px-4 py-2.5 bg-gray-50 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-100 border border-gray-200 transition-colors flex items-center justify-center gap-2">📋 下载API配置 (JSON)</button>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-100">
+              <div class="text-xs font-medium text-gray-600 mb-2">已保存的模型</div>
+              <div id="savedModelsList" class="space-y-1"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toastBox" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2"></div>
 
 <script>
-function switchQTab(el, name) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-' + name).classList.add('active');
-}
+const API_KEY='sk-ktAv8mWCMSM9vxap1MoyxYbYS1IqlHOY4kkt0sw07qhH3ymn';
+const API_URL='https://api.n1n.ai/v1/chat/completions';
 
-// Agent
-const agentFileData = {};
-function handleAgentUpload(files) {
-  const container = document.getElementById('agentFiles');
-  const select = document.getElementById('agentFileSelect');
-  Array.from(files).forEach(file => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      agentFileData[file.name] = e.target.result;
-      const div = document.createElement('div');
-      div.className = 'agent-file';
-      div.innerHTML = `<div class="name">📄 ${file.name}</div><div class="size">${(file.size/1024).toFixed(1)}KB</div>`;
-      container.appendChild(div);
-      const opt = document.createElement('option');
-      opt.value = file.name; opt.textContent = file.name;
-      select.appendChild(opt);
-    };
-    reader.readAsText(file);
+const AGENT_PROMPT=`你是 Qiqiaob Agent，一个能自主规划、创建和编辑文件的AI编程助手。
+
+## 核心规则：文件创建格式
+你必须使用 [FILE:文件名] 和 [/FILE] 标签来创建文件。
+
+**绝对规则：标签之间只放纯代码，绝对不能加 markdown 代码块标记**
+
+正确写法：
+[FILE:index.html]
+<!DOCTYPE html>
+<html>
+<head><title>Hello</title></head>
+<body><h1>Hello World</h1></body>
+</html>
+[/FILE]
+
+[FILE:style.css]
+body { margin: 0; padding: 20px; }
+h1 { color: #333; }
+[/FILE]
+
+[FILE:app.js]
+console.log('Hello World');
+[/FILE]
+
+错误写法（绝对禁止）：
+[FILE:index.html]
+\\\`\\\`\\\`html
+<-- 绝对不要加 \\\`\\\`\\\`html ！！！
+\\\`\\\`\\\`
+[/FILE]
+
+## 规则
+1. [FILE:文件名] 和 [/FILE] 之间必须是纯代码，不能有任何 \\\`\\\`\\\` 标记
+2. 代码必须完整可运行，不省略任何部分
+3. 用中文回复，先简述步骤，再创建文件
+4. 每个文件都要用 [FILE:...] ... [/FILE] 包裹`;
+
+let agentMessages=[],isAgentRunning=false,abortCtrl=null,rCoins=0;
+let trainDataset=[],trainChatHistory=[],tuneChatHistory=[],presets=[];
+let currentEditFile=null,workspaceFiles={};
+let trainedModelData=null,isTraining=false;
+const AGENT_COST=5,TUNE_TEST_COST=2,TRAIN_COST=20;
+
+function loadCoins(){try{rCoins=parseInt(localStorage.getItem('ruiweihan_rcoins'))||100}catch(e){rCoins=100}if(isNaN(rCoins)||rCoins<0)rCoins=0;updateCoinDisplay()}
+function saveCoins(){localStorage.setItem('ruiweihan_rcoins',rCoins);updateCoinDisplay()}
+function updateCoinDisplay(){document.getElementById('rCoinDisplay').textContent=rCoins}
+function spendCoins(a){if(rCoins<a){toast('R币不足！需要 '+a+'R，当前 '+rCoins+'R','err');return false}rCoins-=a;saveCoins();return true}
+
+function switchPage(p){
+  ['agent','tune','train'].forEach(k=>{
+    const el=document.getElementById('page-'+k);
+    if(k===p){el.classList.remove('hidden');el.style.display=k==='agent'?'flex':'block'}
+    else{el.classList.add('hidden');el.style.display='none'}
+  });
+  const tabs={agent:'tabAgent',tune:'tabTune',train:'tabTrain'};
+  Object.entries(tabs).forEach(([k,id])=>{
+    document.getElementById(id).className=k===p
+      ?'px-3.5 py-1.5 text-xs font-medium rounded-md bg-gray-900 text-white transition-all'
+      :'px-3.5 py-1.5 text-xs font-medium rounded-md text-gray-500 hover:text-gray-700 transition-all';
   });
 }
 
-async function askAgent() {
-  const question = document.getElementById('agentQuestion').value.trim();
-  if (!question) return;
-  const fileName = document.getElementById('agentFileSelect').value;
-  const fileContent = fileName ? agentFileData[fileName] || '' : '';
-  const systemPrompt = fileContent
-    ? `基于以下文件内容回答问题。文件: ${fileName}\n内容:\n${fileContent.substring(0, 3000)}`
-    : '你是瑞微涵AI助手。';
+function loadWorkspace(){try{workspaceFiles=JSON.parse(localStorage.getItem('ruiweihan_workspace'))||{}}catch(e){workspaceFiles={}}renderFileTree()}
+function saveWorkspace(){localStorage.setItem('ruiweihan_workspace',JSON.stringify(workspaceFiles))}
 
-  const result = document.getElementById('agentResult');
-  result.style.display = 'block';
-  result.textContent = '思考中...';
+function renderFileTree(){
+  const tree=document.getElementById('fileTree');
+  const names=Object.keys(workspaceFiles).sort();
+  if(!names.length){tree.innerHTML='<div class="text-center py-6 text-gray-400 text-xs"><div class="text-xl mb-1">📁</div>空空间</div>';return}
+  let h='';
+  names.forEach(p=>{
+    const icon=getFileIcon(p.split('/').pop());
+    h+=`<div class="file-item ${currentEditFile===p?'active':''}" onclick="openFile('${escA(p)}')">${icon} ${esc(p.split('/').pop())}</div>`;
+  });
+  tree.innerHTML=h;
+}
 
-  try {
-    const resp = await fetch('https://api.n1n.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer sk-ktAv8mWCMSM9vxap1MoyxYbYS1IqlHOY4kkt0sw07qhH3ymn' },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: question }
-        ],
-        max_tokens: 1024
-      })
-    });
-    const data = await resp.json();
-    result.textContent = stripCodeFences(data.choices?.[0]?.message?.content || '无法获取回复');
-  } catch (e) {
-    result.textContent = '请求失败: ' + e.message;
+function getFileIcon(n){if(n.endsWith('.py'))return'🐍';if(n.endsWith('.js'))return'📜';if(n.endsWith('.html'))return'🌐';if(n.endsWith('.css'))return'🎨';if(n.endsWith('.json'))return'📋';if(n.endsWith('.md'))return'📝';if(n.endsWith('.ts'))return'💠';return'📄'}
+
+function openFile(path){
+  currentEditFile=path;
+  document.getElementById('workspaceEditor').value=workspaceFiles[path]||'';
+  document.getElementById('editingFileName').textContent=path;
+  document.getElementById('editingFileName').classList.remove('hidden');
+  document.getElementById('editorStatus').textContent=path+' · '+(workspaceFiles[path]||'').split('\n').length+'行';
+  const prevBtn=document.getElementById('wsTabPreview');
+  if(path.endsWith('.html'))prevBtn.classList.remove('hidden');else prevBtn.classList.add('hidden');
+  switchWorkspace('edit');renderFileTree();
+}
+
+function saveCurrentFile(){if(!currentEditFile){toast('没有打开的文件','err');return}workspaceFiles[currentEditFile]=document.getElementById('workspaceEditor').value;saveWorkspace();renderFileTree();toast('已保存','ok')}
+function deleteCurrentFile(){if(!currentEditFile)return;if(!confirm('删除 '+currentEditFile+'？'))return;delete workspaceFiles[currentEditFile];currentEditFile=null;document.getElementById('workspaceEditor').value='';document.getElementById('editingFileName').classList.add('hidden');document.getElementById('editorStatus').textContent='未选择文件';document.getElementById('wsTabPreview').classList.add('hidden');saveWorkspace();renderFileTree()}
+function createNewFile(){const n=prompt('文件名：');if(!n||!n.trim())return;const p=n.trim();if(workspaceFiles[p]){toast('文件已存在','err');return}workspaceFiles[p]='';saveWorkspace();renderFileTree();openFile(p)}
+function clearWorkspace(){if(!confirm('清空所有文件？'))return;workspaceFiles={};currentEditFile=null;document.getElementById('workspaceEditor').value='';document.getElementById('editingFileName').classList.add('hidden');document.getElementById('editorStatus').textContent='未选择文件';document.getElementById('wsTabPreview').classList.add('hidden');saveWorkspace();renderFileTree();toast('已清空','ok')}
+
+function switchWorkspace(tab){
+  ['chat','edit','preview'].forEach(k=>{document.getElementById('ws'+k.charAt(0).toUpperCase()+k.slice(1)).classList.toggle('hidden',k!==tab)});
+  const on='px-3 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-700';
+  const off='px-3 py-1 text-xs font-medium rounded-md text-gray-400 hover:text-gray-600';
+  document.getElementById('wsTabChat').className=tab==='chat'?on:off;
+  document.getElementById('wsTabEdit').className=tab==='edit'?on:off;
+  document.getElementById('wsTabPreview').className=tab==='preview'?on:off;
+  if(tab==='preview')updatePreview();
+}
+
+function updatePreview(){
+  if(!currentEditFile||!currentEditFile.endsWith('.html'))return;
+  const frame=document.getElementById('previewFrame');
+  let html=document.getElementById('workspaceEditor').value;
+  const base=currentEditFile.replace('.html','');
+  const cssFile=base+'.css',jsFile=base+'.js';
+  if(workspaceFiles[cssFile]){const c=`<style>${workspaceFiles[cssFile]}</style>`;if(html.includes('</head>'))html=html.replace('</head>',c+'</head>');else html=c+html}
+  if(workspaceFiles[jsFile]){const j=`<script>${workspaceFiles[jsFile]}<\/script>`;if(html.includes('</body>'))html=html.replace('</body>',j+'</body>');else html+=j}
+  frame.srcdoc=html;
+  document.getElementById('previewTitle').textContent='预览: '+currentEditFile;
+}
+function refreshPreview(){updatePreview();toast('已刷新','ok')}
+function openPreviewNewTab(){
+  if(!currentEditFile||!currentEditFile.endsWith('.html'))return;
+  let html=document.getElementById('workspaceEditor').value;
+  const base=currentEditFile.replace('.html','');
+  if(workspaceFiles[base+'.css']){const c=`<style>${workspaceFiles[base+'.css']}</style>`;if(html.includes('</head>'))html=html.replace('</head>',c+'</head>');else html=c+html}
+  if(workspaceFiles[base+'.js']){const j=`<script>${workspaceFiles[base+'.js']}<\/script>`;if(html.includes('</body>'))html=html.replace('</body>',j+'</body>');else html+=j}
+  const w=window.open('','_blank');w.document.write(html);w.document.close();
+}
+
+function quickTask(t){document.getElementById('agentInput').value=t;runAgent()}
+
+async function runAgent(){
+  if(!spendCoins(AGENT_COST))return;
+  const input=document.getElementById('agentInput'),text=input.value.trim();
+  if(!text||isAgentRunning)return;input.value='';input.style.height='auto';
+  const area=document.getElementById('wsChat'),empty=document.getElementById('agentEmpty');if(empty)empty.remove();
+  switchWorkspace('chat');
+  area.insertAdjacentHTML('beforeend',`<div class="flex justify-end msg-anim"><div class="max-w-[65%] bg-gray-900 text-white px-4 py-2.5 rounded-2xl rounded-br-sm text-sm leading-relaxed">${esc(text)}</div></div>`);
+  area.scrollTop=area.scrollHeight;
+  const fileCtx=Object.keys(workspaceFiles).length>0?'\n\n已有文件：\n'+Object.keys(workspaceFiles).map(p=>'- '+p).join('\n'):'';
+  agentMessages.push({role:'user',content:text});
+  const pid='p_'+Date.now();
+  area.insertAdjacentHTML('beforeend',`<div class="flex gap-3 msg-anim" id="${pid}"><div class="w-7 h-7 rounded-full bg-violet-100 flex items-center justify-center text-sm flex-shrink-0">🤖</div><div class="max-w-[80%] min-w-0"><div id="${pid}_steps"><div class="step-item running"><span class="step-spin text-xs">⏳</span><span class="text-gray-600 ml-2">思考中...</span></div></div><div id="${pid}_content" class="hidden mt-3"></div></div></div>`);
+  area.scrollTop=area.scrollHeight;
+  isAgentRunning=true;document.getElementById('agentSendBtn').disabled=true;
+  try{
+    abortCtrl=new AbortController();
+    const res=await callAPI([{role:'system',content:AGENT_PROMPT+fileCtx},...agentMessages.slice(-10)],true);
+    const files=parseFileOps(res);
+    if(files.length){
+      files.forEach(f=>{workspaceFiles[f.path]=f.content});
+      saveWorkspace();renderFileTree();
+      toast('创建了 '+files.length+' 个文件','ok');
+    }
+    const stepReg=/^(?:#{1,3}\s*)?(?:步骤\s*\d+|Step\s*\d+)[：:]\s*.+$/gm;
+    const sm=res.match(stepReg);
+    if(sm&&sm.length){
+      const steps=sm.map(s=>s.replace(/^#{1,3}\s*/,'').trim());
+      const se=document.getElementById(`${pid}_steps`);
+      se.innerHTML=steps.map((s,i)=>`<div class="step-item" id="${pid}_s${i}"><span class="text-xs">⬜</span><span class="text-gray-600">${esc(s)}</span></div>`).join('');
+      for(let i=0;i<steps.length;i++){
+        const el=document.getElementById(`${pid}_s${i}`);
+        if(el){el.className='step-item running';el.children[0].innerHTML='<span class="step-spin text-xs">⏳</span>'}
+        area.scrollTop=area.scrollHeight;await sleep(300+Math.random()*300);
+        if(el){el.className='step-item done';el.children[0].innerHTML='✅'}
+      }
+    }else{
+      document.getElementById(`${pid}_steps`).innerHTML='<div class="step-item done"><span class="text-xs">✅</span><span class="text-gray-600">完成</span></div>';
+    }
+    const ce=document.getElementById(`${pid}_content`);ce.classList.remove('hidden');ce.innerHTML=renderMD(res);area.scrollTop=area.scrollHeight;
+    agentMessages.push({role:'assistant',content:res});
+  }catch(e){if(e.name!=='AbortError')toast('执行失败: '+e.message,'err')}finally{isAgentRunning=false;document.getElementById('agentSendBtn').disabled=false;abortCtrl=null}
+}
+
+// ★★★ 文件解析 - 彻底修复反引号泄漏 ★★★
+function parseFileOps(text){
+  const files=[],seen=new Set();
+  const tagPatterns=[
+    /\[FILE:([^\]]+)\]\n?([\s\S]*?)\[\/FILE\]/g,
+    /\[CREATE:([^\]]+)\]\n?([\s\S]*?)\[\/CREATE\]/g,
+    /\[EDIT:([^\]]+)\]\n?([\s\S]*?)\[\/EDIT\]/g
+  ];
+  tagPatterns.forEach(re=>{
+    let m;
+    while((m=re.exec(text))!==null){
+      let path=m[1].trim();
+      let content=m[2];
+      path=path.replace(/^`+|`+$/g,'').trim();
+      if(!path||seen.has(path))continue;
+      seen.add(path);
+      content=stripCodeFences(content);
+      files.push({path,content:content.trimEnd()+'\n'});
+    }
+  });
+  if(files.length===0){
+    const codeBlockRe=/```(\w+)?\s*\n([\s\S]*?)```/g;
+    let m;
+    while((m=codeBlockRe.exec(text))!==null){
+      const lang=m[1]||'';
+      const code=m[2];
+      const extMap={html:'index.html',css:'style.css',javascript:'app.js',js:'app.js',python:'main.py',py:'main.py',typescript:'app.ts',ts:'app.ts',json:'data.json'};
+      const defaultName=extMap[lang]||('file.'+(lang||'txt'));
+      if(!seen.has(defaultName)){
+        seen.add(defaultName);
+        files.push({path:defaultName,content:code.trimEnd()+'\n'});
+      }
+    }
   }
+  return files;
 }
 
-// Tuning
-async function testTuning() {
-  const input = document.getElementById('tuneInput').value.trim();
-  if (!input) return;
-  const model = document.getElementById('tuneModel').value;
-  const temp = parseFloat(document.getElementById('tuneTemp').value);
-  const maxTokens = parseInt(document.getElementById('tuneTokens').value);
-  const topP = parseFloat(document.getElementById('tuneTopP').value);
-  const freqPen = parseFloat(document.getElementById('tuneFreq').value);
-  const sysPrompt = document.getElementById('tuneSystemPrompt').value;
+function stripCodeFences(content){
+  content=content.replace(/^\s*```[a-zA-Z0-9]*\s*\n/,'');
+  content=content.replace(/\n\s*```\s*$/,'');
+  content=content.replace(/^`{3,}[a-zA-Z0-9]*\s*$/gm,'');
+  return content;
+}
 
-  const result = document.getElementById('tuneResult');
-  result.style.display = 'block';
-  result.textContent = `正在用 ${model} (temp=${temp}, tokens=${maxTokens}) 测试...`;
+async function callAPI(messages,stream=true,model='gpt-4o-mini',temperature=0.7,max_tokens=4096,top_p=1,freq_pen=0,pres_pen=0){
+  const body={model,messages,temperature,max_tokens,stream};
+  if(top_p!==1)body.top_p=top_p;
+  if(freq_pen!==0)body.frequency_penalty=freq_pen;
+  if(pres_pen!==0)body.presence_penalty=pres_pen;
+  const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+API_KEY},body:JSON.stringify(body),signal:abortCtrl?.signal});
+  if(!res.ok)throw new Error('API '+res.status+': '+await res.text().catch(()=>''));
+  if(!stream){const d=await res.json();return d.choices?.[0]?.message?.content||''}
+  const reader=res.body.getReader(),dec=new TextDecoder();let full='';
+  while(true){const{done,value}=await reader.read();if(done)break;const chunk=dec.decode(value,{stream:true});for(const line of chunk.split('\n')){if(line.startsWith('data: ')){const d=line.slice(6).trim();if(d==='[DONE]')break;try{const j=JSON.parse(d);const delta=j.choices?.[0]?.delta?.content;if(delta)full+=delta}catch(e){}}}}
+  return full;
+}
 
-  try {
-    const resp = await fetch('https://api.n1n.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer sk-ktAv8mWCMSM9vxap1MoyxYbYS1IqlHOY4kkt0sw07qhH3ymn' },
-      body: JSON.stringify({
-        model, temperature: temp, max_tokens: maxTokens, top_p: topP, frequency_penalty: freqPen,
-        messages: [
-          { role: 'system', content: sysPrompt },
-          { role: 'user', content: input }
-        ]
-      })
-    });
-    const data = await resp.json();
-    result.textContent = stripCodeFences(data.choices?.[0]?.message?.content || '无法获取回复');
-  } catch (e) {
-    result.textContent = '请求失败: ' + e.message;
+function renderMD(text){
+  let clean=text;
+  clean=clean.replace(/\[(?:FILE|CREATE|EDIT):([^\]]+)\]\n?[\s\S]*?\[\/(?:FILE|CREATE|EDIT)\]/g,(m,path)=>`<span class="file-badge" onclick="openFile('${escA(path)}')">📄 ${esc(path)}</span>`);
+  const codeBlocks=[];
+  clean=clean.replace(/```(\w*)\n([\s\S]*?)```/g,(m,lang,code)=>{const i=codeBlocks.length;codeBlocks.push({lang,code:code.trimEnd()});return `\x00CB${i}\x00`});
+  clean=esc(clean);
+  clean=clean.replace(/\x00CB(\d+)\x00/g,(m,i)=>{
+    const b=codeBlocks[parseInt(i)];
+    const lc=b.lang?` class="language-${esc(b.lang)}"`:'';
+    const lbl=b.lang?`<span style="position:absolute;top:6px;left:12px;font-size:10px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.5px">${esc(b.lang)}</span>`:'';
+    return `${lbl}<pre style="position:relative"><code${lc}>${esc(b.code)}</code><button class="copy-btn" onclick="copyCode(this)">复制</button></pre>`;
+  });
+  clean=clean.replace(/^### (.+)$/gm,'<h3>$1</h3>');
+  clean=clean.replace(/^## (.+)$/gm,'<h2>$1</h2>');
+  clean=clean.replace(/^# (.+)$/gm,'<h1>$1</h1>');
+  clean=clean.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  clean=clean.replace(/\*(.+?)\*/g,'<em>$1</em>');
+  clean=clean.replace(/`([^`]+)`/g,'<code>$1</code>');
+  clean=clean.replace(/^&gt; (.+)$/gm,'<blockquote>$1</blockquote>');
+  clean=clean.replace(/^[\-\*] (.+)$/gm,'<li>$1</li>');
+  clean=clean.replace(/^\d+\. (.+)$/gm,'<li>$1</li>');
+  clean=clean.replace(/^---+$/gm,'<hr>');
+  clean=clean.replace(/\n/g,'<br>');
+  return `<div class="md-body">${clean}</div>`;
+}
+
+function copyCode(btn){const code=btn.previousElementSibling.textContent;navigator.clipboard.writeText(code).then(()=>{btn.textContent='已复制';setTimeout(()=>btn.textContent='复制',1200)}).catch(()=>{btn.textContent='失败';setTimeout(()=>btn.textContent='复制',1200)})}
+function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function escA(s){return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"')}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+
+function toast(msg,type='info'){
+  const box=document.getElementById('toastBox');
+  const cls={ok:'bg-green-50 border-green-200 text-green-700',err:'bg-red-50 border-red-200 text-red-700',info:'bg-gray-50 border-gray-200 text-gray-700'};
+  const el=document.createElement('div');
+  el.className=`px-4 py-2 rounded-xl border text-sm font-medium shadow-sm ${cls[type]||cls.info}`;
+  el.style.animation='fadeUp .2s ease';el.textContent=msg;box.appendChild(el);setTimeout(()=>el.remove(),3000);
+}
+
+function tuneTest(){
+  if(!spendCoins(TUNE_TEST_COST))return;
+  const input=document.getElementById('tuneTestInput'),text=input.value.trim();if(!text)return;input.value='';
+  const area=document.getElementById('tuneChatArea');if(area.querySelector('.text-center'))area.innerHTML='';
+  area.insertAdjacentHTML('beforeend',`<div class="flex justify-end msg-anim"><div class="max-w-[70%] bg-gray-900 text-white px-3 py-2 rounded-xl rounded-br-sm text-sm">${esc(text)}</div></div>`);
+  area.scrollTop=area.scrollHeight;
+  const model=document.getElementById('tuneModel').value,sysP=document.getElementById('tuneSystemPrompt').value.trim();
+  const temp=parseInt(document.getElementById('tuneTemp').value)/100,topP=parseInt(document.getElementById('tuneTopP').value)/100;
+  const maxTok=parseInt(document.getElementById('tuneMaxTokens').value),fP=parseInt(document.getElementById('tuneFreqPen').value)/100,pP=parseInt(document.getElementById('tunePresPen').value)/100;
+  tuneChatHistory.push({role:'user',content:text});
+  const msgs=[];if(sysP)msgs.push({role:'system',content:sysP});msgs.push(...tuneChatHistory.slice(-10));
+  const lid='tl_'+Date.now();
+  area.insertAdjacentHTML('beforeend',`<div class="flex gap-2 msg-anim" id="${lid}"><div class="w-6 h-6 rounded-full bg-violet-100 flex items-center justify-center text-xs flex-shrink-0">🤖</div><div class="max-w-[70%] bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl rounded-bl-sm text-sm text-gray-500">思考中...</div></div>`);
+  area.scrollTop=area.scrollHeight;
+  callAPI(msgs,false,model,temp,maxTok,topP,fP,pP).then(res=>{
+    const el=document.getElementById(lid);
+    if(el)el.outerHTML=`<div class="flex gap-2 msg-anim"><div class="w-6 h-6 rounded-full bg-violet-100 flex items-center justify-center text-xs flex-shrink-0">🤖</div><div class="max-w-[70%] bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl rounded-bl-sm text-sm leading-relaxed">${renderMD(res)}</div></div>`;
+    tuneChatHistory.push({role:'assistant',content:res});area.scrollTop=area.scrollHeight;
+  }).catch(e=>{document.getElementById(lid)?.remove();toast('失败: '+e.message,'err')});
+}
+
+function savePreset(){const n=document.getElementById('presetName').value.trim();if(!n){toast('输入名称','err');return}presets=presets.filter(p=>p.name!==n);presets.push({name:n,model:document.getElementById('tuneModel').value,sysPrompt:document.getElementById('tuneSystemPrompt').value,temp:document.getElementById('tuneTemp').value,topP:document.getElementById('tuneTopP').value,maxTok:document.getElementById('tuneMaxTokens').value,freqPen:document.getElementById('tuneFreqPen').value,presPen:document.getElementById('tunePresPen').value});localStorage.setItem('ruiweihan_tune_presets',JSON.stringify(presets));updatePresetSelect();toast('已保存','ok')}
+function loadPreset(){const s=document.getElementById('presetSelect').value;if(!s)return;const p=presets.find(x=>x.name===s);if(!p)return;document.getElementById('tuneModel').value=p.model;document.getElementById('tuneSystemPrompt').value=p.sysPrompt||'';document.getElementById('tuneTemp').value=p.temp;document.getElementById('tuneTempVal').textContent=(p.temp/100).toFixed(2);document.getElementById('tuneTopP').value=p.topP;document.getElementById('tuneTopPVal').textContent=(p.topP/100).toFixed(2);document.getElementById('tuneMaxTokens').value=p.maxTok;document.getElementById('tuneMaxTokensVal').textContent=p.maxTok;document.getElementById('tuneFreqPen').value=p.freqPen;document.getElementById('tuneFreqPenVal').textContent=(p.freqPen/100).toFixed(2);document.getElementById('tunePresPen').value=p.presPen;document.getElementById('tunePresPenVal').textContent=(p.presPen/100).toFixed(2);toast('已加载','ok')}
+function updatePresetSelect(){document.getElementById('presetSelect').innerHTML='<option value="">加载预设...</option>'+presets.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('')}
+
+// ============= 模型训练 =============
+function addTrainRow(sys='',usr='',ast=''){
+  trainDataset.push({system:sys,user:usr,assistant:ast});
+  renderTrainRows();
+}
+
+function renderTrainRows(){
+  const c=document.getElementById('trainRowsContainer');
+  const e=document.getElementById('trainEmptyState');
+  document.getElementById('trainRowCount').textContent=trainDataset.length+' 条对话';
+  if(!trainDataset.length){c.innerHTML='';e.classList.remove('hidden');return}
+  e.classList.add('hidden');
+  c.innerHTML=trainDataset.map((d,i)=>`
+    <div class="train-row mb-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-semibold text-gray-500">对话 #${i+1}</span>
+        <button onclick="trainDataset.splice(${i},1);renderTrainRows()" class="text-xs text-gray-300 hover:text-red-400 transition-colors">✕ 删除</button>
+      </div>
+      <div class="space-y-2">
+        <div>
+          <div class="text-[10px] font-medium text-gray-400 mb-0.5">🤖 System (角色设定)</div>
+          <textarea oninput="trainDataset[${i}].system=this.value" placeholder="如：你是一个活泼的聊天伙伴">${esc(d.system||'')}</textarea>
+        </div>
+        <div>
+          <div class="text-[10px] font-medium text-gray-400 mb-0.5">👤 User (用户输入)</div>
+          <textarea oninput="trainDataset[${i}].user=this.value" placeholder="如：你好！">${esc(d.user||'')}</textarea>
+        </div>
+        <div>
+          <div class="text-[10px] font-medium text-gray-400 mb-0.5">🤖 Assistant (AI回复)</div>
+          <textarea oninput="trainDataset[${i}].assistant=this.value" placeholder="如：你好呀！很高兴见到你！">${esc(d.assistant||'')}</textarea>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function loadTrainSample(){
+  trainDataset=[
+    {system:'你是一个叫小薇的活泼聊天伙伴，喜欢用可爱的语气说话',user:'你好！',assistant:'你好呀～我是小薇！很高兴认识你呢！今天过得怎么样呀？'},
+    {system:'你是一个叫小薇的活泼聊天伙伴，喜欢用可爱的语气说话',user:'今天天气怎么样？',assistant:'让我想想～今天的天气应该很不错哦！适合出去走走呢～你有没有什么户外计划呀？'},
+    {system:'你是一个叫小薇的活泼聊天伙伴，喜欢用可爱的语气说话',user:'我有点不开心',assistant:'啊呀，怎么啦？别难过嘛～小薇陪着你呢！要不要跟我说说发生了什么？说出来会好受一点的～'},
+    {system:'你是一个叫小薇的活泼聊天伙伴，喜欢用可爱的语气说话',user:'你会做什么？',assistant:'我呀，我可以陪你聊天、讲笑话、聊故事～还可以回答你的各种问题哦！你尽管问我好啦～'},
+    {system:'你是一个叫小薇的活泼聊天伙伴，喜欢用可爱的语气说话',user:'讲个笑话',assistant:'好的好的～听好啦：为什么程序员总是分不清万圣节和圣诞节？因为 Oct 31 = Dec 25！哈哈，好冷吧～'},
+  ];
+  document.getElementById('trainSysPrompt').value='你是一个叫小薇的活泼聊天伙伴，喜欢用可爱的语气说话';
+  document.getElementById('trainModelName').value='小薇';
+  renderTrainRows();toast('已加载示例数据','ok');
+}
+
+function handleTrainFileUpload(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      const t=ev.target.result;
+      if(f.name.endsWith('.csv')){
+        const ls=t.trim().split('\n');
+        trainDataset=ls.slice(1).map(l=>{const c=l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);return{system:c[0]?.replace(/^"|"$/g,'')||'',user:c[1]?.replace(/^"|"$/g,'')||'',assistant:c[2]?.replace(/^"|"$/g,'')||''}});
+      }else{
+        trainDataset=t.trim().split('\n').filter(l=>l.trim()).map(l=>{const o=JSON.parse(l);if(o.messages)return{system:o.messages.find(m=>m.role==='system')?.content||'',user:o.messages.find(m=>m.role==='user')?.content||'',assistant:o.messages.find(m=>m.role==='assistant')?.content||''};return o});
+      }
+      renderTrainRows();toast('导入成功: '+trainDataset.length+' 条','ok');
+    }catch(err){toast('解析失败: '+err.message,'err')}
+  };
+  r.readAsText(f);
+  e.target.value='';
+}
+
+function exportDataset(){
+  if(!trainDataset.length){toast('无数据','err');return}
+  const j=trainDataset.map(d=>JSON.stringify({messages:[...(d.system?[{role:'system',content:d.system}]:[]),{role:'user',content:d.user},{role:'assistant',content:d.assistant}]})).join('\n');
+  downloadFile(j,'dataset.jsonl','application/jsonl');toast('已导出','ok');
+}
+
+// ============= 训练流程 =============
+async function startTraining(){
+  if(isTraining)return;
+  if(!trainDataset.length){toast('请先添加训练数据','err');return}
+  if(!spendCoins(TRAIN_COST))return;
+
+  isTraining=true;
+  const btn=document.getElementById('startTrainBtn');
+  btn.disabled=true;btn.textContent='训练中...';btn.classList.add('opacity-50');
+
+  const progSection=document.getElementById('trainProgressSection');
+  progSection.classList.remove('hidden');
+  const resultSection=document.getElementById('trainResultSection');
+  resultSection.classList.add('hidden');
+
+  const progBar=document.getElementById('trainProgressBar');
+  const statusText=document.getElementById('trainStatusText');
+  const logArea=document.getElementById('trainLog');
+
+  const modelName=document.getElementById('trainModelName').value.trim()||'我的助手';
+  const sysPrompt=document.getElementById('trainSysPrompt').value.trim();
+  const baseModel=document.getElementById('trainBaseModel').value;
+
+  logArea.innerHTML='';
+
+  function addLog(msg){
+    logArea.insertAdjacentHTML('beforeend',`<div>${new Date().toLocaleTimeString()} ${esc(msg)}</div>`);
+    logArea.scrollTop=logArea.scrollHeight;
   }
-}
 
-// Training
-let currentTrainScene = 'greeting';
-let shotCount = 2;
+  addLog('🚀 开始训练模型: '+modelName);
+  addLog('📊 数据量: '+trainDataset.length+' 条对话');
+  addLog('🔧 基础模型: '+baseModel);
 
-function selectTrainCard(el, scene) {
-  document.querySelectorAll('.train-card').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  currentTrainScene = scene;
-}
+  const phases=[
+    {name:'数据预处理',pct:15},
+    {name:'构建对话模板',pct:30},
+    {name:'验证数据质量',pct:45},
+    {name:'生成 System Prompt',pct:60},
+    {name:'API 参数优化',pct:75},
+    {name:'模型验证测试',pct:90},
+    {name:'训练完成',pct:100},
+  ];
 
-function addFewShot() {
-  shotCount++;
-  const container = document.getElementById('fewShotExamples');
-  const div = document.createElement('div');
-  div.className = 'form-group';
-  div.style.cssText = 'border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin-bottom:8px';
-  div.innerHTML = `
-    <label>用户输入 ${shotCount}</label>
-    <input type="text" id="shot_user_${shotCount}" placeholder="用户说的话">
-    <label style="margin-top:8px">AI回复 ${shotCount}</label>
-    <input type="text" id="shot_ai_${shotCount}" placeholder="AI应该怎么回">
-  `;
-  container.appendChild(div);
-}
+  for(let i=0;i<phases.length;i++){
+    const phase=phases[i];
+    addLog('⏳ '+phase.name+'...');
+    statusText.textContent=phase.name;
+    progBar.style.width=phase.pct+'%';
+    await sleep(600+Math.random()*800);
 
-async function trainAndTest() {
-  const testInput = document.getElementById('trainTestInput').value.trim();
-  if (!testInput) return;
+    if(i===3&&trainDataset.length>0){
+      const firstSys=trainDataset.find(d=>d.system)?.system||'';
+      if(firstSys&&!sysPrompt){
+        document.getElementById('trainSysPrompt').value=firstSys;
+      }
+      addLog('✅ 自动提取角色设定: '+(firstSys||sysPrompt||'通用助手').substring(0,30)+'...');
+    }
 
-  const btn = document.getElementById('btnTrain');
-  btn.disabled = true;
-  btn.textContent = '训练中...';
+    if(i===5){
+      addLog('🧪 正在用训练数据验证模型回复...');
+      try{
+        const testSys=sysPrompt||trainDataset.find(d=>d.system)?.system||'';
+        const testUser=trainDataset[0]?.user||'你好';
+        const testMsgs=[];
+        if(testSys)testMsgs.push({role:'system',content:testSys});
+        testMsgs.push({role:'user',content:testUser});
+        const testRes=await callAPI(testMsgs,false,baseModel,0.7,256);
+        addLog('✅ 模型回复: '+(testRes||'无回复').substring(0,50)+'...');
+      }catch(e){
+        addLog('⚠️ 验证请求失败: '+e.message);
+      }
+    }
 
-  // Collect few-shot examples
-  const messages = [{ role: 'system', content: `你是瑞微涵AI助手，当前场景: ${currentTrainScene}。请按照示例风格回复。` }];
-  for (let i = 1; i <= shotCount; i++) {
-    const userEl = document.getElementById('shot_user_' + i);
-    const aiEl = document.getElementById('shot_ai_' + i);
-    if (userEl?.value?.trim()) messages.push({ role: 'user', content: userEl.value.trim() });
-    if (aiEl?.value?.trim()) messages.push({ role: 'assistant', content: aiEl.value.trim() });
-  }
-  messages.push({ role: 'user', content: testInput });
-
-  const result = document.getElementById('trainResult');
-  result.style.display = 'block';
-  result.textContent = '模型正在学习你的示例并生成回复...';
-
-  try {
-    const resp = await fetch('https://api.n1n.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer sk-ktAv8mWCMSM9vxap1MoyxYbYS1IqlHOY4kkt0sw07qhH3ymn' },
-      body: JSON.stringify({ model: 'gpt-4o-mini', messages, max_tokens: 1024 })
-    });
-    const data = await resp.json();
-    const reply = stripCodeFences(data.choices?.[0]?.message?.content || '无法生成回复');
-    result.textContent = `✅ 训练完成！测试结果:\n\n用户: ${testInput}\nAI: ${reply}`;
-    document.getElementById('trainDownloads').style.display = 'flex';
-    window._lastTrainResult = { scene: currentTrainScene, messages, testInput, reply };
-  } catch (e) {
-    result.textContent = '训练失败: ' + e.message;
+    addLog('✅ '+phase.name+' 完成');
   }
 
-  btn.disabled = false;
-  btn.textContent = '🎯 训练并测试';
+  trainedModelData={
+    name:modelName,
+    systemPrompt:sysPrompt||trainDataset.find(d=>d.system)?.system||'',
+    baseModel:baseModel,
+    dataset:JSON.parse(JSON.stringify(trainDataset)),
+    trainedAt:new Date().toISOString(),
+    temperature:0.7,
+    top_p:1,
+  };
+
+  let savedModels=[];
+  try{savedModels=JSON.parse(localStorage.getItem('ruiweihan_trained_models'))||[]}catch(e){savedModels=[]}
+  savedModels=savedModels.filter(m=>m.name!==modelName);
+  savedModels.push(trainedModelData);
+  localStorage.setItem('ruiweihan_trained_models',JSON.stringify(savedModels));
+
+  statusText.textContent='训练完成！';
+  addLog('🎉 模型 "'+modelName+'" 训练完成！可以开始对话测试了。');
+
+  resultSection.classList.remove('hidden');
+  document.getElementById('trainedModelInfo').innerHTML=`
+    <div class="bg-violet-50 border border-violet-100 rounded-xl p-4">
+      <div class="text-sm font-semibold text-violet-900 mb-2">🤖 ${esc(modelName)}</div>
+      <div class="text-xs text-violet-700 space-y-1">
+        <div>基础模型: ${esc(baseModel)}</div>
+        <div>训练数据: ${trainDataset.length} 条对话</div>
+        <div>角色设定: ${esc((trainedModelData.systemPrompt||'无').substring(0,60))}${(trainedModelData.systemPrompt||'').length>60?'...':''}</div>
+        <div>训练时间: ${new Date().toLocaleString()}</div>
+      </div>
+    </div>`;
+
+  renderSavedModels();
+
+  isTraining=false;
+  btn.disabled=false;btn.textContent='🚀 开始训练';btn.classList.remove('opacity-50');
+  toast('模型 "'+modelName+'" 训练完成！','ok');
 }
 
-function downloadTraining(format) {
-  const data = window._lastTrainResult;
-  if (!data) return;
-  let content, filename, type;
+function testTrainedModel(){
+  if(!trainedModelData){toast('请先训练模型','err');return}
+  if(!spendCoins(TUNE_TEST_COST))return;
+  const input=document.getElementById('trainedTestInput'),text=input.value.trim();if(!text)return;input.value='';
+  const area=document.getElementById('trainedChatArea');
+  if(area.querySelector('.text-center'))area.innerHTML='';
+  area.insertAdjacentHTML('beforeend',`<div class="flex justify-end msg-anim"><div class="max-w-[70%] bg-gray-900 text-white px-3 py-2 rounded-xl rounded-br-sm text-sm">${esc(text)}</div></div>`);
+  area.scrollTop=area.scrollHeight;
 
-  if (format === 'json') {
-    content = JSON.stringify(data, null, 2);
-    filename = 'training_data.json';
-    type = 'application/json';
-  } else if (format === 'txt') {
-    content = `场景: ${data.scene}\n测试输入: ${data.testInput}\nAI回复: ${data.reply}\n\n--- Few-Shot 示例 ---\n`;
-    data.messages.forEach(m => { if (m.role !== 'system') content += `\n[${m.role}]: ${m.content}\n`; });
-    filename = 'training_data.txt';
-    type = 'text/plain';
-  } else {
-    content = `# 模型训练数据\n\n## 场景: ${data.scene}\n\n### 测试结果\n- **用户**: ${data.testInput}\n- **AI**: ${data.reply}\n\n### Few-Shot 示例\n`;
-    data.messages.forEach(m => { if (m.role !== 'system') content += `- **${m.role}**: ${m.content}\n`; });
-    filename = 'training_data.md';
-    type = 'text/markdown';
+  const msgs=[];
+  if(trainedModelData.systemPrompt)msgs.push({role:'system',content:trainedModelData.systemPrompt});
+  const samples=trainedModelData.dataset.slice(0,5);
+  samples.forEach(d=>{
+    if(d.user)msgs.push({role:'user',content:d.user});
+    if(d.assistant)msgs.push({role:'assistant',content:d.assistant});
+  });
+  trainChatHistory.push({role:'user',content:text});
+  msgs.push(...trainChatHistory.slice(-6));
+
+  const lid='trm_'+Date.now();
+  area.insertAdjacentHTML('beforeend',`<div class="flex gap-2 msg-anim" id="${lid}"><div class="w-6 h-6 rounded-full bg-violet-100 flex items-center justify-center text-xs flex-shrink-0">🤖</div><div class="max-w-[70%] bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl rounded-bl-sm text-sm text-gray-500">思考中...</div></div>`);
+  area.scrollTop=area.scrollHeight;
+  callAPI(msgs,false,trainedModelData.baseModel,trainedModelData.temperature,1024,trainedModelData.top_p).then(res=>{
+    const el=document.getElementById(lid);
+    if(el)el.outerHTML=`<div class="flex gap-2 msg-anim"><div class="w-6 h-6 rounded-full bg-violet-100 flex items-center justify-center text-xs flex-shrink-0">🤖</div><div class="max-w-[70%] bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl rounded-bl-sm text-sm leading-relaxed">${renderMD(res)}</div></div>`;
+    trainChatHistory.push({role:'assistant',content:res});area.scrollTop=area.scrollHeight;
+  }).catch(e=>{document.getElementById(lid)?.remove();toast('失败: '+e.message,'err')});
+}
+
+// ============= 下载功能 =============
+function downloadTrainedModel(){
+  if(!trainedModelData){toast('请先训练模型','err');return}
+  const lines=trainedModelData.dataset.map(d=>JSON.stringify({messages:[...(d.system?[{role:'system',content:d.system}]:[]),{role:'user',content:d.user},{role:'assistant',content:d.assistant}]})).join('\n');
+  downloadFile(lines,trainedModelData.name+'_dataset.jsonl','application/jsonl');
+  toast('数据集已下载','ok');
+}
+
+function downloadAsChatWidget(){
+  if(!trainedModelData){toast('请先训练模型','err');return}
+  const sysP=(trainedModelData.systemPrompt||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"').replace(/\n/g,'\\n');
+  const fewShotData=trainedModelData.dataset.slice(0,5);
+  const fewShotJS=JSON.stringify(fewShotData.map(d=>({user:d.user,assistant:d.assistant})));
+
+  const html=`<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${esc(trainedModelData.name)} - AI Chat</title>
+<script src="https://cdn.tailwindcss.com"><\/script>
+<style>*{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans SC',sans-serif;box-sizing:border-box}::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}</style>
+</head>
+<body class="h-screen bg-gray-50 flex flex-col">
+<nav class="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center text-sm">🤖</div>
+<div><div class="text-sm font-semibold text-gray-900">${esc(trainedModelData.name)}</div><div class="text-[10px] text-gray-400">Powered by ${esc(trainedModelData.baseModel)}</div></div>
+</nav>
+<div id="chat" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+<div class="bg-white border-t border-gray-200 p-3 flex gap-2">
+<input id="inp" class="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400" placeholder="说点什么..." onkeydown="if(event.key==='Enter')send()">
+<button onclick="send()" class="px-4 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800">发送</button>
+</div>
+<script>
+var API_KEY='${API_KEY}';var API_URL='${API_URL}';
+var SYSTEM_PROMPT='${sysP}';
+var FEW_SHOT=${fewShotJS};
+var MODEL='${trainedModelData.baseModel}';
+var history=[];
+async function send(){
+var inp=document.getElementById('inp'),text=inp.value.trim();if(!text)return;inp.value='';
+var chat=document.getElementById('chat');
+chat.insertAdjacentHTML('beforeend','<div class="flex justify-end"><div class="max-w-[70%] bg-gray-900 text-white px-4 py-2.5 rounded-2xl rounded-br-sm text-sm">'+esc2(text)+'</div></div>');
+chat.scrollTop=chat.scrollHeight;
+history.push({role:'user',content:text});
+var msgs=[];if(SYSTEM_PROMPT)msgs.push({role:'system',content:SYSTEM_PROMPT});
+FEW_SHOT.forEach(function(s){msgs.push({role:'user',content:s.user});msgs.push({role:'assistant',content:s.assistant})});
+msgs.push.apply(msgs,history.slice(-10));
+var lid='m_'+Date.now();
+chat.insertAdjacentHTML('beforeend','<div class="flex gap-2" id="'+lid+'"><div class="w-7 h-7 rounded-full bg-violet-100 flex items-center justify-center text-xs">🤖</div><div class="max-w-[70%] bg-white border border-gray-200 px-4 py-2.5 rounded-2xl rounded-bl-sm text-sm text-gray-400">思考中...</div></div>');
+chat.scrollTop=chat.scrollHeight;
+try{
+var res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+API_KEY},body:JSON.stringify({model:MODEL,messages:msgs,temperature:0.7,max_tokens:1024})});
+var d=await res.json();var reply=d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content||'无回复';
+history.push({role:'assistant',content:reply});
+document.getElementById(lid).outerHTML='<div class="flex gap-2"><div class="w-7 h-7 rounded-full bg-violet-100 flex items-center justify-center text-xs">🤖</div><div class="max-w-[70%] bg-white border border-gray-200 px-4 py-2.5 rounded-2xl rounded-bl-sm text-sm text-gray-900">'+esc2(reply)+'</div></div>';
+chat.scrollTop=chat.scrollHeight;
+}catch(e){document.getElementById(lid).remove();alert('请求失败:'+e.message)}
+}
+function esc2(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+<\/script>
+</body>
+</html>`;
+
+  downloadFile(html,trainedModelData.name+'_chat.html','text/html');
+  toast('聊天页面已下载','ok');
+}
+
+function downloadAsAPIConfig(){
+  if(!trainedModelData){toast('请先训练模型','err');return}
+  const config={
+    model:trainedModelData.baseModel,
+    system_prompt:trainedModelData.systemPrompt,
+    temperature:trainedModelData.temperature,
+    top_p:trainedModelData.top_p,
+    few_shot_examples:trainedModelData.dataset.slice(0,5).map(d=>({user:d.user,assistant:d.assistant})),
+    api_endpoint:API_URL,
+    model_name:trainedModelData.name,
+    trained_at:trainedModelData.trainedAt,
+    dataset_size:trainedModelData.dataset.length,
+  };
+  downloadFile(JSON.stringify(config,null,2),trainedModelData.name+'_config.json','application/json');
+  toast('API配置已下载','ok');
+}
+
+function downloadFile(content,filename,type){
+  const blob=new Blob([content],{type:type});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
+
+function renderSavedModels(){
+  let savedModels=[];
+  try{savedModels=JSON.parse(localStorage.getItem('ruiweihan_trained_models'))||[]}catch(e){savedModels=[]}
+  const list=document.getElementById('savedModelsList');
+  if(!savedModels.length){list.innerHTML='<div class="text-xs text-gray-400">暂无已保存的模型</div>';return}
+  list.innerHTML=savedModels.map(m=>`
+    <div class="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg border border-gray-100">
+      <div class="flex items-center gap-2">
+        <span class="text-sm">🤖</span>
+        <div>
+          <div class="text-xs font-medium text-gray-700">${esc(m.name)}</div>
+          <div class="text-[10px] text-gray-400">${esc(m.baseModel)} · ${(m.dataset||[]).length}条数据</div>
+        </div>
+      </div>
+      <div class="flex gap-1">
+        <button onclick="loadSavedModel('${escA(m.name)}')" class="px-2 py-1 text-[10px] text-violet-600 hover:bg-violet-50 rounded transition-colors">加载</button>
+        <button onclick="deleteSavedModel('${escA(m.name)}')" class="px-2 py-1 text-[10px] text-red-400 hover:bg-red-50 rounded transition-colors">删除</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function loadSavedModel(name){
+  let savedModels=[];
+  try{savedModels=JSON.parse(localStorage.getItem('ruiweihan_trained_models'))||[]}catch(e){savedModels=[]}
+  const m=savedModels.find(x=>x.name===name);
+  if(!m){toast('模型不存在','err');return}
+  trainedModelData=m;
+  trainDataset=m.dataset||[];
+  document.getElementById('trainModelName').value=m.name;
+  document.getElementById('trainSysPrompt').value=m.systemPrompt||'';
+  document.getElementById('trainBaseModel').value=m.baseModel||'gpt-4o-mini';
+  renderTrainRows();
+  document.getElementById('trainResultSection').classList.remove('hidden');
+  document.getElementById('trainedModelInfo').innerHTML=`
+    <div class="bg-violet-50 border border-violet-100 rounded-xl p-4">
+      <div class="text-sm font-semibold text-violet-900 mb-2">🤖 ${esc(m.name)}</div>
+      <div class="text-xs text-violet-700 space-y-1">
+        <div>基础模型: ${esc(m.baseModel)}</div>
+        <div>训练数据: ${(m.dataset||[]).length} 条对话</div>
+        <div>角色设定: ${esc((m.systemPrompt||'无').substring(0,60))}</div>
+      </div>
+    </div>`;
+  toast('已加载模型: '+m.name,'ok');
+}
+
+function deleteSavedModel(name){
+  if(!confirm('删除模型 "'+name+'"？'))return;
+  let savedModels=[];
+  try{savedModels=JSON.parse(localStorage.getItem('ruiweihan_trained_models'))||[]}catch(e){savedModels=[]}
+  savedModels=savedModels.filter(m=>m.name!==name);
+  localStorage.setItem('ruiweihan_trained_models',JSON.stringify(savedModels));
+  renderSavedModels();toast('已删除','ok');
+}
+
+// ============= 初始化 =============
+document.getElementById('agentInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();runAgent()}});
+document.getElementById('agentInput').addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'});
+document.getElementById('workspaceEditor').addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='s'){e.preventDefault();saveCurrentFile()}if(e.key==='Tab'){e.preventDefault();const t=e.target,s=t.selectionStart;t.value=t.value.substring(0,s)+'    '+t.value.substring(t.selectionEnd);t.selectionStart=t.selectionEnd=s+4}});
+document.getElementById('workspaceEditor').addEventListener('input',()=>{
+  if(currentEditFile){
+    workspaceFiles[currentEditFile]=document.getElementById('workspaceEditor').value;
+    saveWorkspace();
+    if(currentEditFile.endsWith('.html')&&!document.getElementById('wsPreview').classList.contains('hidden'))updatePreview();
   }
+});
 
-  const blob = new Blob([content], { type });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename; a.click();
-  URL.revokeObjectURL(url);
-}
-
-function stripCodeFences(text) {
-  return text.replace(/^```[\w]*\n?/gm, '').replace(/\n?```$/gm, '');
-}
+loadCoins();loadWorkspace();
+try{presets=JSON.parse(localStorage.getItem('ruiweihan_tune_presets'))||[]}catch(e){presets=[]}
+updatePresetSelect();renderTrainRows();renderSavedModels();
 </script>
 </body>
 </html>
+
