@@ -8,21 +8,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>学习中心 - Rui Hub</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <style>
     * { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     .fade-in { animation: fadeIn 0.3s ease-out; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     .resource-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px -5px rgba(0,0,0,0.1); }
     .resource-card { transition: all 0.2s ease; }
-    .category-tab.active { background: #7c3aed; color: white; border-color: #7c3aed; }
+    .category-tab.active { background: #111827; color: white; border-color: #111827; }
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
     .drop-zone { border: 2px dashed #d1d5db; transition: all 0.2s; }
-    .drop-zone.dragover { border-color: #7c3aed; background: #f5f3ff; }
+    .drop-zone.dragover { border-color: #111827; background: #f9fafb; }
     .upload-progress { transition: width 0.3s ease; }
-    .video-preview { position: relative; }
-    .video-preview::after { content: '▶'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 24px; color: white; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+    .preview-page { background: white; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .preview-page canvas { display: block; margin: 0 auto; }
+    .quiz-option { transition: all 0.15s ease; }
+    .quiz-option:hover { border-color: #374151; background: #f9fafb; }
+    .quiz-option.selected { border-color: #111827; background: #f3f4f6; }
+    .quiz-option.correct { border-color: #16a34a; background: #f0fdf4; color: #16a34a; }
+    .quiz-option.wrong { border-color: #dc2626; background: #fef2f2; color: #dc2626; }
   </style>
 </head>
 <body class="min-h-screen bg-white text-gray-900 flex flex-col">
@@ -31,7 +37,7 @@
   <nav class="w-full px-6 py-4 border-b border-gray-100">
     <div class="max-w-6xl mx-auto flex items-center justify-between">
       <div class="flex items-center gap-8">
-        <a href="index.html" class="text-xl font-semibold text-gray-900 hover:text-violet-600 transition-colors">Rui</a>
+        <a href="index.html" class="text-xl font-semibold text-gray-900 hover:text-gray-600 transition-colors">Rui</a>
         <div class="flex items-center gap-6 text-sm">
           <a href="download.html" class="text-gray-500 hover:text-gray-900 transition-colors">下载</a>
           <a href="ruiflow.html" class="text-gray-500 hover:text-gray-900 transition-colors">论坛</a>
@@ -45,7 +51,7 @@
           <button id="loginBtn" class="px-4 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg hover:bg-gray-800 transition-colors ml-2">登录</button>
         </div>
         <div id="userMenu" class="hidden relative flex items-center gap-2">
-          <span id="levelBadge" class="text-xs px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 font-semibold"></span>
+          <span id="levelBadge" class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 font-semibold"></span>
           <div class="relative">
             <button id="userBtn" class="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
               <span id="userDisplayName" class="text-sm text-gray-700"></span>
@@ -68,32 +74,38 @@
   <!-- 未登录提示 -->
   <div id="loginRequired" class="hidden fixed inset-0 z-50 bg-white flex items-center justify-center">
     <div class="text-center">
-      <div class="w-20 h-20 mx-auto mb-4 bg-violet-100 rounded-full flex items-center justify-center">
-        <svg class="w-10 h-10 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+      <div class="w-20 h-20 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+        <svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
       </div>
       <h2 class="text-2xl font-bold text-gray-800 mb-2">学习资源中心</h2>
       <p class="text-gray-500 mb-6">请先登录以访问学习资源</p>
-      <button onclick="showLoginModal()" class="px-8 py-3 bg-violet-600 text-white font-medium rounded-xl hover:bg-violet-700 transition-colors">登录 / 注册</button>
+      <button onclick="showLoginModal()" class="px-8 py-3 bg-gray-900 text-white font-medium rounded-xl hover:bg-gray-800 transition-colors">登录 / 注册</button>
     </div>
   </div>
 
   <!-- 主内容 -->
   <main id="mainContent" class="hidden flex-1 max-w-5xl mx-auto w-full px-6 py-8">
     <!-- 页面标题 -->
-    <div class="mb-8">
-      <div class="flex items-center gap-3 mb-2">
-        <h1 class="text-2xl font-bold text-gray-900">学习资源中心</h1>
-        <span class="text-xs px-2 py-0.5 rounded-full bg-violet-500 text-white font-bold shadow-sm">NEW</span>
+    <div class="mb-8 flex items-center justify-between">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <h1 class="text-2xl font-bold text-gray-900">学习资源中心</h1>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-gray-900 text-white font-bold">NEW</span>
+        </div>
+        <p class="text-gray-500 text-sm">MA 至 SU 成员可上传学习资源，所有用户可浏览学习</p>
       </div>
-      <p class="text-gray-500 text-sm">MA 至 SU 成员可上传学习资源，所有用户可浏览下载</p>
-    </div>
-
-    <!-- 上传按钮（仅 MA-SU 可见） -->
-    <div id="uploadSection" class="hidden mb-6">
-      <button onclick="showUploadModal()" class="px-5 py-2.5 bg-violet-600 text-white text-sm font-medium rounded-xl hover:bg-violet-700 transition-colors flex items-center gap-2">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-        上传资源
-      </button>
+      <div class="flex items-center gap-3">
+        <button onclick="showExamModal()" class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-200 transition-colors flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+          考试
+        </button>
+        <div id="uploadSection" class="hidden">
+          <button onclick="showUploadModal()" class="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+            上传资源
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- 分类标签 -->
@@ -112,7 +124,7 @@
     <div class="mb-6">
       <div class="relative">
         <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-        <input id="searchInput" type="text" placeholder="搜索学习资源..." class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-violet-300 focus:bg-white transition-all" oninput="renderResources()">
+        <input id="searchInput" type="text" placeholder="搜索学习资源..." class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400 focus:bg-white transition-all" oninput="renderResources()">
       </div>
     </div>
 
@@ -124,7 +136,22 @@
     </div>
   </main>
 
-  <!-- 上传弹窗 -->
+  <!-- ======== 全屏预览 ======== -->
+  <div id="previewOverlay" class="fixed inset-0 z-[100] bg-white hidden flex flex-col">
+    <div class="flex items-center justify-between px-6 py-3 border-b border-gray-100 flex-shrink-0">
+      <h2 id="previewTitle" class="text-lg font-semibold text-gray-900 truncate"></h2>
+      <div class="flex items-center gap-3">
+        <span id="previewPageInfo" class="text-sm text-gray-400 hidden"></span>
+        <a id="previewDownloadBtn" href="" target="_blank" download class="px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors">下载</a>
+        <button onclick="closePreview()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100">
+          <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+    </div>
+    <div id="previewBody" class="flex-1 overflow-auto bg-gray-50"></div>
+  </div>
+
+  <!-- ======== 上传弹窗 ======== -->
   <div id="uploadModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-sm">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
       <div class="p-5 border-b border-gray-100 flex items-center justify-between">
@@ -136,11 +163,11 @@
       <div class="p-5 space-y-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1.5">资源标题</label>
-          <input id="resourceTitle" type="text" placeholder="例如：Python入门教程" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-violet-300 focus:bg-white transition-all">
+          <input id="resourceTitle" type="text" placeholder="例如：Python入门教程" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400 focus:bg-white transition-all">
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1.5">资源描述</label>
-          <textarea id="resourceDesc" placeholder="简要描述这个资源的内容..." class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-violet-300 focus:bg-white transition-all resize-none" rows="3"></textarea>
+          <textarea id="resourceDesc" placeholder="简要描述这个资源的内容..." class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400 focus:bg-white transition-all resize-none" rows="3"></textarea>
         </div>
         <div class="flex gap-3">
           <div class="flex-1">
@@ -156,62 +183,55 @@
           <div class="flex-1">
             <label class="block text-sm font-medium text-gray-700 mb-1.5">上传方式</label>
             <select id="uploadType" onchange="toggleUploadMode()" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none">
-              <option value="file">上传文件</option>
+              <option value="file">上传文档</option>
               <option value="video">上传视频</option>
               <option value="link">视频链接</option>
             </select>
           </div>
         </div>
-
-        <!-- 文件上传区域 -->
         <div id="fileUploadArea">
           <div id="dropZone" class="drop-zone rounded-xl p-6 text-center cursor-pointer" onclick="document.getElementById('fileInput').click()">
             <svg class="w-10 h-10 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
             <p class="text-sm text-gray-500 mb-1">点击或拖拽文件到此处</p>
             <p id="fileHint" class="text-xs text-gray-400">支持 PDF、DOC、DOCX、PPT、PPTX、XLS、XLSX、TXT 等</p>
-            <p id="selectedFile" class="text-sm text-violet-600 font-medium mt-2 hidden"></p>
+            <p id="selectedFile" class="text-sm text-gray-900 font-medium mt-2 hidden"></p>
           </div>
           <input type="file" id="fileInput" class="hidden" onchange="handleFileSelect(event)">
-          <!-- 上传进度 -->
           <div id="uploadProgress" class="hidden mt-3">
             <div class="flex items-center justify-between text-xs text-gray-500 mb-1">
               <span id="uploadFileName">上传中...</span>
               <span id="uploadPercent">0%</span>
             </div>
             <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div id="uploadBar" class="h-full bg-violet-500 rounded-full upload-progress" style="width: 0%"></div>
+              <div id="uploadBar" class="h-full bg-gray-900 rounded-full upload-progress" style="width: 0%"></div>
             </div>
           </div>
         </div>
-
-        <!-- 视频链接输入 -->
         <div id="linkInputArea" class="hidden">
           <label class="block text-sm font-medium text-gray-700 mb-1.5">视频链接</label>
-          <input id="resourceLink" type="text" placeholder="粘贴 Bilibili / YouTube 等视频链接" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-violet-300 focus:bg-white transition-all">
+          <input id="resourceLink" type="text" placeholder="粘贴 Bilibili / YouTube 等视频链接" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400 focus:bg-white transition-all">
           <p class="text-xs text-gray-400 mt-1">支持 Bilibili、YouTube、腾讯视频等链接</p>
         </div>
       </div>
       <div class="p-5 border-t border-gray-100 flex justify-end gap-3">
         <button onclick="closeUploadModal()" class="px-5 py-2.5 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors text-sm">取消</button>
-        <button onclick="submitResource()" id="submitBtn" class="px-5 py-2.5 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors text-sm font-medium">上传</button>
+        <button onclick="submitResource()" id="submitBtn" class="px-5 py-2.5 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-colors text-sm font-medium">上传</button>
       </div>
     </div>
   </div>
 
-  <!-- 资源详情弹窗 -->
-  <div id="detailModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-sm">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-      <div class="p-5 border-b border-gray-100 flex items-center justify-between">
-        <h2 id="detailTitle" class="text-lg font-semibold text-gray-900"></h2>
-        <button onclick="closeDetailModal()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100">
-          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-        </button>
-      </div>
-      <div id="detailContent" class="p-5"></div>
+  <!-- ======== 考试弹窗 ======== -->
+  <div id="examModal" class="fixed inset-0 z-[90] hidden bg-white flex flex-col">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <h2 class="text-lg font-semibold text-gray-900">在线考试</h2>
+      <button onclick="closeExamModal()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100">
+        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
     </div>
+    <div id="examContent" class="flex-1 overflow-auto px-6 py-6 max-w-3xl mx-auto w-full"></div>
   </div>
 
-  <!-- 登录弹窗 -->
+  <!-- ======== 登录弹窗 ======== -->
   <div id="loginModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-sm">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden">
       <div class="p-6 border-b border-gray-100">
@@ -219,27 +239,34 @@
       </div>
       <form id="loginForm" class="p-6 space-y-4">
         <div id="loginError" class="hidden p-3 bg-red-50 border border-red-100 rounded-xl text-sm text-red-600"></div>
-        <input id="loginUsername" type="text" placeholder="用户名" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-violet-300" required>
-        <input id="loginPassword" type="password" placeholder="密码" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-violet-300" required>
+        <input id="loginUsername" type="text" placeholder="用户名" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400" required>
+        <input id="loginPassword" type="password" placeholder="密码" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400" required>
         <button type="submit" class="w-full py-3 bg-gray-900 text-white font-medium rounded-xl hover:bg-gray-800 transition-colors">登录</button>
-        <div class="text-center text-sm text-gray-500">没有账号？<a href="register.html" class="text-violet-600 hover:text-violet-700 font-medium">立即注册</a></div>
+        <div class="text-center text-sm text-gray-500">没有账号？<a href="register.html" class="text-gray-900 hover:text-gray-600 font-medium">立即注册</a></div>
       </form>
     </div>
   </div>
 
   <script src="auth-v2.js"></script>
   <script>
+    if (typeof pdfjsLib !== 'undefined') {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+
     const LEARN_REPO = 'RuiweihanHub/ruiuser';
     const LEARN_FILE = 'learn.json';
     const LEARN_FOLDER = 'learn-files';
+    const EXAM_FILE = 'exams.json';
     const getToken = () => ['ghp_', 'aJxbQaU0S56e8pl6N8zrkWoHkfJHi92GOiFQ'].join('');
-    // MA 至 SU 权限用户名列表（可以上传资源）
     const UPLOAD_USERS = ['Administrator', 'Ruiweihan', 'Xvjiarui', 'Wangpengyi', '000001', '000002'];
-    
+
     let currentUser = null;
     let allResources = [];
+    let allExams = [];
     let currentCategory = '';
     let selectedFile = null;
+    let currentPdfDoc = null;
+    let currentPdfPage = 1;
 
     function toBase64(arrayBuffer) {
       const bytes = new Uint8Array(arrayBuffer);
@@ -263,8 +290,22 @@
       if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
       return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
     }
+    function getFileExt(fileName) {
+      if (!fileName) return '';
+      return fileName.split('.').pop().toLowerCase();
+    }
+    function formatTime(isoString) {
+      const date = new Date(isoString);
+      const now = new Date();
+      const diff = now - date;
+      if (diff < 60000) return '刚刚';
+      if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前';
+      if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前';
+      if (diff < 604800000) return Math.floor(diff / 86400000) + '天前';
+      return date.toLocaleDateString('zh-CN');
+    }
 
-    // 检查登录
+    // ========== 登录 ==========
     function checkLogin() {
       const loginState = syncLoginState();
       if (loginState.isLoggedIn) {
@@ -274,19 +315,17 @@
         document.getElementById('authButtons').classList.add('hidden');
         document.getElementById('userMenu').classList.remove('hidden');
         document.getElementById('userDisplayName').textContent = loginState.username;
-
-        // 检查上传权限（MA 到 SU）
         if (UPLOAD_USERS.includes(currentUser.username) || UPLOAD_USERS.includes(currentUser.uid)) {
           document.getElementById('uploadSection').classList.remove('hidden');
         }
         loadResources();
+        loadExams();
       } else {
         document.getElementById('loginRequired').classList.remove('hidden');
       }
     }
     checkLogin();
 
-    // 用户菜单
     document.getElementById('userBtn')?.addEventListener('click', (e) => {
       e.stopPropagation();
       document.getElementById('dropdown').classList.toggle('hidden');
@@ -295,7 +334,6 @@
       document.getElementById('dropdown')?.classList.add('hidden');
     });
 
-    // 登录弹窗
     function showLoginModal() {
       document.getElementById('loginModal').classList.remove('hidden');
       document.getElementById('loginModal').classList.add('flex');
@@ -323,7 +361,6 @@
         document.getElementById('loginError').classList.remove('hidden');
       }
     });
-
     function logout() {
       sessionStorage.removeItem('rui_user');
       sessionStorage.removeItem('rui_uid');
@@ -333,13 +370,12 @@
       location.reload();
     }
 
-    // 上传模式切换
+    // ========== 上传模式 ==========
     function toggleUploadMode() {
       const mode = document.getElementById('uploadType').value;
       const fileArea = document.getElementById('fileUploadArea');
       const linkArea = document.getElementById('linkInputArea');
       const fileHint = document.getElementById('fileHint');
-
       if (mode === 'link') {
         fileArea.classList.add('hidden');
         linkArea.classList.remove('hidden');
@@ -355,79 +391,46 @@
         }
       }
     }
-
-    // 文件选择
     function handleFileSelect(event) {
       const file = event.target.files[0];
       if (!file) return;
-
-      // 大小限制检查
-      const mode = document.getElementById('uploadType').value;
-      const maxSize = mode === 'video' ? 25 * 1024 * 1024 : 25 * 1024 * 1024;
-      if (file.size > maxSize) {
-        alert('文件大小不能超过 25MB');
-        event.target.value = '';
-        return;
-      }
-
+      if (file.size > 25 * 1024 * 1024) { alert('文件大小不能超过 25MB'); event.target.value = ''; return; }
       selectedFile = file;
-      const selectedEl = document.getElementById('selectedFile');
-      selectedEl.textContent = file.name + ' (' + formatFileSize(file.size) + ')';
-      selectedEl.classList.remove('hidden');
+      const el = document.getElementById('selectedFile');
+      el.textContent = file.name + ' (' + formatFileSize(file.size) + ')';
+      el.classList.remove('hidden');
     }
-
-    // 拖拽上传
     const dropZone = document.getElementById('dropZone');
     if (dropZone) {
-      dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropZone.classList.add('dragover');
-      });
-      dropZone.addEventListener('dragleave', () => {
-        dropZone.classList.remove('dragover');
-      });
+      dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+      dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
       dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('dragover');
-        const file = e.dataTransfer.files[0];
-        if (!file) return;
-        const mode = document.getElementById('uploadType').value;
-        const maxSize = 25 * 1024 * 1024;
-        if (file.size > maxSize) {
-          alert('文件大小不能超过 25MB');
-          return;
-        }
+        e.preventDefault(); dropZone.classList.remove('dragover');
+        const file = e.dataTransfer.files[0]; if (!file) return;
+        if (file.size > 25 * 1024 * 1024) { alert('文件大小不能超过 25MB'); return; }
         selectedFile = file;
         document.getElementById('fileInput').files = e.dataTransfer.files;
-        const selectedEl = document.getElementById('selectedFile');
-        selectedEl.textContent = file.name + ' (' + formatFileSize(file.size) + ')';
-        selectedEl.classList.remove('hidden');
+        const el = document.getElementById('selectedFile');
+        el.textContent = file.name + ' (' + formatFileSize(file.size) + ')';
+        el.classList.remove('hidden');
       });
     }
 
-    // 加载资源
+    // ========== 资源加载与渲染 ==========
     async function loadResources() {
       try {
         const res = await fetch(`https://api.github.com/repos/${LEARN_REPO}/contents/${LEARN_FILE}?ref=main&_=${Date.now()}`, {
           headers: { 'Authorization': `token ${getToken()}`, 'Accept': 'application/vnd.github.v3+json' }
         });
-        if (res.ok) {
-          const data = await res.json();
-          allResources = JSON.parse(fromBase64(data.content));
-        } else if (res.status === 404) {
-          allResources = [];
-        }
-      } catch (err) {
-        allResources = [];
-      }
+        if (res.ok) { const data = await res.json(); allResources = JSON.parse(fromBase64(data.content)); }
+        else if (res.status === 404) { allResources = []; }
+      } catch (err) { allResources = []; }
       renderResources();
     }
 
-    // 渲染资源
     function renderResources() {
       const search = document.getElementById('searchInput')?.value?.toLowerCase() || '';
       let resources = allResources;
-
       if (currentCategory) {
         if (currentCategory === '文档' || currentCategory === '视频') {
           resources = resources.filter(r => r.resourceType === currentCategory);
@@ -437,51 +440,33 @@
       }
       if (search) {
         resources = resources.filter(r =>
-          r.title.toLowerCase().includes(search) ||
-          r.description.toLowerCase().includes(search) ||
-          r.author.toLowerCase().includes(search)
+          r.title.toLowerCase().includes(search) || r.description.toLowerCase().includes(search) || r.author.toLowerCase().includes(search)
         );
       }
-
-      // 按时间排序
       resources.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
       const container = document.getElementById('resourceList');
-
       if (resources.length === 0) {
-        container.innerHTML = `
-          <div class="col-span-2 text-center py-16 text-gray-400">
-            <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-            <p>暂无学习资源</p>
-            <p class="text-sm mt-1">MA 至 SU 成员可以上传资源</p>
-          </div>
-        `;
+        container.innerHTML = `<div class="col-span-2 text-center py-16 text-gray-400"><p>暂无学习资源</p><p class="text-sm mt-1">MA 至 SU 成员可以上传资源</p></div>`;
         return;
       }
-
       const typeIcons = {
         '文档': '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>',
         '视频': '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>',
         '链接': '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>'
       };
       const typeColors = {
-        '文档': { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-100' },
-        '视频': { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-100' },
-        '链接': { bg: 'bg-green-50', text: 'text-green-600', border: 'border-green-100' }
+        '文档': { bg: 'bg-blue-50', text: 'text-blue-600' },
+        '视频': { bg: 'bg-red-50', text: 'text-red-600' },
+        '链接': { bg: 'bg-green-50', text: 'text-green-600' }
       };
-
       container.innerHTML = resources.map(r => {
         const colors = typeColors[r.resourceType] || typeColors['文档'];
         const icon = typeIcons[r.resourceType] || typeIcons['文档'];
         const fileSizeStr = r.fileSize ? formatFileSize(r.fileSize) : '';
-        const fileName = r.fileName || '';
-        
         return `
         <div class="resource-card bg-white rounded-2xl border border-gray-100 p-5 cursor-pointer hover:border-gray-200" onclick="openResource('${r.id}')">
           <div class="flex items-start gap-3">
-            <div class="w-10 h-10 rounded-xl ${colors.bg} flex items-center justify-center flex-shrink-0 ${colors.text}">
-              ${icon}
-            </div>
+            <div class="w-10 h-10 rounded-xl ${colors.bg} flex items-center justify-center flex-shrink-0 ${colors.text}">${icon}</div>
             <div class="flex-1 min-w-0">
               <h3 class="font-semibold text-gray-900 mb-1 truncate">${escapeHtml(r.title)}</h3>
               <p class="text-sm text-gray-500 line-clamp-2 mb-3">${escapeHtml(r.description)}</p>
@@ -489,107 +474,55 @@
                 <span class="px-2 py-0.5 rounded-full ${colors.bg} ${colors.text} font-medium">${r.resourceType}</span>
                 <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">${r.category}</span>
                 ${fileSizeStr ? `<span>${fileSizeStr}</span>` : ''}
-                ${fileName ? `<span class="truncate max-w-[100px]">${escapeHtml(fileName)}</span>` : ''}
                 <span>${r.author}</span>
                 <span>${formatTime(r.createdAt)}</span>
               </div>
             </div>
           </div>
-        </div>
-      `}).join('');
+        </div>`;
+      }).join('');
     }
 
-    // 获取文件扩展名
-    function getFileExt(fileName) {
-      if (!fileName) return '';
-      return fileName.split('.').pop().toLowerCase();
-    }
-
-    // 打开资源详情 - 在线预览
+    // ========== 全屏预览 ==========
     function openResource(id) {
       const r = allResources.find(res => res.id === id);
       if (!r) return;
+      document.getElementById('previewTitle').textContent = r.title;
+      document.getElementById('previewDownloadBtn').href = r.fileUrl || '#';
+      const body = document.getElementById('previewBody');
+      body.innerHTML = '';
+      currentPdfDoc = null;
 
-      document.getElementById('detailTitle').textContent = r.title;
-
-      let contentHtml = '';
-
-      // ====== 视频文件类型 - 直接在线播放 ======
+      // 视频
       if (r.resourceType === '视频' && r.fileUrl) {
-        contentHtml += `
-          <div class="mb-4 rounded-xl overflow-hidden bg-black">
-            <video controls preload="metadata" class="w-full" style="max-height:450px;" src="${r.fileUrl}">
-              你的浏览器不支持视频播放
-            </video>
-          </div>
-        `;
+        body.innerHTML = `<video controls preload="metadata" class="w-full h-full" style="min-height:80vh;background:#000;" src="${r.fileUrl}">浏览器不支持视频播放</video>`;
       }
-
-      // ====== 视频链接类型 - Bilibili/YouTube嵌入播放 ======
-      if (r.resourceType === '链接' && r.link) {
+      // 链接视频
+      else if (r.resourceType === '链接' && r.link) {
         let embedUrl = r.link;
-        // Bilibili
         if (r.link.includes('bilibili.com/video/')) {
-          const bvMatch = r.link.match(/\/video\/(BV[a-zA-Z0-9]+)/);
-          if (bvMatch) embedUrl = `https://player.bilibili.com/player.html?bvid=${bvMatch[1]}&autoplay=0`;
+          const m = r.link.match(/\/video\/(BV[a-zA-Z0-9]+)/);
+          if (m) embedUrl = `https://player.bilibili.com/player.html?bvid=${m[1]}&autoplay=0`;
+        } else if (r.link.includes('youtube.com/watch')) {
+          const m = r.link.match(/[?&]v=([^&]+)/);
+          if (m) embedUrl = `https://www.youtube.com/embed/${m[1]}`;
+        } else if (r.link.includes('youtu.be/')) {
+          const m = r.link.match(/youtu\.be\/([^?]+)/);
+          if (m) embedUrl = `https://www.youtube.com/embed/${m[1]}`;
         }
-        // YouTube
-        if (r.link.includes('youtube.com/watch')) {
-          const vidMatch = r.link.match(/[?&]v=([^&]+)/);
-          if (vidMatch) embedUrl = `https://www.youtube.com/embed/${vidMatch[1]}`;
-        }
-        if (r.link.includes('youtu.be/')) {
-          const vidMatch = r.link.match(/youtu\.be\/([^?]+)/);
-          if (vidMatch) embedUrl = `https://www.youtube.com/embed/${vidMatch[1]}`;
-        }
-
         if (embedUrl !== r.link) {
-          contentHtml += `
-            <div class="mb-4 rounded-xl overflow-hidden bg-black" style="padding-bottom:56.25%;position:relative;">
-              <iframe src="${embedUrl}" style="position:absolute;top:0;left:0;width:100%;height:100%;" frameborder="0" allowfullscreen></iframe>
-            </div>
-          `;
+          body.innerHTML = `<iframe src="${embedUrl}" class="w-full border-0" style="height:90vh;" allowfullscreen></iframe>`;
         } else {
-          contentHtml += `
-            <a href="${r.link}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 transition-colors text-sm font-medium mb-4">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-              打开视频链接
-            </a>
-          `;
+          body.innerHTML = `<div class="flex items-center justify-center h-full"><a href="${r.link}" target="_blank" class="px-6 py-3 bg-gray-900 text-white rounded-xl hover:bg-gray-800 font-medium">打开视频链接</a></div>`;
         }
       }
-
-      // ====== 文档类型 - 在线预览 ======
-      if (r.resourceType === '文档' && r.fileUrl) {
+      // 文档
+      else if (r.resourceType === '文档' && r.fileUrl) {
         const ext = getFileExt(r.fileName);
-        
-        // PDF - 浏览器原生支持，直接iframe预览
         if (ext === 'pdf') {
-          contentHtml += `
-            <div class="mb-4 rounded-xl overflow-hidden border border-gray-200" style="height:600px;">
-              <iframe src="${r.fileUrl}" style="width:100%;height:100%;border:none;"></iframe>
-            </div>
-          `;
-        }
-        // Word / PPT / Excel - 用微软 Office Online Viewer 在线预览
-        else if (['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'].includes(ext)) {
-          const viewerUrl = 'https://view.officeapps.live.com/op/view.aspx?src=' + encodeURIComponent(r.fileUrl);
-          contentHtml += `
-            <div class="mb-4 rounded-xl overflow-hidden border border-gray-200" style="height:600px;">
-              <iframe src="${viewerUrl}" style="width:100%;height:100%;border:none;"></iframe>
-            </div>
-          `;
-        }
-        // TXT / MD - 直接读取内容展示
-        else if (['txt', 'md'].includes(ext)) {
-          contentHtml += `
-            <div class="mb-4">
-              <div id="textContent" class="p-5 bg-gray-50 rounded-xl border border-gray-200 text-sm text-gray-700 whitespace-pre-wrap max-h-[500px] overflow-y-auto font-mono leading-relaxed">
-                加载中...
-              </div>
-            </div>
-          `;
-          // 异步加载文本内容
+          renderPdfPreview(r.fileUrl, body);
+        } else if (['txt', 'md'].includes(ext)) {
+          body.innerHTML = '<div class="max-w-4xl mx-auto p-8"><div id="textContent" class="text-sm text-gray-700 whitespace-pre-wrap font-mono leading-relaxed">加载中...</div></div>';
           fetch(r.fileUrl).then(res => res.text()).then(text => {
             const el = document.getElementById('textContent');
             if (el) el.textContent = text;
@@ -597,70 +530,63 @@
             const el = document.getElementById('textContent');
             if (el) el.textContent = '内容加载失败';
           });
-        }
-        // 图片类型
-        else if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(ext)) {
-          contentHtml += `
-            <div class="mb-4 rounded-xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center p-4">
-              <img src="${r.fileUrl}" alt="${escapeHtml(r.title)}" class="max-w-full max-h-[500px] rounded-lg" />
-            </div>
-          `;
-        }
-        // 其他格式 - 提示下载
-        else {
-          contentHtml += `
-            <div class="mb-4 p-6 bg-gray-50 rounded-xl border border-gray-200 text-center">
-              <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-              <p class="text-gray-500 text-sm">此格式暂不支持在线预览</p>
-            </div>
-          `;
+        } else if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(ext)) {
+          body.innerHTML = `<div class="flex items-center justify-center min-h-full p-8"><img src="${r.fileUrl}" class="max-w-full rounded-lg" /></div>`;
+        } else {
+          // docx等用iframe直接加载（浏览器可能支持也可能不支持）
+          body.innerHTML = `<iframe src="${r.fileUrl}" class="w-full border-0" style="height:90vh;"></iframe>`;
         }
       }
 
-      // 资源信息
-      contentHtml += `
-        <div class="space-y-3">
-          <p class="text-gray-600">${escapeHtml(r.description)}</p>
-          <div class="flex items-center gap-3 flex-wrap text-sm">
-            <span class="px-2.5 py-1 rounded-lg bg-violet-50 text-violet-600 font-medium">${r.resourceType}</span>
-            <span class="px-2.5 py-1 rounded-lg bg-gray-100 text-gray-600">${r.category}</span>
-            ${r.fileSize ? `<span class="text-gray-400">${formatFileSize(r.fileSize)}</span>` : ''}
-          </div>
-          <div class="flex items-center gap-2 text-sm text-gray-400">
-            <span>上传者: ${escapeHtml(r.author)}</span>
-            <span>|</span>
-            <span>${formatTime(r.createdAt)}</span>
-          </div>
-        </div>
-      `;
+      document.getElementById('previewOverlay').classList.remove('hidden');
+      document.getElementById('previewOverlay').classList.add('flex');
+    }
 
-      // 底部操作栏 - 下载按钮
-      if (r.fileUrl) {
-        contentHtml += `
-          <div class="mt-4 pt-4 border-t border-gray-100 flex items-center gap-3">
-            <a href="${r.fileUrl}" target="_blank" download class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors text-sm font-medium">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-              下载
-            </a>
-            <a href="${r.fileUrl}" target="_blank" class="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors text-sm font-medium">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-              新窗口打开
-            </a>
-          </div>
-        `;
+    // PDF.js渲染 - 自建预览
+    async function renderPdfPreview(url, container) {
+      if (typeof pdfjsLib === 'undefined') {
+        container.innerHTML = '<div class="flex items-center justify-center h-full text-gray-400">PDF预览组件加载失败，请刷新重试</div>';
+        return;
       }
+      try {
+        const loadingTask = pdfjsLib.getDocument(url);
+        currentPdfDoc = await loadingTask.promise;
+        const totalPages = currentPdfDoc.numPages;
+        document.getElementById('previewPageInfo').textContent = `共 ${totalPages} 页`;
+        document.getElementById('previewPageInfo').classList.remove('hidden');
 
-      document.getElementById('detailContent').innerHTML = contentHtml;
-      document.getElementById('detailModal').classList.remove('hidden');
-      document.getElementById('detailModal').classList.add('flex');
+        // 一次性渲染所有页面
+        for (let i = 1; i <= totalPages; i++) {
+          const page = await currentPdfDoc.getPage(i);
+          const containerWidth = container.clientWidth - 48;
+          const viewport = page.getViewport({ scale: 1 });
+          const scale = containerWidth / viewport.width;
+          const scaledViewport = page.getViewport({ scale: Math.max(scale, 1.2) });
+
+          const pageDiv = document.createElement('div');
+          pageDiv.className = 'preview-page rounded-lg overflow-hidden max-w-4xl mx-auto';
+          const canvas = document.createElement('canvas');
+          canvas.width = scaledViewport.width;
+          canvas.height = scaledViewport.height;
+          pageDiv.appendChild(canvas);
+          container.appendChild(pageDiv);
+
+          const ctx = canvas.getContext('2d');
+          await page.render({ canvasContext: ctx, viewport: scaledViewport }).promise;
+        }
+      } catch (err) {
+        container.innerHTML = '<div class="flex items-center justify-center h-full text-gray-400">PDF加载失败</div>';
+      }
     }
 
-    function closeDetailModal() {
-      document.getElementById('detailModal').classList.add('hidden');
-      document.getElementById('detailModal').classList.remove('flex');
+    function closePreview() {
+      document.getElementById('previewOverlay').classList.add('hidden');
+      document.getElementById('previewOverlay').classList.remove('flex');
+      document.getElementById('previewPageInfo').classList.add('hidden');
+      currentPdfDoc = null;
     }
 
-    // 分类过滤
+    // ========== 分类过滤 ==========
     function filterCategory(cat) {
       currentCategory = cat;
       document.querySelectorAll('.category-tab').forEach(btn => {
@@ -672,7 +598,7 @@
       renderResources();
     }
 
-    // 上传弹窗
+    // ========== 上传 ==========
     function showUploadModal() {
       selectedFile = null;
       document.getElementById('resourceTitle').value = '';
@@ -691,60 +617,37 @@
       selectedFile = null;
     }
 
-    // 提交资源
     async function submitResource() {
       const title = document.getElementById('resourceTitle').value.trim();
       const desc = document.getElementById('resourceDesc').value.trim();
       const category = document.getElementById('resourceCategory').value;
       const uploadType = document.getElementById('uploadType').value;
       const link = document.getElementById('resourceLink').value.trim();
-
       if (!title) { alert('请输入资源标题'); return; }
       if (!desc) { alert('请输入资源描述'); return; }
-
       const submitBtn = document.getElementById('submitBtn');
       submitBtn.disabled = true;
       submitBtn.textContent = '上传中...';
-
       try {
-        let resourceType = '文档';
-        let fileUrl = '';
-        let fileName = '';
-        let fileSize = 0;
-
+        let resourceType = '文档', fileUrl = '', fileName = '', fileSize = 0;
         if (uploadType === 'link') {
           if (!link) { alert('请输入视频链接'); submitBtn.disabled = false; submitBtn.textContent = '上传'; return; }
           resourceType = '链接';
-        } else if (uploadType === 'video') {
-          if (!selectedFile) { alert('请选择视频文件'); submitBtn.disabled = false; submitBtn.textContent = '上传'; return; }
-          resourceType = '视频';
-          
-          // 显示进度
+        } else {
+          if (!selectedFile) { alert('请选择文件'); submitBtn.disabled = false; submitBtn.textContent = '上传'; return; }
+          resourceType = uploadType === 'video' ? '视频' : '文档';
           document.getElementById('uploadProgress').classList.remove('hidden');
           document.getElementById('uploadFileName').textContent = selectedFile.name;
-          
-          // 上传视频文件到 GitHub
           const arrayBuffer = await selectedFile.arrayBuffer();
           const base64Content = toBase64(arrayBuffer);
           const filePath = `${LEARN_FOLDER}/${currentUser.uid}_${Date.now()}_${selectedFile.name}`;
-          
-          // 模拟进度
           document.getElementById('uploadPercent').textContent = '50%';
           document.getElementById('uploadBar').style.width = '50%';
-          
           const uploadRes = await fetch(`https://api.github.com/repos/${LEARN_REPO}/contents/${filePath}`, {
             method: 'PUT',
-            headers: {
-              'Authorization': `token ${getToken()}`,
-              'Accept': 'application/vnd.github.v3+json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              message: `Upload video: ${title}`,
-              content: base64Content
-            })
+            headers: { 'Authorization': `token ${getToken()}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: `Upload: ${title}`, content: base64Content })
           });
-          
           if (uploadRes.ok) {
             const uploadData = await uploadRes.json();
             fileUrl = uploadData.content.download_url;
@@ -752,110 +655,249 @@
             fileSize = selectedFile.size;
             document.getElementById('uploadPercent').textContent = '100%';
             document.getElementById('uploadBar').style.width = '100%';
-          } else {
-            const errData = await uploadRes.json();
-            throw new Error(errData.message || '视频上传失败');
-          }
-        } else {
-          // 文档文件上传
-          if (!selectedFile) { alert('请选择文件'); submitBtn.disabled = false; submitBtn.textContent = '上传'; return; }
-          resourceType = '文档';
-          
-          // 显示进度
-          document.getElementById('uploadProgress').classList.remove('hidden');
-          document.getElementById('uploadFileName').textContent = selectedFile.name;
-          document.getElementById('uploadPercent').textContent = '30%';
-          document.getElementById('uploadBar').style.width = '30%';
-          
-          const arrayBuffer = await selectedFile.arrayBuffer();
-          const base64Content = toBase64(arrayBuffer);
-          const filePath = `${LEARN_FOLDER}/${currentUser.uid}_${Date.now()}_${selectedFile.name}`;
-          
-          document.getElementById('uploadPercent').textContent = '60%';
-          document.getElementById('uploadBar').style.width = '60%';
-          
-          const uploadRes = await fetch(`https://api.github.com/repos/${LEARN_REPO}/contents/${filePath}`, {
-            method: 'PUT',
-            headers: {
-              'Authorization': `token ${getToken()}`,
-              'Accept': 'application/vnd.github.v3+json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              message: `Upload document: ${title}`,
-              content: base64Content
-            })
-          });
-          
-          if (uploadRes.ok) {
-            const uploadData = await uploadRes.json();
-            fileUrl = uploadData.content.download_url;
-            fileName = selectedFile.name;
-            fileSize = selectedFile.size;
-            document.getElementById('uploadPercent').textContent = '100%';
-            document.getElementById('uploadBar').style.width = '100%';
-          } else {
-            const errData = await uploadRes.json();
-            throw new Error(errData.message || '文件上传失败');
-          }
+          } else { throw new Error('文件上传失败'); }
         }
-
-        // 保存资源信息到 learn.json
-        const newResource = {
-          id: 'learn_' + Date.now(),
-          title, description: desc, category, resourceType,
-          fileUrl, fileName, fileSize,
-          link: uploadType === 'link' ? link : '',
-          author: currentUser.username,
-          authorUid: currentUser.uid,
-          createdAt: new Date().toISOString(),
-          downloads: 0
-        };
-
+        const newResource = { id: 'learn_' + Date.now(), title, description: desc, category, resourceType, fileUrl, fileName, fileSize, link: uploadType === 'link' ? link : '', author: currentUser.username, authorUid: currentUser.uid, createdAt: new Date().toISOString(), downloads: 0 };
         allResources.unshift(newResource);
-
-        // 获取 learn.json 的 sha
         let sha = null;
-        const getRes = await fetch(`https://api.github.com/repos/${LEARN_REPO}/contents/${LEARN_FILE}?ref=main`, {
-          headers: { 'Authorization': `token ${getToken()}`, 'Accept': 'application/vnd.github.v3+json' }
-        });
+        const getRes = await fetch(`https://api.github.com/repos/${LEARN_REPO}/contents/${LEARN_FILE}?ref=main`, { headers: { 'Authorization': `token ${getToken()}`, 'Accept': 'application/vnd.github.v3+json' } });
         if (getRes.ok) { const d = await getRes.json(); sha = d.sha; }
-
-        const body = {
-          message: `Add learning resource: ${title}`,
-          content: toBase64(new TextEncoder().encode(JSON.stringify(allResources, null, 2)))
-        };
+        const body = { message: `Add: ${title}`, content: toBase64(new TextEncoder().encode(JSON.stringify(allResources, null, 2))) };
         if (sha) body.sha = sha;
-
-        const res = await fetch(`https://api.github.com/repos/${LEARN_REPO}/contents/${LEARN_FILE}`, {
-          method: 'PUT',
-          headers: { 'Authorization': `token ${getToken()}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-
-        if (res.ok) {
-          closeUploadModal();
-          renderResources();
-        } else {
-          throw new Error('保存资源信息失败');
-        }
-      } catch (err) {
-        alert('上传失败: ' + err.message);
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = '上传';
-      }
+        const res = await fetch(`https://api.github.com/repos/${LEARN_REPO}/contents/${LEARN_FILE}`, { method: 'PUT', headers: { 'Authorization': `token ${getToken()}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        if (res.ok) { closeUploadModal(); renderResources(); } else { throw new Error('保存失败'); }
+      } catch (err) { alert('上传失败: ' + err.message); } finally { submitBtn.disabled = false; submitBtn.textContent = '上传'; }
     }
 
-    function formatTime(isoString) {
-      const date = new Date(isoString);
-      const now = new Date();
-      const diff = now - date;
-      if (diff < 60000) return '刚刚';
-      if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前';
-      if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前';
-      if (diff < 604800000) return Math.floor(diff / 86400000) + '天前';
-      return date.toLocaleDateString('zh-CN');
+    // ========== 考试系统 ==========
+    async function loadExams() {
+      try {
+        const res = await fetch(`https://api.github.com/repos/${LEARN_REPO}/contents/${EXAM_FILE}?ref=main&_=${Date.now()}`, {
+          headers: { 'Authorization': `token ${getToken()}`, 'Accept': 'application/vnd.github.v3+json' }
+        });
+        if (res.ok) { const data = await res.json(); allExams = JSON.parse(fromBase64(data.content)); }
+        else { allExams = []; }
+      } catch (err) { allExams = []; }
+    }
+
+    function showExamModal() {
+      renderExamList();
+      document.getElementById('examModal').classList.remove('hidden');
+      document.getElementById('examModal').classList.add('flex');
+    }
+    function closeExamModal() {
+      document.getElementById('examModal').classList.add('hidden');
+      document.getElementById('examModal').classList.remove('flex');
+    }
+
+    function renderExamList() {
+      const container = document.getElementById('examContent');
+      const canCreate = UPLOAD_USERS.includes(currentUser?.username) || UPLOAD_USERS.includes(currentUser?.uid);
+
+      if (allExams.length === 0 && !canCreate) {
+        container.innerHTML = `
+          <div class="text-center py-16 text-gray-400">
+            <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+            <p>暂无考试</p>
+          </div>`;
+        return;
+      }
+
+      let html = '';
+      if (canCreate) {
+        html += `
+          <div class="mb-6 p-5 bg-gray-50 rounded-2xl border border-gray-200">
+            <h3 class="font-semibold text-gray-900 mb-4">创建考试</h3>
+            <div class="space-y-3">
+              <input id="examTitle" type="text" placeholder="考试名称（如：第一章测试）" class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400">
+              <select id="examCategory" class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm">
+                <option value="编程">编程</option><option value="数学">数学</option><option value="物理">物理</option><option value="英语">英语</option><option value="其他">其他</option>
+              </select>
+              <div id="questionsContainer">
+                <div class="question-item bg-white rounded-xl p-4 border border-gray-200 space-y-3">
+                  <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-700">第 1 题</span>
+                    <button onclick="removeQuestion(this)" class="text-xs text-red-500 hover:text-red-700">删除</button>
+                  </div>
+                  <input type="text" placeholder="题目" class="q-title w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none">
+                  <input type="text" placeholder="选项A" class="q-a w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none">
+                  <input type="text" placeholder="选项B" class="q-b w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none">
+                  <input type="text" placeholder="选项C" class="q-c w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none">
+                  <input type="text" placeholder="选项D" class="q-d w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none">
+                  <select class="q-answer w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm">
+                    <option value="A">正确答案: A</option><option value="B">正确答案: B</option><option value="C">正确答案: C</option><option value="D">正确答案: D</option>
+                  </select>
+                </div>
+              </div>
+              <button onclick="addQuestion()" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-xl border border-gray-200 transition-colors">+ 添加题目</button>
+              <button onclick="createExam()" class="px-5 py-2.5 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-colors text-sm font-medium w-full">创建考试</button>
+            </div>
+          </div>`;
+      }
+
+      if (allExams.length > 0) {
+        html += '<h3 class="font-semibold text-gray-900 mb-4">可用考试</h3><div class="space-y-3">';
+        allExams.forEach(exam => {
+          html += `
+            <div class="p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-gray-300 cursor-pointer transition-colors" onclick="startExam('${exam.id}')">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h4 class="font-medium text-gray-900">${escapeHtml(exam.title)}</h4>
+                  <p class="text-xs text-gray-400 mt-1">${exam.category} | ${exam.questions.length} 题 | 创建者: ${exam.author}</p>
+                </div>
+                <button class="px-4 py-2 bg-gray-900 text-white text-xs font-medium rounded-lg hover:bg-gray-800">开始考试</button>
+              </div>
+            </div>`;
+        });
+        html += '</div>';
+      }
+
+      container.innerHTML = html;
+    }
+
+    function addQuestion() {
+      const container = document.getElementById('questionsContainer');
+      const count = container.children.length + 1;
+      const div = document.createElement('div');
+      div.className = 'question-item bg-white rounded-xl p-4 border border-gray-200 space-y-3';
+      div.innerHTML = `
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-medium text-gray-700">第 ${count} 题</span>
+          <button onclick="removeQuestion(this)" class="text-xs text-red-500 hover:text-red-700">删除</button>
+        </div>
+        <input type="text" placeholder="题目" class="q-title w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none">
+        <input type="text" placeholder="选项A" class="q-a w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none">
+        <input type="text" placeholder="选项B" class="q-b w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none">
+        <input type="text" placeholder="选项C" class="q-c w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none">
+        <input type="text" placeholder="选项D" class="q-d w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none">
+        <select class="q-answer w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm">
+          <option value="A">正确答案: A</option><option value="B">正确答案: B</option><option value="C">正确答案: C</option><option value="D">正确答案: D</option>
+        </select>`;
+      container.appendChild(div);
+    }
+
+    function removeQuestion(btn) {
+      const item = btn.closest('.question-item');
+      item.remove();
+      document.querySelectorAll('.question-item').forEach((el, i) => {
+        el.querySelector('span').textContent = `第 ${i + 1} 题`;
+      });
+    }
+
+    async function createExam() {
+      const title = document.getElementById('examTitle').value.trim();
+      const category = document.getElementById('examCategory').value;
+      if (!title) { alert('请输入考试名称'); return; }
+      const items = document.querySelectorAll('.question-item');
+      const questions = [];
+      items.forEach(item => {
+        const q = item.querySelector('.q-title').value.trim();
+        const a = item.querySelector('.q-a').value.trim();
+        const b = item.querySelector('.q-b').value.trim();
+        const c = item.querySelector('.q-c').value.trim();
+        const d = item.querySelector('.q-d').value.trim();
+        const answer = item.querySelector('.q-answer').value;
+        if (q && a && b && c && d) {
+          questions.push({ question: q, options: { A: a, B: b, C: c, D: d }, answer });
+        }
+      });
+      if (questions.length === 0) { alert('请至少添加一道完整题目'); return; }
+
+      const newExam = { id: 'exam_' + Date.now(), title, category, questions, author: currentUser.username, createdAt: new Date().toISOString() };
+      allExams.unshift(newExam);
+
+      try {
+        let sha = null;
+        const getRes = await fetch(`https://api.github.com/repos/${LEARN_REPO}/contents/${EXAM_FILE}?ref=main`, { headers: { 'Authorization': `token ${getToken()}`, 'Accept': 'application/vnd.github.v3+json' } });
+        if (getRes.ok) { const d = await getRes.json(); sha = d.sha; }
+        const body = { message: `Create exam: ${title}`, content: toBase64(new TextEncoder().encode(JSON.stringify(allExams, null, 2))) };
+        if (sha) body.sha = sha;
+        const res = await fetch(`https://api.github.com/repos/${LEARN_REPO}/contents/${EXAM_FILE}`, { method: 'PUT', headers: { 'Authorization': `token ${getToken()}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        if (res.ok) { alert('考试创建成功！'); renderExamList(); } else { throw new Error('保存失败'); }
+      } catch (err) { alert('创建失败: ' + err.message); allExams.shift(); }
+    }
+
+    // 开始考试
+    function startExam(examId) {
+      const exam = allExams.find(e => e.id === examId);
+      if (!exam) return;
+      const userAnswers = {};
+      const container = document.getElementById('examContent');
+
+      let html = `
+        <div class="mb-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-bold text-gray-900">${escapeHtml(exam.title)}</h3>
+            <span class="text-sm text-gray-400">${exam.questions.length} 题</span>
+          </div>
+          <div class="space-y-6">`;
+
+      exam.questions.forEach((q, i) => {
+        html += `
+          <div class="bg-gray-50 rounded-2xl p-5 border border-gray-200">
+            <p class="font-medium text-gray-900 mb-4">${i + 1}. ${escapeHtml(q.question)}</p>
+            <div class="space-y-2">
+              ${['A', 'B', 'C', 'D'].map(letter => `
+                <button onclick="selectAnswer('${examId}', ${i}, '${letter}')" id="q${i}_${letter}" class="quiz-option w-full text-left px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-700 flex items-center gap-3">
+                  <span class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center text-xs font-medium flex-shrink-0">${letter}</span>
+                  <span>${escapeHtml(q.options[letter])}</span>
+                </button>
+              `).join('')}
+            </div>
+          </div>`;
+      });
+
+      html += `</div></div>
+        <button onclick="submitExam('${examId}')" class="w-full py-3 bg-gray-900 text-white font-medium rounded-xl hover:bg-gray-800 transition-colors text-sm">提交答卷</button>`;
+
+      container.innerHTML = html;
+      window._examAnswers = {};
+      window._examSubmitted = false;
+    }
+
+    function selectAnswer(examId, qIndex, letter) {
+      if (window._examSubmitted) return;
+      window._examAnswers[qIndex] = letter;
+      ['A', 'B', 'C', 'D'].forEach(l => {
+        const el = document.getElementById(`q${qIndex}_${l}`);
+        if (el) el.classList.remove('selected');
+      });
+      const el = document.getElementById(`q${qIndex}_${letter}`);
+      if (el) el.classList.add('selected');
+    }
+
+    function submitExam(examId) {
+      if (window._examSubmitted) return;
+      const exam = allExams.find(e => e.id === examId);
+      if (!exam) return;
+      window._examSubmitted = true;
+      let correct = 0;
+
+      exam.questions.forEach((q, i) => {
+        const userAns = window._examAnswers[i];
+        ['A', 'B', 'C', 'D'].forEach(l => {
+          const el = document.getElementById(`q${i}_${l}`);
+          if (!el) return;
+          if (l === q.answer) el.classList.add('correct');
+          if (userAns === l && l !== q.answer) el.classList.add('wrong');
+        });
+        if (userAns === q.answer) correct++;
+      });
+
+      const total = exam.questions.length;
+      const score = Math.round((correct / total) * 100);
+
+      const resultHtml = `
+        <div class="mt-6 p-5 rounded-2xl border ${score >= 60 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}">
+          <div class="text-center">
+            <p class="text-4xl font-bold ${score >= 60 ? 'text-green-600' : 'text-red-600'}">${score}</p>
+            <p class="text-sm text-gray-600 mt-1">正确 ${correct}/${total} 题</p>
+            <p class="text-sm ${score >= 60 ? 'text-green-600' : 'text-red-600'} mt-2">${score >= 60 ? '恭喜通过！' : '继续加油！'}</p>
+          </div>
+        </div>
+        <button onclick="renderExamList()" class="w-full mt-4 py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors text-sm">返回考试列表</button>`;
+
+      document.getElementById('examContent').insertAdjacentHTML('beforeend', resultHtml);
     }
   </script>
 </body>
