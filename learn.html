@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>学习中心 - Rui Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    .fade-in { animation: fadeIn 0.3s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .resource-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px -5px rgba(0,0,0,0.1); }
+    .resource-card { transition: all 0.2s ease; }
+    .category-tab.active { background: #7c3aed; color: white; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+  </style>
+</head>
+<body class="min-h-screen bg-white text-gray-900 flex flex-col">
+
+  <!-- 顶部导航栏 -->
+  <nav class="w-full px-6 py-4 border-b border-gray-100">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-8">
+        <a href="index.html" class="text-xl font-semibold text-gray-900 hover:text-violet-600 transition-colors">Rui</a>
+        <div class="flex items-center gap-6 text-sm">
+          <a href="download.html" class="text-gray-500 hover:text-gray-900 transition-colors">下载</a>
+          <a href="ruiflow.html" class="text-gray-500 hover:text-gray-900 transition-colors">论坛</a>
+          <a href="chat.html" class="text-gray-500 hover:text-gray-900 transition-colors">聊天</a>
+          <a href="cloud.html" class="text-gray-500 hover:text-gray-900 transition-colors">云盘</a>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div id="authButtons">
+          <a href="register.html" class="px-4 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors">注册</a>
+          <button id="loginBtn" class="px-4 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg hover:bg-gray-800 transition-colors ml-2">登录</button>
+        </div>
+        <div id="userMenu" class="hidden relative flex items-center gap-2">
+          <span id="levelBadge" class="text-xs px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 font-semibold"></span>
+          <div class="relative">
+            <button id="userBtn" class="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+              <span id="userDisplayName" class="text-sm text-gray-700"></span>
+              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+            </button>
+            <div id="dropdown" class="hidden absolute right-0 top-full mt-2 w-36 bg-white rounded-xl shadow-lg border border-gray-100 py-1 overflow-hidden">
+              <a href="profile.html" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">我的</a>
+              <div class="border-t border-gray-100"></div>
+              <a href="javascript:void(0)" onclick="logout()" class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50">退出</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 未登录提示 -->
+  <div id="loginRequired" class="hidden fixed inset-0 z-50 bg-white flex items-center justify-center">
+    <div class="text-center">
+      <div class="w-20 h-20 mx-auto mb-4 bg-rose-100 rounded-full flex items-center justify-center">
+        <svg class="w-10 h-10 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-800 mb-2">学习资源中心</h2>
+      <p class="text-gray-500 mb-6">请先登录以访问学习资源</p>
+      <button onclick="showLoginModal()" class="px-8 py-3 bg-rose-500 text-white font-medium rounded-xl hover:bg-rose-600 transition-colors">登录 / 注册</button>
+    </div>
+  </div>
+
+  <!-- 主内容 -->
+  <main id="mainContent" class="hidden flex-1 max-w-5xl mx-auto w-full px-6 py-8">
+    <!-- 页面标题 -->
+    <div class="mb-8">
+      <div class="flex items-center gap-3 mb-2">
+        <h1 class="text-2xl font-bold text-gray-900">学习资源中心</h1>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-rose-500 text-white font-bold shadow-sm">NEW</span>
+      </div>
+      <p class="text-gray-500 text-sm">MA 至 SU 成员可上传学习资源，所有用户可浏览下载</p>
+    </div>
+
+    <!-- 上传按钮（仅 MA-SU 可见） -->
+    <div id="uploadSection" class="hidden mb-6">
+      <button onclick="showUploadModal()" class="px-5 py-2.5 bg-rose-500 text-white text-sm font-medium rounded-xl hover:bg-rose-600 transition-colors flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+        上传资源
+      </button>
+    </div>
+
+    <!-- 分类标签 -->
+    <div class="flex flex-wrap gap-2 mb-6">
+      <button onclick="filterCategory('')" class="category-tab active px-4 py-2 text-sm rounded-xl border border-gray-200 transition-all">全部</button>
+      <button onclick="filterCategory('编程')" class="category-tab px-4 py-2 text-sm rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all">编程</button>
+      <button onclick="filterCategory('数学')" class="category-tab px-4 py-2 text-sm rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all">数学</button>
+      <button onclick="filterCategory('物理')" class="category-tab px-4 py-2 text-sm rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all">物理</button>
+      <button onclick="filterCategory('英语')" class="category-tab px-4 py-2 text-sm rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all">英语</button>
+      <button onclick="filterCategory('其他')" class="category-tab px-4 py-2 text-sm rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all">其他</button>
+    </div>
+
+    <!-- 搜索 -->
+    <div class="mb-6">
+      <div class="relative">
+        <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+        <input id="searchInput" type="text" placeholder="搜索学习资源..." class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-300 focus:bg-white transition-all" oninput="renderResources()">
+      </div>
+    </div>
+
+    <!-- 资源列表 -->
+    <div id="resourceList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="col-span-2 text-center py-16 text-gray-400">
+        <p>加载中...</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- 上传弹窗 -->
+  <div id="uploadModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+      <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900">上传学习资源</h2>
+        <button onclick="closeUploadModal()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100">
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+      <div class="p-5 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">资源标题</label>
+          <input id="resourceTitle" type="text" placeholder="例如：Python入门教程" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-300 focus:bg-white transition-all">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">资源描述</label>
+          <textarea id="resourceDesc" placeholder="简要描述这个资源的内容..." class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-300 focus:bg-white transition-all resize-none" rows="3"></textarea>
+        </div>
+        <div class="flex gap-3">
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">分类</label>
+            <select id="resourceCategory" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none">
+              <option value="编程">编程</option>
+              <option value="数学">数学</option>
+              <option value="物理">物理</option>
+              <option value="英语">英语</option>
+              <option value="其他">其他</option>
+            </select>
+          </div>
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">类型</label>
+            <select id="resourceType" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none">
+              <option value="文档">文档</option>
+              <option value="视频链接">视频链接</option>
+              <option value="代码">代码</option>
+              <option value="笔记">笔记</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">链接 / 内容</label>
+          <input id="resourceLink" type="text" placeholder="资源链接或内容" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-300 focus:bg-white transition-all">
+        </div>
+      </div>
+      <div class="p-5 border-t border-gray-100 flex justify-end gap-3">
+        <button onclick="closeUploadModal()" class="px-5 py-2.5 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors text-sm">取消</button>
+        <button onclick="submitResource()" class="px-5 py-2.5 bg-rose-500 text-white rounded-xl hover:bg-rose-600 transition-colors text-sm font-medium">上传</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 登录弹窗 -->
+  <div id="loginModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden">
+      <div class="p-6 border-b border-gray-100">
+        <h2 class="text-lg font-semibold text-gray-900">登录</h2>
+      </div>
+      <form id="loginForm" class="p-6 space-y-4">
+        <div id="loginError" class="hidden p-3 bg-red-50 border border-red-100 rounded-xl text-sm text-red-600"></div>
+        <input id="loginUsername" type="text" placeholder="用户名" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-violet-300" required>
+        <input id="loginPassword" type="password" placeholder="密码" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-violet-300" required>
+        <button type="submit" class="w-full py-3 bg-gray-900 text-white font-medium rounded-xl hover:bg-gray-800 transition-colors">登录</button>
+        <div class="text-center text-sm text-gray-500">没有账号？<a href="register.html" class="text-violet-600 hover:text-violet-700 font-medium">立即注册</a></div>
+      </form>
+    </div>
+  </div>
+
+  <script src="auth-v2.js"></script>
+  <script>
+    const LEARN_REPO = 'RuiweihanHub/ruiuser';
+    const LEARN_FILE = 'learn.json';
+    const getToken = () => ['ghp_', 'aJxbQaU0S56e8pl6N8zrkWoHkfJHi92GOiFQ'].join('');
+    // MA 至 SU 权限用户名列表（可以上传资源）
+    const UPLOAD_USERS = ['Administrator', 'Ruiweihan', 'Xvjiarui', 'Wangpengyi', '000001', '000002'];
+    
+    let currentUser = null;
+    let allResources = [];
+    let currentCategory = '';
+
+    function toBase64(str) {
+      const bytes = new TextEncoder().encode(str);
+      let binary = '';
+      for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+      return btoa(binary);
+    }
+    function fromBase64(base64) {
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      return new TextDecoder().decode(bytes);
+    }
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // 检查登录
+    function checkLogin() {
+      const loginState = syncLoginState();
+      if (loginState.isLoggedIn) {
+        currentUser = { username: loginState.username, uid: loginState.uid };
+        document.getElementById('loginRequired').classList.add('hidden');
+        document.getElementById('mainContent').classList.remove('hidden');
+        document.getElementById('authButtons').classList.add('hidden');
+        document.getElementById('userMenu').classList.remove('hidden');
+        document.getElementById('userDisplayName').textContent = loginState.username;
+
+        // 检查上传权限
+        if (UPLOAD_USERS.includes(currentUser.username) || UPLOAD_USERS.includes(currentUser.uid)) {
+          document.getElementById('uploadSection').classList.remove('hidden');
+        }
+        loadResources();
+      } else {
+        document.getElementById('loginRequired').classList.remove('hidden');
+      }
+    }
+    checkLogin();
+
+    // 用户菜单
+    document.getElementById('userBtn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.getElementById('dropdown').classList.toggle('hidden');
+    });
+    document.addEventListener('click', () => {
+      document.getElementById('dropdown')?.classList.add('hidden');
+    });
+
+    // 登录弹窗
+    function showLoginModal() {
+      document.getElementById('loginModal').classList.remove('hidden');
+      document.getElementById('loginModal').classList.add('flex');
+    }
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      try {
+        const auth = await getAuth();
+        const result = await auth.validateUser(username, password);
+        if (result.success) {
+          sessionStorage.setItem('rui_user', result.user.username);
+          sessionStorage.setItem('rui_uid', result.user.uid);
+          localStorage.setItem('rui_user_remember', result.user.username);
+          localStorage.setItem('rui_uid_remember', result.user.uid);
+          localStorage.setItem('rui_user_expire', (Date.now() + 7 * 24 * 60 * 60 * 1000).toString());
+          location.reload();
+        } else {
+          document.getElementById('loginError').textContent = result.error;
+          document.getElementById('loginError').classList.remove('hidden');
+        }
+      } catch (err) {
+        document.getElementById('loginError').textContent = '登录失败';
+        document.getElementById('loginError').classList.remove('hidden');
+      }
+    });
+
+    function logout() {
+      sessionStorage.removeItem('rui_user');
+      sessionStorage.removeItem('rui_uid');
+      localStorage.removeItem('rui_user_remember');
+      localStorage.removeItem('rui_uid_remember');
+      localStorage.removeItem('rui_user_expire');
+      location.reload();
+    }
+
+    // 加载资源
+    async function loadResources() {
+      try {
+        const res = await fetch(`https://api.github.com/repos/${LEARN_REPO}/contents/${LEARN_FILE}?ref=main&_=${Date.now()}`, {
+          headers: { 'Authorization': `token ${getToken()}`, 'Accept': 'application/vnd.github.v3+json' }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          allResources = JSON.parse(fromBase64(data.content));
+        } else if (res.status === 404) {
+          allResources = [];
+        }
+      } catch (err) {
+        allResources = [];
+      }
+      renderResources();
+    }
+
+    // 渲染资源
+    function renderResources() {
+      const search = document.getElementById('searchInput')?.value?.toLowerCase() || '';
+      let resources = allResources;
+
+      if (currentCategory) {
+        resources = resources.filter(r => r.category === currentCategory);
+      }
+      if (search) {
+        resources = resources.filter(r =>
+          r.title.toLowerCase().includes(search) ||
+          r.description.toLowerCase().includes(search) ||
+          r.author.toLowerCase().includes(search)
+        );
+      }
+
+      // 按时间排序
+      resources.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      const container = document.getElementById('resourceList');
+
+      if (resources.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-2 text-center py-16 text-gray-400">
+            <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+            <p>暂无学习资源</p>
+            <p class="text-sm mt-1">MA 至 SU 成员可以上传资源</p>
+          </div>
+        `;
+        return;
+      }
+
+      const typeColors = {
+        '文档': 'bg-blue-50 text-blue-600',
+        '视频链接': 'bg-red-50 text-red-600',
+        '代码': 'bg-green-50 text-green-600',
+        '笔记': 'bg-amber-50 text-amber-600'
+      };
+      const typeIcons = {
+        '文档': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />',
+        '视频链接': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />',
+        '代码': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />',
+        '笔记': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />'
+      };
+
+      container.innerHTML = resources.map(r => `
+        <div class="resource-card bg-white rounded-2xl border border-gray-100 p-5 cursor-pointer hover:border-gray-200" onclick="openResource('${r.id}')">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-xl ${typeColors[r.type]?.split(' ')[0] || 'bg-gray-50'} flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 ${typeColors[r.type]?.split(' ')[1] || 'text-gray-500'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">${typeIcons[r.type] || ''}</svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="font-semibold text-gray-900 mb-1 truncate">${escapeHtml(r.title)}</h3>
+              <p class="text-sm text-gray-500 line-clamp-2 mb-3">${escapeHtml(r.description)}</p>
+              <div class="flex items-center gap-3 text-xs text-gray-400">
+                <span class="px-2 py-0.5 rounded-full ${typeColors[r.type] || 'bg-gray-100 text-gray-600'} font-medium">${r.type}</span>
+                <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">${r.category}</span>
+                <span>${r.author}</span>
+                <span>${formatTime(r.createdAt)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openResource(id) {
+      const r = allResources.find(res => res.id === id);
+      if (!r) return;
+      if (r.link) {
+        window.open(r.link, '_blank');
+      } else {
+        alert('资源内容：\n' + r.description);
+      }
+    }
+
+    // 分类过滤
+    function filterCategory(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('.category-tab').forEach(btn => {
+        btn.classList.remove('active');
+        btn.classList.add('text-gray-600');
+      });
+      event.target.classList.add('active');
+      event.target.classList.remove('text-gray-600');
+      renderResources();
+    }
+
+    // 上传弹窗
+    function showUploadModal() {
+      document.getElementById('uploadModal').classList.remove('hidden');
+      document.getElementById('uploadModal').classList.add('flex');
+    }
+    function closeUploadModal() {
+      document.getElementById('uploadModal').classList.add('hidden');
+      document.getElementById('uploadModal').classList.remove('flex');
+    }
+
+    // 提交资源
+    async function submitResource() {
+      const title = document.getElementById('resourceTitle').value.trim();
+      const desc = document.getElementById('resourceDesc').value.trim();
+      const category = document.getElementById('resourceCategory').value;
+      const type = document.getElementById('resourceType').value;
+      const link = document.getElementById('resourceLink').value.trim();
+
+      if (!title) { alert('请输入资源标题'); return; }
+      if (!desc) { alert('请输入资源描述'); return; }
+
+      const newResource = {
+        id: 'learn_' + Date.now(),
+        title, description: desc, category, type, link,
+        author: currentUser.username,
+        authorUid: currentUser.uid,
+        createdAt: new Date().toISOString(),
+        downloads: 0
+      };
+
+      allResources.unshift(newResource);
+
+      try {
+        let sha = null;
+        const getRes = await fetch(`https://api.github.com/repos/${LEARN_REPO}/contents/${LEARN_FILE}?ref=main`, {
+          headers: { 'Authorization': `token ${getToken()}`, 'Accept': 'application/vnd.github.v3+json' }
+        });
+        if (getRes.ok) { const d = await getRes.json(); sha = d.sha; }
+
+        const body = {
+          message: `Upload learning resource: ${title}`,
+          content: toBase64(JSON.stringify(allResources, null, 2))
+        };
+        if (sha) body.sha = sha;
+
+        const res = await fetch(`https://api.github.com/repos/${LEARN_REPO}/contents/${LEARN_FILE}`, {
+          method: 'PUT',
+          headers: { 'Authorization': `token ${getToken()}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        if (res.ok) {
+          closeUploadModal();
+          renderResources();
+          document.getElementById('resourceTitle').value = '';
+          document.getElementById('resourceDesc').value = '';
+          document.getElementById('resourceLink').value = '';
+        } else {
+          throw new Error('保存失败');
+        }
+      } catch (err) {
+        alert('上传失败，请重试');
+        allResources.shift();
+      }
+    }
+
+    function formatTime(isoString) {
+      const date = new Date(isoString);
+      const now = new Date();
+      const diff = now - date;
+      if (diff < 60000) return '刚刚';
+      if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前';
+      if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前';
+      if (diff < 604800000) return Math.floor(diff / 86400000) + '天前';
+      return date.toLocaleDateString('zh-CN');
+    }
+  </script>
+</body>
+</html>

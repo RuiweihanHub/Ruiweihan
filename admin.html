@@ -421,10 +421,18 @@
       // 操作按钮
       const actionsDiv = document.getElementById('detailActions');
       if (user.role === 'admin') {
-        actionsDiv.innerHTML = '<p class="text-sm text-gray-500 flex-1">管理员账户无法修改</p>';
+        actionsDiv.innerHTML = `
+          <p class="text-sm text-purple-600 flex-1 font-medium">超级管理员</p>
+          <button onclick="removeAdmin('${uid}')" class="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-xl transition-colors text-sm">
+            取消管理员
+          </button>
+        `;
       } else {
         actionsDiv.innerHTML = `
-          <button onclick="toggleUserStatus('${uid}')" class="flex-1 py-2.5 ${user.status === 'active' ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} text-white font-medium rounded-xl transition-colors">
+          <button onclick="setAdmin('${uid}')" class="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-xl transition-colors text-sm">
+            设为超级管理员
+          </button>
+          <button onclick="toggleUserStatus('${uid}')" class="flex-1 py-2.5 ${user.status === 'active' ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} text-white font-medium rounded-xl transition-colors text-sm">
             ${user.status === 'active' ? '禁用用户' : '启用用户'}
           </button>
         `;
@@ -479,6 +487,84 @@
         
         if (saveRes.ok) {
           showToast(`用户已${newStatus === 'disabled' ? '禁用' : '启用'}`);
+          closeUserDetailModal();
+          loadUsers();
+        } else {
+          throw new Error('保存失败');
+        }
+      } catch (err) {
+        showToast('操作失败，请重试', 'error');
+      }
+    }
+    
+    // 设为超级管理员
+    async function setAdmin(uid) {
+      if (!confirm('确定将此用户设为超级管理员？此用户将拥有管理面板访问权限。')) return;
+      
+      const token = getToken();
+      try {
+        const res = await fetch(`https://api.github.com/repos/${USER_REPO}/contents/users.json?ref=main`, {
+          headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+        });
+        const data = await res.json();
+        const content = JSON.parse(fromBase64(data.content));
+        
+        const userIndex = content.users.findIndex(u => u.uid === uid);
+        if (userIndex !== -1) {
+          content.users[userIndex].role = 'admin';
+        }
+        
+        const saveRes = await fetch(`https://api.github.com/repos/${USER_REPO}/contents/users.json`, {
+          method: 'PUT',
+          headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: `Admin: Set ${content.users[userIndex]?.username || uid} as super admin`,
+            content: toBase64(JSON.stringify(content, null, 2)),
+            sha: data.sha
+          })
+        });
+        
+        if (saveRes.ok) {
+          showToast('已设为超级管理员');
+          closeUserDetailModal();
+          loadUsers();
+        } else {
+          throw new Error('保存失败');
+        }
+      } catch (err) {
+        showToast('操作失败，请重试', 'error');
+      }
+    }
+    
+    // 取消管理员
+    async function removeAdmin(uid) {
+      if (!confirm('确定取消此用户的管理员权限？')) return;
+      
+      const token = getToken();
+      try {
+        const res = await fetch(`https://api.github.com/repos/${USER_REPO}/contents/users.json?ref=main`, {
+          headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+        });
+        const data = await res.json();
+        const content = JSON.parse(fromBase64(data.content));
+        
+        const userIndex = content.users.findIndex(u => u.uid === uid);
+        if (userIndex !== -1) {
+          content.users[userIndex].role = 'user';
+        }
+        
+        const saveRes = await fetch(`https://api.github.com/repos/${USER_REPO}/contents/users.json`, {
+          method: 'PUT',
+          headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: `Admin: Remove admin from ${content.users[userIndex]?.username || uid}`,
+            content: toBase64(JSON.stringify(content, null, 2)),
+            sha: data.sha
+          })
+        });
+        
+        if (saveRes.ok) {
+          showToast('已取消管理员权限');
           closeUserDetailModal();
           loadUsers();
         } else {
