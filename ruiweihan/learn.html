@@ -233,20 +233,50 @@
     };
   </script>
   <div id="jsErr" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:12px;background:#fff;border-bottom:2px solid #dc2626;max-height:200px;overflow-y:auto"></div>
-  <script src="auth-v2.js?v=20260426b"></script>
   <script>
-    // 安全回退：如果auth-v2.js未加载
-    if(typeof syncLoginState==='undefined'){
-      function syncLoginState(){
-        var u=sessionStorage.getItem('rui_user')||localStorage.getItem('rui_user_remember');
-        var uid=sessionStorage.getItem('rui_uid')||localStorage.getItem('rui_uid_remember');
-        var exp=localStorage.getItem('rui_user_expire');
-        if(u&&uid&&exp&&parseInt(exp)>Date.now()){return{isLoggedIn:true,username:u,uid:uid}}
-        if(u&&uid){return{isLoggedIn:true,username:u,uid:uid}}
-        return{isLoggedIn:false}
-      }
-      function getAuth(){return Promise.resolve({validateUser:function(u,p){return Promise.resolve({success:false,error:'系统维护中'})}})}
+    // ====== 内联 auth-v2.js（解决Cloudflare缓存JS文件301死循环问题）======
+    function hashPasswordSync(p){var h=0,s=p+'ruihub_salt_2024';for(var i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h=h&h}return Math.abs(h).toString(36).padStart(8,'0')}
+    function toBase64(s){var b=new TextEncoder().encode(s),r='';for(var i=0;i<b.length;i++)r+=String.fromCharCode(b[i]);return btoa(r)}
+    function fromBase64(b){var s=atob(b),r=new Uint8Array(s.length);for(var i=0;i<s.length;i++)r[i]=s.charCodeAt(i);return new TextDecoder().decode(r)}
+    var AUTH_LOCAL_USERS={users:[{uid:'Administrator',username:'Administrator',passwordHash:hashPasswordSync('admin123'),role:'admin'},{uid:'000001',username:'Ruiweihan',passwordHash:hashPasswordSync('rui123'),role:'admin'},{uid:'000002',username:'Xvjiarui',passwordHash:hashPasswordSync('xvj123'),role:'user'}]};
+    var AUTH_REPO='RuiweihanHub/ruiuser',AUTH_TK=function(){return['ghp_','aJxbQaU0S56e8pl6N8zrkWoHkfJHi92GOiFQ'].join('')};
+
+    function syncLoginState(){
+      var su=sessionStorage.getItem('rui_user'),suid=sessionStorage.getItem('rui_uid');
+      if(su&&suid)return{isLoggedIn:true,username:su,uid:suid};
+      var lu=localStorage.getItem('rui_user_remember'),luid=localStorage.getItem('rui_uid_remember'),exp=localStorage.getItem('rui_user_expire');
+      if(lu&&luid){if(exp&&parseInt(exp)>Date.now()){sessionStorage.setItem('rui_user',lu);sessionStorage.setItem('rui_uid',luid);return{isLoggedIn:true,username:lu,uid:luid}}else{localStorage.removeItem('rui_user_remember');localStorage.removeItem('rui_uid_remember');localStorage.removeItem('rui_user_expire')}}
+      return{isLoggedIn:false}
     }
+
+    async function getAuth(){
+      var auth={initialized:false,users:null,usersSha:null};
+      async function init(){
+        if(auth.initialized)return true;
+        try{var r=await fetch('https://api.github.com/repos/'+AUTH_REPO+'/contents/users.json?ref=main&_='+Date.now(),{headers:{'Authorization':'token '+AUTH_TK(),'Accept':'application/vnd.github.v3+json'}});if(r.ok){var d=await r.json();auth.usersSha=d.sha;auth.users=JSON.parse(fromBase64(d.content));auth.initialized=true;return true}}catch(e){}
+        auth.initialized=true;return false
+      }
+      return{
+        validateUser:async function(usernameOrUid,password){
+          if(!auth.initialized)await init();
+          var hashed=hashPasswordSync(password);
+          if(!auth.users){
+            var lu=AUTH_LOCAL_USERS.users.find(function(u){return(u.username===usernameOrUid||u.uid===usernameOrUid)&&u.passwordHash===hashed});
+            return lu?{success:true,user:{uid:lu.uid,username:lu.username,role:lu.role}}:{success:false,error:'用户名或密码错误'}
+          }
+          var idx=-1;
+          if(auth.users.index&&auth.users.index.byUsername&&auth.users.index.byUsername[usernameOrUid]!==undefined)idx=auth.users.index.byUsername[usernameOrUid];
+          if(idx===-1&&auth.users.index&&auth.users.index.byUid&&auth.users.index.byUid[usernameOrUid]!==undefined)idx=auth.users.index.byUid[usernameOrUid];
+          if(idx===-1)idx=auth.users.users.findIndex(function(u){return u.username===usernameOrUid||u.uid===usernameOrUid});
+          if(idx===-1)return{success:false,error:'用户名或密码错误'};
+          var user=auth.users.users[idx];
+          if(user.status==='disabled')return{success:false,error:'账户已被禁用'};
+          if(user.passwordHash===hashed){return{success:true,user:{uid:user.uid,username:user.username,displayName:user.displayName,role:user.role,profile:user.profile}}}
+          return{success:false,error:'用户名或密码错误'}
+        }
+      }
+    }
+    // ====== 内联 auth 结束 ======
   </script>
   <script>
     var REPO='RuiweihanHub/ruiuser',LF='learn.json',LD='learn-files',EF='exams.json',OJF='oj-problems.json';
