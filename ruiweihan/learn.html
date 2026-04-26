@@ -224,7 +224,21 @@
     </form>
   </div></div>
 
-  <script src="auth-v2.js"></script>
+  <script src="auth-v2.js?v=20260426"></script>
+  <script>
+    // 安全回退：如果auth-v2.js未加载
+    if(typeof syncLoginState==='undefined'){
+      function syncLoginState(){
+        var u=sessionStorage.getItem('rui_user')||localStorage.getItem('rui_user_remember');
+        var uid=sessionStorage.getItem('rui_uid')||localStorage.getItem('rui_uid_remember');
+        var exp=localStorage.getItem('rui_user_expire');
+        if(u&&uid&&exp&&parseInt(exp)>Date.now()){return{isLoggedIn:true,username:u,uid:uid}}
+        if(u&&uid){return{isLoggedIn:true,username:u,uid:uid}}
+        return{isLoggedIn:false}
+      }
+      function getAuth(){return Promise.resolve({validateUser:function(u,p){return Promise.resolve({success:false,error:'系统维护中'})}})}
+    }
+  </script>
   <script>
     var REPO='RuiweihanHub/ruiuser',LF='learn.json',LD='learn-files',EF='exams.json',OJF='oj-problems.json';
     var TK=function(){return['ghp_','aJxbQaU0S56e8pl6N8zrkWoHkfJHi92GOiFQ'].join('')};
