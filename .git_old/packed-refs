@@ -1,0 +1,4 @@
+# pack-refs with: peeled fully-peeled sorted 
+101ad87f5ae04e33f5dce9299e9a0fcda3cc02cc refs/remotes/origin/main
+02ff58056585e46755b8506b703e5ae1dea7d871 refs/remotes/origin/master
+90f20c8fa9e92802457c5ac911c5c29de849bb8b refs/remotes/origin/qwen-code-5212d9fc-0596-46f7-b7b9-d57a7ad8b14a
