@@ -7,6 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>学习中心 - Rui Hub</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
   <style>
     *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
     body{min-height:100vh;background:#fff;color:#111827;display:flex;flex-direction:column}
@@ -155,7 +156,7 @@
 
   <div class="main" id="mainContent" style="display:none">
     <div class="hd">
-      <div><h1>学习资源中心<span class="badge">NEW</span></h1><p class="sub">MA 至 SU 成员可上传资源，所有用户可浏览学习</p></div>
+      <div><h1>学习资源中心<span class="badge">V2.0</span></h1><p class="sub">资源 · 考试 · OJ在线判题 | MA至SU可上传</p></div>
       <div class="hbtns">
         <div id="upW" style="display:none"><button class="bd" onclick="showUploadModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v16m8-8H4"/></svg> 上传</button></div>
       </div>
@@ -224,7 +225,15 @@
     </form>
   </div></div>
 
-  <script src="auth-v2.js?v=20260426"></script>
+  <script>
+    // 全局错误捕获 - 在页面顶部显示错误信息
+    window.onerror=function(msg,url,line){
+      var d=document.getElementById('jsErr');if(d){d.style.display='block';d.innerHTML+='<div style="padding:8px 12px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;margin-bottom:6px;font-size:12px;color:#dc2626">JS错误: '+msg+' (行:'+line+')</div>'}
+      return false;
+    };
+  </script>
+  <div id="jsErr" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:12px;background:#fff;border-bottom:2px solid #dc2626;max-height:200px;overflow-y:auto"></div>
+  <script src="auth-v2.js?v=20260426b"></script>
   <script>
     // 安全回退：如果auth-v2.js未加载
     if(typeof syncLoginState==='undefined'){
@@ -335,7 +344,7 @@
     async function loadRes(){try{var r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+LF+'?ref=main&_='+Date.now(),{headers:{'Authorization':'token '+TK(),'Accept':'application/vnd.github.v3+json'}});if(r.ok){var d=await r.json();res=JSON.parse(b64d(d.content))}else{res=[]}}catch(e){res=[]}renderRes()}
 
     function renderRes(){
-      var s=(document.getElementById('si')?.value||'').toLowerCase(),list=res.slice();
+      var siEl=document.getElementById('si');var s=(siEl?siEl.value||'':'').toLowerCase(),list=res.slice();
       if(curCat){if(curCat==='文档'||curCat==='视频'||curCat==='图片')list=list.filter(function(r){return r.resourceType===curCat});else list=list.filter(function(r){return r.category===curCat})}
       if(s)list=list.filter(function(r){return r.title.toLowerCase().indexOf(s)>=0||r.description.toLowerCase().indexOf(s)>=0||r.author.toLowerCase().indexOf(s)>=0});
       list.sort(function(a,b){return new Date(b.createdAt)-new Date(a.createdAt)});
@@ -411,7 +420,7 @@
     function saveExamRecord(r){var rs=getExamRecords();rs.unshift(r);if(rs.length>50)rs=rs.slice(0,50);localStorage.setItem('rui_exam_records',JSON.stringify(rs))}
 
     function renderExamHome(){
-      var c=document.getElementById('examHome'),can=UP.indexOf(cu?.username)>=0||UP.indexOf(cu?.uid)>=0;
+      var c=document.getElementById('examHome'),can=cu&&cu.username&&(UP.indexOf(cu.username)>=0||UP.indexOf(cu.uid)>=0);
       var myRecs=getExamRecords().filter(function(r){return cu&&r.user===cu.username});
       var h='';
 
@@ -483,8 +492,8 @@
       var qs=[],totalScore=0;
       document.querySelectorAll('.qi').forEach(function(el){
         var type=el.dataset.type,q=el.querySelector('.q-title').value.trim(),ans=el.querySelector('.q-ans').value.trim();
-        var sc=parseInt(el.querySelector('.q-score')?.value)||10;
-        var exp=el.querySelector('.q-exp')?.value?.trim()||'';
+        var scoreEl=el.querySelector('.q-score');var sc=scoreEl?parseInt(scoreEl.value)||10:10;
+        var expEl=el.querySelector('.q-exp');var exp=expEl&&expEl.value?expEl.value.trim():'';
         if(!q||!ans)return;
         var item={type:type,question:q,answer:ans,score:sc,explanation:exp};
         if(type==='choice'){var a=el.querySelector('.q-a').value.trim(),b=el.querySelector('.q-b').value.trim(),c=el.querySelector('.q-c').value.trim(),d=el.querySelector('.q-d').value.trim();if(a&&b&&c&&d)item.options={A:a,B:b,C:c,D:d}}
@@ -589,7 +598,7 @@
     function saveOJRecord(r){var rs=getOJRecords();rs.unshift(r);if(rs.length>100)rs=rs.slice(0,100);localStorage.setItem(OJ_RECORDS_KEY,JSON.stringify(rs))}
 
     function renderOJ(){
-      var c=document.getElementById('ojWrap'),can=UP.indexOf(cu?.username)>=0||UP.indexOf(cu?.uid)>=0;
+      var c=document.getElementById('ojWrap'),can=cu&&cu.username&&(UP.indexOf(cu.username)>=0||UP.indexOf(cu.uid)>=0);
       var h='<div class="oj-header"><h3>OJ 在线判题</h3><div>';
       if(can)h+='<button class="bd" onclick="showAddOJ()">+ 出题</button>';
       h+='</div></div>';
@@ -674,7 +683,7 @@
             }else if(d.status&&d.status.id===6){
               results.push({idx:si+1,passed:false,output:'',expected:(s.output||'').trim(),stderr:'编译错误: '+(d.compile_output||'').substring(0,200),time:'?',memory:'?'});
             }else{
-              var errMsg=d.stderr||d.compile_output||d.status?.description||'未知错误';
+              var errMsg=d.stderr||d.compile_output||(d.status&&d.status.description)||'未知错误';
               results.push({idx:si+1,passed:false,output:'',expected:(s.output||'').trim(),stderr:errMsg.substring(0,200),time:d.time||'?',memory:'?'});
             }
           }catch(e){
@@ -712,7 +721,7 @@
           resEl.innerHTML='<h4>运行完成</h4><pre>'+(output?'输出:\n'+esc(output):'')+(err?'\n\n错误:\n'+esc(err):'')+'\n\n运行时间: '+(d.time||'?')+'s\n内存: '+(d.memory?Math.round(d.memory/1024)+'MB':'?')+'</pre>';
         }else{
           resEl.className='oj-result show ce';
-          var errMsg=d.compile_output||d.stderr||d.status?.description||'运行错误';
+          var errMsg=d.compile_output||d.stderr||(d.status&&d.status.description)||'运行错误';
           resEl.innerHTML='<h4>运行错误</h4><pre>'+esc(errMsg.substring(0,500))+'</pre>';
         }
       }).catch(function(e){resEl.className='oj-result show ce';resEl.innerHTML='<h4>运行失败</h4><pre>'+esc(e.message)+'</pre>'});
@@ -751,7 +760,7 @@
       if(!t||!desc){alert('请填写题目名称和描述');return}
       var sis=document.querySelectorAll('.oj-si'),sos=document.querySelectorAll('.oj-so');
       var samples=[];
-      for(var i=0;i<sis.length;i++){var si=sis[i].value.trim(),so=sos[i]?.value?.trim()||'';if(si||so)samples.push({input:si,output:so})}
+      for(var i=0;i<sis.length;i++){var si=sis[i].value.trim(),soEl=sos[i],so=soEl&&soEl.value?soEl.value.trim():'';if(si||so)samples.push({input:si,output:so})}
       var np={id:'oj_'+Date.now(),title:t,difficulty:d,description:desc,inputDesc:ind,outputDesc:outd,samples:samples,timeLimit:tl,memoryLimit:ml,author:cu.username,createdAt:new Date().toISOString()};
       ojProbs.unshift(np);
       try{var sha=null;var gr=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+OJF+'?ref=main',{headers:{'Authorization':'token '+TK(),'Accept':'application/vnd.github.v3+json'}});if(gr.ok){var gd=await gr.json();sha=gd.sha}
