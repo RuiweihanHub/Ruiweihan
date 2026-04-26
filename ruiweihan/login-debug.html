@@ -31,7 +31,7 @@
     <button onclick="setTestLogin()">设置测试登录（Ruiweihan）</button>
     <button onclick="clearLogin()">清除登录状态</button>
     <button onclick="location.reload()">刷新页面</button>
-    <a href="index.html"><button>返回首页</button></a>
+    <a href="/ruiweihan/index.html"><button>返回首页</button></a>
   </div>
   
   <div class="card" id="result"></div>
@@ -82,7 +82,7 @@
       localStorage.setItem('rui_user_remember', user);
       localStorage.setItem('rui_uid_remember', uid);
       localStorage.setItem('rui_user_expire', (Date.now() + 7 * 24 * 60 * 60 * 1000).toString());
-      document.getElementById('result').innerHTML = '<div class="success">✅ 已设置登录状态！点击<a href="cloud.html">云盘</a>测试。</div>';
+      document.getElementById('result').innerHTML = '<div class="success">✅ 已设置登录状态！点击<a href="/ruiweihan/cloud.html">云盘</a>测试。</div>';
       showStatus();
     }
     
