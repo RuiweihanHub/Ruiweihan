@@ -7,598 +7,2318 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>管理员面板 - Rui Hub</title>
-  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    * { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    ::-webkit-scrollbar { width: 6px; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-    .fade-in { animation: fadeIn 0.3s ease-out; }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+
+    body { background: #f5f5f7; color: #1a1a2e; min-height: 100vh; }
+
+    /* === Layout === */
+    .admin-layout { display: flex; min-height: 100vh; }
+
+    /* === Sidebar === */
+    .sidebar {
+      width: 220px; min-height: 100vh; background: #1a1a2e; color: #e0e0e0;
+      display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 40;
+      transition: transform 0.3s ease;
+    }
+    .sidebar-header {
+      padding: 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .sidebar-logo { font-size: 18px; font-weight: 700; color: #fff; text-decoration: none; }
+    .sidebar-logo:hover { color: #a78bfa; }
+    .sidebar-close { display: none; background: none; border: none; color: #999; font-size: 22px; cursor: pointer; padding: 4px; }
+    .sidebar-close:hover { color: #fff; }
+
+    .sidebar-nav { flex: 1; padding: 12px 8px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px;
+      cursor: pointer; font-size: 14px; color: #a0a0b8; transition: all 0.2s; margin-bottom: 2px;
+      background: none; border: none; width: 100%; text-align: left;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.06); color: #e0e0e0; }
+    .nav-item.active { background: rgba(167,139,250,0.15); color: #a78bfa; font-weight: 600; }
+    .nav-item-icon { font-size: 18px; width: 24px; text-align: center; }
+
+    .sidebar-footer {
+      padding: 16px; border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sidebar-avatar {
+      width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #a78bfa, #7c3aed);
+      display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 14px;
+    }
+    .sidebar-user-info { flex: 1; }
+    .sidebar-username { font-size: 13px; font-weight: 600; color: #e0e0e0; }
+    .sidebar-role { font-size: 11px; color: #a78bfa; }
+    .sidebar-home-link {
+      display: inline-block; padding: 5px 12px; background: rgba(255,255,255,0.08);
+      color: #ccc; font-size: 12px; border-radius: 8px; text-decoration: none;
+    }
+    .sidebar-home-link:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+    /* === Main Content === */
+    .main-content { flex: 1; margin-left: 220px; min-height: 100vh; }
+    .main-header {
+      background: #fff; border-bottom: 1px solid #e5e7eb; padding: 16px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 10;
+    }
+    .main-header h1 { font-size: 20px; font-weight: 700; color: #1a1a2e; }
+    .main-header p { font-size: 13px; color: #888; margin-top: 2px; }
+    .mobile-menu-btn {
+      display: none; background: none; border: 1px solid #e5e7eb; border-radius: 8px;
+      padding: 6px 10px; font-size: 20px; cursor: pointer; color: #666;
+    }
+    .header-actions { display: flex; align-items: center; gap: 10px; }
+    .btn-sm {
+      padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 500;
+      cursor: pointer; border: none; transition: all 0.2s;
+    }
+    .btn-outline { background: #f3f4f6; color: #555; }
+    .btn-outline:hover { background: #e5e7eb; }
+
+    .main-body { padding: 24px 28px; }
+
+    /* === Cards === */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card {
+      background: #fff; border-radius: 14px; border: 1px solid #e5e7eb; padding: 18px 20px;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .stat-icon {
+      width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center;
+      justify-content: center; font-size: 20px; flex-shrink: 0;
+    }
+    .stat-icon.blue { background: #eff6ff; color: #3b82f6; }
+    .stat-icon.green { background: #f0fdf4; color: #22c55e; }
+    .stat-icon.purple { background: #f5f3ff; color: #8b5cf6; }
+    .stat-icon.orange { background: #fff7ed; color: #f97316; }
+    .stat-icon.amber { background: #fffbeb; color: #f59e0b; }
+    .stat-icon.rose { background: #fff1f2; color: #f43f5e; }
+    .stat-label { font-size: 13px; color: #888; }
+    .stat-value { font-size: 22px; font-weight: 700; color: #1a1a2e; margin-top: 2px; }
+
+    /* === Panel === */
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .panel-card {
+      background: #fff; border-radius: 14px; border: 1px solid #e5e7eb; overflow: hidden;
+    }
+    .panel-card-header {
+      padding: 18px 20px; border-bottom: 1px solid #f0f0f0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .panel-card-header h3 { font-size: 15px; font-weight: 600; color: #1a1a2e; }
+    .panel-card-body { padding: 20px; }
+
+    /* === Table === */
+    .table-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .search-input {
+      flex: 1; min-width: 200px; padding: 9px 14px 9px 38px; background: #f9fafb; border: 1px solid #e5e7eb;
+      border-radius: 10px; font-size: 13px; outline: none; transition: border 0.2s; position: relative;
+    }
+    .search-input:focus { border-color: #a78bfa; }
+    .search-wrap { position: relative; flex: 1; min-width: 200px; }
+    .search-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #aaa; }
+    .filter-select {
+      padding: 9px 14px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px;
+      font-size: 13px; outline: none; cursor: pointer;
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      text-align: left; font-size: 12px; font-weight: 600; color: #888; padding: 10px 12px;
+      border-bottom: 1px solid #e5e7eb; white-space: nowrap;
+    }
+    tbody td { padding: 12px; border-bottom: 1px solid #f5f5f5; font-size: 13px; vertical-align: middle; }
+    tbody tr:hover { background: #fafafa; }
+    .user-cell { display: flex; align-items: center; gap: 10px; }
+    .user-avatar-sm {
+      width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #a78bfa, #7c3aed);
+      display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 14px;
+      flex-shrink: 0; overflow: hidden;
+    }
+    .user-avatar-sm img { width: 100%; height: 100%; object-fit: cover; }
+    .user-name { font-weight: 600; color: #1a1a2e; }
+    .user-handle { font-size: 11px; color: #999; }
+    .uid-badge { background: #f3f4f6; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-family: monospace; }
+
+    /* === Badges === */
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+    }
+    .badge-su { background: #fef3c7; color: #92400e; }
+    .badge-ma { background: #e0e7ff; color: #3730a3; }
+    .badge-member { background: #f3f4f6; color: #555; }
+    .badge-active { background: #dcfce7; color: #166534; }
+    .badge-disabled { background: #fee2e2; color: #991b1b; }
+    .badge-pro { background: #fef3c7; color: #b45309; }
+
+    /* === Buttons === */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 500;
+      cursor: pointer; border: none; transition: all 0.2s;
+    }
+    .btn-primary { background: #7c3aed; color: #fff; }
+    .btn-primary:hover { background: #6d28d9; }
+    .btn-danger { background: #ef4444; color: #fff; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-success { background: #22c55e; color: #fff; }
+    .btn-success:hover { background: #16a34a; }
+    .btn-warning { background: #f59e0b; color: #fff; }
+    .btn-warning:hover { background: #d97706; }
+    .btn-ghost { background: #f3f4f6; color: #555; }
+    .btn-ghost:hover { background: #e5e7eb; }
+    .btn-xs { padding: 4px 10px; font-size: 11px; border-radius: 6px; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
+
+    /* === Modal === */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: #fff; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+      width: 100%; overflow: hidden; animation: modalIn 0.25s ease-out;
+    }
+    .modal-sm { max-width: 420px; }
+    .modal-md { max-width: 540px; }
+    .modal-lg { max-width: 700px; }
+    @keyframes modalIn { from { opacity: 0; transform: translateY(20px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .modal-header {
+      padding: 16px 20px; border-bottom: 1px solid #f0f0f0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-header h3 { font-size: 16px; font-weight: 700; color: #1a1a2e; }
+    .modal-close {
+      width: 32px; height: 32px; border-radius: 50%; border: none; background: #f3f4f6;
+      cursor: pointer; font-size: 16px; color: #888; display: flex; align-items: center; justify-content: center;
+    }
+    .modal-close:hover { background: #e5e7eb; color: #555; }
+    .modal-body { padding: 20px; }
+    .modal-footer { padding: 16px 20px; border-top: 1px solid #f0f0f0; display: flex; justify-content: flex-end; gap: 8px; }
+
+    /* === Form === */
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 13px; font-weight: 600; color: #555; margin-bottom: 6px; }
+    .form-input {
+      width: 100%; padding: 9px 14px; background: #f9fafb; border: 1px solid #e5e7eb;
+      border-radius: 10px; font-size: 14px; outline: none; transition: border 0.2s;
+    }
+    .form-input:focus { border-color: #a78bfa; }
+    .form-hint { font-size: 11px; color: #999; margin-top: 4px; }
+    .form-row { display: flex; gap: 10px; align-items: center; }
+    .quick-btn {
+      padding: 4px 10px; font-size: 11px; border-radius: 6px; border: 1px solid #e5e7eb;
+      background: #fff; cursor: pointer; color: #555; transition: all 0.15s; white-space: nowrap;
+    }
+    .quick-btn:hover { border-color: #a78bfa; color: #7c3aed; background: #f5f3ff; }
+
+    /* === User Detail Modal === */
+    .detail-header { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+    .detail-avatar {
+      width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, #a78bfa, #7c3aed);
+      display: flex; align-items: center; justify-content: center; color: #fff; font-size: 22px; font-weight: 700;
+      overflow: hidden; flex-shrink: 0;
+    }
+    .detail-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .detail-name { font-size: 17px; font-weight: 700; color: #1a1a2e; }
+    .detail-uid { font-size: 12px; color: #888; margin-top: 2px; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .detail-item { padding: 8px 12px; background: #f9fafb; border-radius: 8px; }
+    .detail-item-label { font-size: 11px; color: #999; }
+    .detail-item-value { font-size: 13px; font-weight: 600; color: #1a1a2e; margin-top: 2px; }
+    .detail-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #f0f0f0; }
+    .action-group-label { width: 100%; font-size: 11px; font-weight: 700; color: #999; text-transform: uppercase; margin-top: 6px; margin-bottom: 2px; }
+
+    /* === Settings === */
+    .setting-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 0; border-bottom: 1px solid #f5f5f5;
+    }
+    .setting-item:last-child { border-bottom: none; }
+    .setting-info h4 { font-size: 14px; font-weight: 600; color: #1a1a2e; }
+    .setting-info p { font-size: 12px; color: #888; margin-top: 2px; }
+    .toggle-switch { position: relative; width: 44px; height: 24px; cursor: pointer; }
+    .toggle-switch input { display: none; }
+    .toggle-slider {
+      position: absolute; inset: 0; background: #d1d5db; border-radius: 24px; transition: 0.2s;
+    }
+    .toggle-slider::before {
+      content: ''; position: absolute; width: 18px; height: 18px; background: #fff;
+      border-radius: 50%; top: 3px; left: 3px; transition: 0.2s;
+    }
+    .toggle-switch input:checked + .toggle-slider { background: #7c3aed; }
+    .toggle-switch input:checked + .toggle-slider::before { left: 23px; }
+    .announcement-area {
+      width: 100%; min-height: 120px; padding: 12px; background: #f9fafb; border: 1px solid #e5e7eb;
+      border-radius: 10px; font-size: 14px; outline: none; resize: vertical; font-family: inherit;
+    }
+    .announcement-area:focus { border-color: #a78bfa; }
+
+    /* === Logs === */
+    .log-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f5f5f5; }
+    .log-item:last-child { border-bottom: none; }
+    .log-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+    .log-icon.create { background: #dcfce7; }
+    .log-icon.update { background: #dbeafe; }
+    .log-icon.delete { background: #fee2e2; }
+    .log-icon.login { background: #f3e8ff; }
+    .log-text { font-size: 13px; color: #555; }
+    .log-time { font-size: 11px; color: #aaa; margin-top: 2px; }
+
+    /* === Toast === */
+    .toast-container { position: fixed; top: 16px; right: 16px; z-index: 60; display: flex; flex-direction: column; gap: 8px; }
+    .toast {
+      padding: 12px 18px; border-radius: 12px; color: #fff; font-size: 13px; font-weight: 500;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15); animation: toastIn 0.3s ease-out;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .toast-success { background: #22c55e; }
+    .toast-error { background: #ef4444; }
+    .toast-info { background: #555; }
+    @keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+
+    /* === Unauthorized === */
+    .unauthorized {
+      display: none; position: fixed; inset: 0; z-index: 100; background: #fff;
+      align-items: center; justify-content: center;
+    }
+    .unauthorized.show { display: flex; }
+    .unauthorized-icon { width: 72px; height: 72px; background: #fee2e2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 16px; }
+    .unauthorized h2 { font-size: 22px; font-weight: 700; color: #1a1a2e; text-align: center; }
+    .unauthorized p { color: #888; text-align: center; margin-top: 8px; }
+
+    /* === Responsive === */
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 35; }
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-close { display: block; }
+      .sidebar-overlay.show { display: block; }
+      .main-content { margin-left: 0; }
+      .mobile-menu-btn { display: block; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .detail-grid { grid-template-columns: 1fr; }
+      .table-toolbar { flex-direction: column; align-items: stretch; }
+      .search-wrap { min-width: 100%; }
+    }
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .main-body { padding: 16px; }
+      .main-header { padding: 12px 16px; }
     }
   </style>
 </head>
-<body class="min-h-screen bg-gray-50 text-gray-900">
-  
+<body>
+
   <!-- 未授权提示 -->
-  <div id="unauthorized" class="hidden fixed inset-0 z-50 bg-white flex items-center justify-center">
-    <div class="text-center p-8">
-      <div class="w-20 h-20 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center text-red-500 text-3xl">🚫</div>
-      <h2 class="text-2xl font-semibold text-gray-800 mb-2">访问受限</h2>
-      <p class="text-gray-500 mb-6">您没有权限访问此页面</p>
-      <a href="/ruiweihan/index.html" class="px-6 py-3 bg-gray-900 text-white font-medium rounded-xl hover:bg-gray-800 transition-colors">返回首页</a>
+  <div id="unauthorized" class="unauthorized">
+    <div style="text-align:center;padding:32px;">
+      <div class="unauthorized-icon">&#128683;</div>
+      <h2>访问受限</h2>
+      <p>您没有权限访问此页面</p>
+      <a href="index.html" class="btn btn-primary" style="margin-top:20px;display:inline-block;text-decoration:none;">返回首页</a>
     </div>
   </div>
 
-  <!-- 主容器 -->
-  <div id="mainContent" class="hidden">
-    <!-- 顶部导航栏 -->
-    <nav class="w-full px-6 py-4 bg-white border-b border-gray-200">
-      <div class="max-w-6xl mx-auto flex items-center justify-between">
-        <div class="flex items-center gap-8">
-          <a href="/ruiweihan/index.html" class="text-xl font-semibold text-gray-900 hover:text-violet-600 transition-colors">Rui</a>
-          <div class="flex items-center gap-6 text-sm">
-            <a href="/ruiweihan/projects.html" class="text-gray-500 hover:text-gray-900 transition-colors">项目</a>
-            <a href="/ruiweihan/toolbox.html" class="text-gray-500 hover:text-gray-900 transition-colors">百宝箱</a>
-            <a href="/ruiweihan/chat.html" class="text-gray-500 hover:text-gray-900 transition-colors">聊天</a>
-          </div>
-        </div>
-        <div class="flex items-center gap-3">
-          <span id="adminName" class="text-sm text-gray-600">管理员</span>
-          <a href="/ruiweihan/index.html" class="px-4 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors">返回首页</a>
-        </div>
+  <!-- 移动端侧边栏遮罩 -->
+  <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <!-- 主布局 -->
+  <div id="mainContent" class="admin-layout" style="display:none;">
+
+    <!-- 左侧边栏 -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="sidebar-logo">Rui Hub</a>
+        <button class="sidebar-close" onclick="toggleSidebar()">&times;</button>
       </div>
-    </nav>
-
-    <!-- 主内容 -->
-    <main class="max-w-6xl mx-auto px-6 py-8">
-      <div class="mb-8">
-        <h1 class="text-2xl font-semibold text-gray-900">管理员面板</h1>
-        <p class="text-gray-500 mt-1">管理用户和系统设置</p>
-      </div>
-
-      <!-- 统计卡片 -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div class="bg-white rounded-xl border border-gray-200 p-5">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">👥</div>
-            <div>
-              <p class="text-sm text-gray-500">总用户数</p>
-              <p id="statTotalUsers" class="text-xl font-semibold text-gray-900">-</p>
-            </div>
-          </div>
-        </div>
-        <div class="bg-white rounded-xl border border-gray-200 p-5">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-green-600">✅</div>
-            <div>
-              <p class="text-sm text-gray-500">活跃用户</p>
-              <p id="statActiveUsers" class="text-xl font-semibold text-gray-900">-</p>
-            </div>
-          </div>
-        </div>
-        <div class="bg-white rounded-xl border border-gray-200 p-5">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600">🔐</div>
-            <div>
-              <p class="text-sm text-gray-500">管理员</p>
-              <p id="statAdmins" class="text-xl font-semibold text-gray-900">-</p>
-            </div>
-          </div>
-        </div>
-        <div class="bg-white rounded-xl border border-gray-200 p-5">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600">📊</div>
-            <div>
-              <p class="text-sm text-gray-500">总登录次数</p>
-              <p id="statTotalLogins" class="text-xl font-semibold text-gray-900">-</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 标签页 -->
-      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div class="flex border-b border-gray-200">
-          <button onclick="switchTab('users')" id="tabUsers" class="px-6 py-4 text-sm font-medium text-violet-600 border-b-2 border-violet-600">用户管理</button>
-          <button onclick="switchTab('stats')" id="tabStats" class="px-6 py-4 text-sm font-medium text-gray-500 hover:text-gray-700">系统统计</button>
-          <button onclick="switchTab('logs')" id="tabLogs" class="px-6 py-4 text-sm font-medium text-gray-500 hover:text-gray-700">操作日志</button>
-        </div>
-
-        <!-- 用户管理面板 -->
-        <div id="panelUsers" class="p-6">
-          <!-- 搜索和筛选 -->
-          <div class="flex items-center gap-4 mb-6">
-            <div class="flex-1 relative">
-              <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-              <input type="text" id="userSearch" placeholder="搜索用户名或UID..." class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-violet-300" oninput="filterUsers()">
-            </div>
-            <select id="roleFilter" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none" onchange="filterUsers()">
-              <option value="all">所有角色</option>
-              <option value="admin">管理员</option>
-              <option value="user">普通用户</option>
-            </select>
-            <select id="statusFilter" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none" onchange="filterUsers()">
-              <option value="all">所有状态</option>
-              <option value="active">活跃</option>
-              <option value="disabled">禁用</option>
-            </select>
-          </div>
-
-          <!-- 用户列表 -->
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead>
-                <tr class="text-left text-sm text-gray-500 border-b border-gray-200">
-                  <th class="pb-3 font-medium">用户</th>
-                  <th class="pb-3 font-medium">UID</th>
-                  <th class="pb-3 font-medium">角色</th>
-                  <th class="pb-3 font-medium">状态</th>
-                  <th class="pb-3 font-medium">注册时间</th>
-                  <th class="pb-3 font-medium">最后登录</th>
-                  <th class="pb-3 font-medium">操作</th>
-                </tr>
-              </thead>
-              <tbody id="usersTableBody">
-                <tr><td colspan="7" class="py-8 text-center text-gray-400">加载中...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- 系统统计面板 -->
-        <div id="panelStats" class="hidden p-6">
-          <div class="grid grid-cols-2 gap-6">
-            <div class="bg-gray-50 rounded-xl p-6">
-              <h3 class="font-medium text-gray-900 mb-4">📈 用户增长</h3>
-              <div id="userGrowth" class="text-gray-500 text-sm">暂无数据</div>
-            </div>
-            <div class="bg-gray-50 rounded-xl p-6">
-              <h3 class="font-medium text-gray-900 mb-4">⏰ 最近注册</h3>
-              <div id="recentRegistrations" class="text-gray-500 text-sm">暂无数据</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 操作日志面板 -->
-        <div id="panelLogs" class="hidden p-6">
-          <div class="text-center py-8 text-gray-400">
-            <p>操作日志功能开发中...</p>
-          </div>
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <!-- 用户详情弹窗 -->
-  <div id="userDetailModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-sm">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden fade-in">
-      <div class="p-4 border-b border-gray-100 flex items-center justify-between">
-        <h3 class="font-semibold text-gray-800">用户详情</h3>
-        <button onclick="closeUserDetailModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">
-          <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" onclick="switchPanel('dashboard')" data-panel="dashboard">
+          <span class="nav-item-icon">&#128202;</span> 数据概览
         </button>
+        <button class="nav-item" onclick="switchPanel('users')" data-panel="users">
+          <span class="nav-item-icon">&#128101;</span> 用户管理
+        </button>
+        <button class="nav-item" onclick="switchPanel('settings')" data-panel="settings">
+          <span class="nav-item-icon">&#9881;</span> 系统设置
+        </button>
+        <button class="nav-item" onclick="switchPanel('logs')" data-panel="logs">
+          <span class="nav-item-icon">&#128220;</span> 操作日志
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-avatar" id="sidebarAvatar">A</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-username" id="adminName">管理员</div>
+          <div class="sidebar-role" id="adminRole">SU 超管</div>
+        </div>
+        <a href="index.html" class="sidebar-home-link">首页</a>
       </div>
-      <div class="p-6">
-        <div class="flex items-center gap-4 mb-6">
-          <div id="detailAvatar" class="w-16 h-16 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center text-white text-2xl font-semibold">?</div>
+    </aside>
+
+    <!-- 右侧主内容 -->
+    <div class="main-content">
+      <header class="main-header">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button class="mobile-menu-btn" onclick="toggleSidebar()">&#9776;</button>
           <div>
-            <h4 id="detailName" class="text-lg font-semibold text-gray-900">用户名</h4>
-            <p id="detailUid" class="text-sm text-gray-500">UID: -</p>
+            <h1 id="panelTitle">数据概览</h1>
+            <p id="panelDesc">系统运行状态与关键指标</p>
           </div>
         </div>
-        <div class="space-y-3 text-sm">
-          <div class="flex justify-between py-2 border-b border-gray-100">
-            <span class="text-gray-500">角色</span>
-            <span id="detailRole" class="text-gray-900">-</span>
+        <div class="header-actions">
+          <button class="btn btn-xs btn-ghost" onclick="loadUsers()" title="刷新数据">&#8635; 刷新</button>
+        </div>
+      </header>
+
+      <div class="main-body">
+
+        <!-- ===== 数据概览面板 ===== -->
+        <div id="panelDashboard" class="panel active">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon blue">&#128101;</div>
+              <div><div class="stat-label">总用户数</div><div class="stat-value" id="statTotalUsers">-</div></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon green">&#9989;</div>
+              <div><div class="stat-label">活跃用户</div><div class="stat-value" id="statActiveUsers">-</div></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon purple">&#128272;</div>
+              <div><div class="stat-label">管理员</div><div class="stat-value" id="statAdmins">-</div></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon orange">&#128200;</div>
+              <div><div class="stat-label">总登录次数</div><div class="stat-value" id="statTotalLogins">-</div></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon amber">&#127941;</div>
+              <div><div class="stat-label">R币流通总量</div><div class="stat-value" id="statTotalRcoins">-</div></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon rose">&#127775;</div>
+              <div><div class="stat-label">Pro 用户</div><div class="stat-value" id="statProUsers">-</div></div>
+            </div>
           </div>
-          <div class="flex justify-between py-2 border-b border-gray-100">
-            <span class="text-gray-500">状态</span>
-            <span id="detailStatus" class="text-gray-900">-</span>
-          </div>
-          <div class="flex justify-between py-2 border-b border-gray-100">
-            <span class="text-gray-500">注册时间</span>
-            <span id="detailCreatedAt" class="text-gray-900">-</span>
-          </div>
-          <div class="flex justify-between py-2 border-b border-gray-100">
-            <span class="text-gray-500">最后登录</span>
-            <span id="detailLastLogin" class="text-gray-900">-</span>
-          </div>
-          <div class="flex justify-between py-2 border-b border-gray-100">
-            <span class="text-gray-500">登录次数</span>
-            <span id="detailLoginCount" class="text-gray-900">-</span>
-          </div>
-          <div class="flex justify-between py-2">
-            <span class="text-gray-500">好友数量</span>
-            <span id="detailFriends" class="text-gray-900">-</span>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div class="panel-card">
+              <div class="panel-card-header"><h3>&#128202; 用户增长</h3></div>
+              <div class="panel-card-body" id="userGrowth" style="color:#888;font-size:13px;">暂无数据</div>
+            </div>
+            <div class="panel-card">
+              <div class="panel-card-header"><h3>&#9200; 最近注册</h3></div>
+              <div class="panel-card-body" id="recentRegistrations" style="color:#888;font-size:13px;">暂无数据</div>
+            </div>
           </div>
         </div>
-        <div id="detailActions" class="mt-6 flex gap-2">
-          <!-- 操作按钮将根据角色动态生成 -->
+
+        <!-- ===== 用户管理面板 ===== -->
+        <div id="panelUsers" class="panel">
+          <div class="panel-card">
+            <div class="panel-card-body">
+              <div class="table-toolbar">
+                <div class="search-wrap">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                  <input type="text" id="userSearch" class="search-input" placeholder="搜索用户名或UID..." oninput="filterUsers()">
+                </div>
+                <select id="roleFilter" class="filter-select" onchange="filterUsers()">
+                  <option value="all">所有角色</option>
+                  <option value="admin">SU 超管</option>
+                  <option value="ma">MA 管理员</option>
+                  <option value="user">Member</option>
+                </select>
+                <select id="statusFilter" class="filter-select" onchange="filterUsers()">
+                  <option value="all">所有状态</option>
+                  <option value="active">活跃</option>
+                  <option value="disabled">禁用</option>
+                </select>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>用户</th><th>UID</th><th>角色</th><th>等级</th><th>R币</th><th>Pro</th><th>状态</th><th>注册时间</th><th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="usersTableBody">
+                    <tr><td colspan="9" style="text-align:center;padding:32px;color:#aaa;">加载中...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== 系统设置面板 ===== -->
+        <div id="panelSettings" class="panel">
+          <div class="panel-card" style="margin-bottom:16px;">
+            <div class="panel-card-header"><h3>&#9881; 通知设置</h3></div>
+            <div class="panel-card-body">
+              <div class="setting-item">
+                <div class="setting-info"><h4>新用户注册通知</h4><p>当有新用户注册时推送提醒</p></div>
+                <label class="toggle-switch"><input type="checkbox" id="settingRegNotify" onchange="saveSetting('regNotify', this.checked)"><span class="toggle-slider"></span></label>
+              </div>
+              <div class="setting-item">
+                <div class="setting-info"><h4>新访客显示</h4><p>在面板中显示新访客信息</p></div>
+                <label class="toggle-switch"><input type="checkbox" id="settingNewVisitor" onchange="saveSetting('newVisitor', this.checked)"><span class="toggle-slider"></span></label>
+              </div>
+              <div class="setting-item">
+                <div class="setting-info"><h4>登录异常提醒</h4><p>检测到异常登录行为时提醒</p></div>
+                <label class="toggle-switch"><input type="checkbox" id="settingLoginAlert" onchange="saveSetting('loginAlert', this.checked)"><span class="toggle-slider"></span></label>
+              </div>
+            </div>
+          </div>
+          <div class="panel-card">
+            <div class="panel-card-header"><h3>&#128227; 系统公告</h3></div>
+            <div class="panel-card-body">
+              <div class="form-group">
+                <label class="form-label">公告内容</label>
+                <textarea id="announcementText" class="announcement-area" placeholder="输入系统公告内容..."></textarea>
+              </div>
+              <button class="btn btn-primary" onclick="saveAnnouncement()">保存公告</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== 操作日志面板 ===== -->
+        <div id="panelLogs" class="panel">
+          <div class="panel-card">
+            <div class="panel-card-header">
+              <h3>&#128220; 操作日志</h3>
+              <button class="btn btn-xs btn-ghost" onclick="clearLogs()">清空日志</button>
+            </div>
+            <div class="panel-card-body" id="logsContainer">
+              <div style="text-align:center;padding:32px;color:#aaa;">暂无操作日志</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 用户详情弹窗 ===== -->
+  <div id="userDetailModal" class="modal-overlay">
+    <div class="modal modal-md">
+      <div class="modal-header">
+        <h3>用户详情</h3>
+        <button class="modal-close" onclick="closeModal('userDetailModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-header">
+          <div class="detail-avatar" id="detailAvatar">?</div>
+          <div>
+            <div class="detail-name" id="detailName">用户名</div>
+            <div class="detail-uid" id="detailUid">UID: -</div>
+          </div>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-item"><div class="detail-item-label">角色</div><div class="detail-item-value" id="detailRole">-</div></div>
+          <div class="detail-item"><div class="detail-item-label">状态</div><div class="detail-item-value" id="detailStatus">-</div></div>
+          <div class="detail-item"><div class="detail-item-label">等级</div><div class="detail-item-value" id="detailLevel">-</div></div>
+          <div class="detail-item"><div class="detail-item-label">R币</div><div class="detail-item-value" id="detailRcoins">-</div></div>
+          <div class="detail-item"><div class="detail-item-label">Pro状态</div><div class="detail-item-value" id="detailPro">-</div></div>
+          <div class="detail-item"><div class="detail-item-label">经验值</div><div class="detail-item-value" id="detailExp">-</div></div>
+          <div class="detail-item"><div class="detail-item-label">注册时间</div><div class="detail-item-value" id="detailCreatedAt">-</div></div>
+          <div class="detail-item"><div class="detail-item-label">最后登录</div><div class="detail-item-value" id="detailLastLogin">-</div></div>
+          <div class="detail-item"><div class="detail-item-label">登录次数</div><div class="detail-item-value" id="detailLoginCount">-</div></div>
+          <div class="detail-item"><div class="detail-item-label">好友数量</div><div class="detail-item-value" id="detailFriends">-</div></div>
+        </div>
+        <div class="detail-actions" id="detailActions">
+          <!-- 动态生成操作按钮 -->
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Toast通知 -->
-  <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+  <!-- ===== 编辑弹窗（通用） ===== -->
+  <div id="editModal" class="modal-overlay">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3 id="editModalTitle">编辑</h3>
+        <button class="modal-close" onclick="closeModal('editModal')">&times;</button>
+      </div>
+      <div class="modal-body" id="editModalBody">
+        <!-- 动态生成表单 -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('editModal')">取消</button>
+        <button class="btn btn-primary" id="editModalSave" onclick="saveEdit()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 确认弹窗 ===== -->
+  <div id="confirmModal" class="modal-overlay">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3 id="confirmTitle">确认操作</h3>
+        <button class="modal-close" onclick="closeModal('confirmModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmMessage" style="font-size:14px;color:#555;"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('confirmModal')">取消</button>
+        <button class="btn btn-primary" id="confirmOk">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toastContainer" class="toast-container"></div>
 
   <!-- 引入用户管理系统 -->
-  <script src="/ruiweihan/auth-v2.js"></script>
-
   <script>
-    // 配置
-    const USER_REPO = 'RuiweihanHub/ruiuser';
-    const getToken = () => ['ghp_', 'aJxbQaU0S56e8pl6N8zrkWoHkfJHi92GOiFQ'].join('');
-    const ADMINS = ['Administrator', 'Ruiweihan', '000001'];
-    
-    // 状态
-    let currentUser = null;
-    let allUsers = [];
-    
-    // 工具函数
-    function toBase64(str) {
-      const bytes = new TextEncoder().encode(str);
-      let binary = '';
-      for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-      return btoa(binary);
+/**
+ * Rui Hub 用户管理系统 v2.1
+ * 支持 UID 系统
+ * 
+ * UID 格式：
+ * - Administrator: 特殊管理员UID（保持 Administrator）
+ * - 普通用户: 6位数字，如 000001, 000002, ...
+ * 
+ * 更新日志 v2.1:
+ * - 增强跨页面登录状态同步
+ * - 添加更详细的调试日志
+ */
+
+// 版本号（用于防止缓存）
+const AUTH_VERSION = '2.1';
+console.log('auth.js 版本:', AUTH_VERSION, '加载时间:', new Date().toLocaleString());
+
+// GitHub 配置
+const AUTH_CONFIG = {
+  repo: 'RuiweihanHub/ruiuser',
+  getToken: () => ['ghp_', 'aJxbQaU0S56e8pl6N8zrkWoHkfJHi92GOiFQ'].join(''),
+  admins: ['Administrator', 'Ruiweihan', '000001'],
+  usersFile: 'users.json',
+  profilesDir: 'profiles'  // 用户详情目录
+};
+
+// 安全的密码哈希函数（SHA-256 简化版）
+async function hashPassword(password) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password + 'ruihub_salt_2024');
+  
+  // 使用 SubtleCrypto 进行 SHA-256 哈希
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// 同步密码哈希（用于本地验证，简化版）
+function hashPasswordSync(password) {
+  let hash = 0;
+  const str = password + 'ruihub_salt_2024';
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash = hash & hash;
+  }
+  return Math.abs(hash).toString(36).padStart(8, '0');
+}
+
+// Base64 编码（支持中文）
+function toBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+// Base64 解码（支持中文）
+function fromBase64(base64) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return new TextDecoder().decode(bytes);
+}
+
+// 生成6位UID
+function generateUid(number) {
+  return number.toString().padStart(6, '0');
+}
+
+// 默认用户数据（v2.1 带好友系统）
+const DEFAULT_USERS = {
+  version: '2.1',
+  nextUid: 3,  // 下一个可用的UID数字
+  users: [
+    {
+      uid: 'Administrator',
+      username: 'Administrator',
+      displayName: '系统管理员',
+      passwordHash: '1u98e9',
+      role: 'admin',
+      status: 'active',
+      createdAt: '2024-01-01T00:00:00Z',
+      lastLogin: null,
+      loginCount: 0,
+      friends: ['000001', '000002'],
+      profile: {
+        avatar: null,
+        bio: '系统管理员账户',
+        email: null
+      }
+    },
+    {
+      uid: '000001',
+      username: 'Ruiweihan',
+      displayName: 'Ruiweihan',
+      passwordHash: '6052ni',
+      role: 'admin',
+      status: 'active',
+      createdAt: '2024-01-01T00:00:00Z',
+      lastLogin: null,
+      loginCount: 0,
+      friends: ['Administrator', '000002'],
+      profile: {
+        avatar: null,
+        bio: '创始人',
+        email: null
+      }
+    },
+    {
+      uid: '000002',
+      username: 'Xvjiarui',
+      displayName: 'Xvjiarui',
+      passwordHash: 'o7dyuk',
+      role: 'user',
+      status: 'active',
+      createdAt: '2024-01-01T00:00:00Z',
+      lastLogin: null,
+      loginCount: 0,
+      friends: ['Administrator', '000001'],
+      profile: {
+        avatar: null,
+        bio: null,
+        email: null
+      }
     }
-    
-    function fromBase64(base64) {
-      const binary = atob(base64);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-      return new TextDecoder().decode(bytes);
+  ],
+  // 索引：快速查找
+  index: {
+    byUid: {
+      'Administrator': 0,
+      '000001': 1,
+      '000002': 2
+    },
+    byUsername: {
+      'Administrator': 0,
+      'Ruiweihan': 1,
+      'Xvjiarui': 2
     }
+  },
+  // 统计信息
+  stats: {
+    totalUsers: 3,
+    totalLogins: 0,
+    lastRegistration: '2024-01-01T00:00:00Z'
+  }
+};
+
+// 本地缓存用户（用于GitHub不可用时）
+const AUTH_LOCAL_USERS = {
+  users: [
+    { uid: 'Administrator', username: 'Administrator', passwordHash: hashPasswordSync('admin123'), role: 'admin' },
+    { uid: '000001', username: 'Ruiweihan', passwordHash: hashPasswordSync('rui123'), role: 'admin' },
+    { uid: '000002', username: 'Xvjiarui', passwordHash: hashPasswordSync('xvj123'), role: 'user' }
+  ]
+};
+
+// 用户管理类
+class RuiAuth {
+  constructor() {
+    this.token = AUTH_CONFIG.getToken();
+    this.repo = AUTH_CONFIG.repo;
+    this.usersFileSha = null;
+    this.users = null;
+    this.initialized = false;
+  }
+
+  // 初始化：检查或创建用户数据文件
+  async init() {
+    if (this.initialized) return true;
     
-    function formatDate(dateStr) {
-      if (!dateStr) return '-';
-      return new Date(dateStr).toLocaleString('zh-CN');
-    }
-    
-    function showToast(message, type = 'success') {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-gray-700';
-      toast.className = `${bgColor} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 text-sm font-medium fade-in`;
-      toast.innerHTML = `<span>${message}</span>`;
-      container.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
-    }
-    
-    // 检查权限
-    async function checkPermission() {
-      const sessionUser = sessionStorage.getItem('rui_user');
-      const sessionUid = sessionStorage.getItem('rui_uid');
-      const rememberedUser = localStorage.getItem('rui_user_remember');
-      const rememberedUid = localStorage.getItem('rui_uid_remember');
-      
-      const username = sessionUser || rememberedUser;
-      const uid = sessionUid || rememberedUid;
-      
-      if (!username || !ADMINS.includes(username) && !ADMINS.includes(uid)) {
-        document.getElementById('unauthorized').classList.remove('hidden');
-        return false;
+    try {
+      const users = await this.fetchUsers();
+      if (users) {
+        this.users = users;
+        this.initialized = true;
+        return true;
       }
       
-      currentUser = { username, uid };
-      document.getElementById('adminName').textContent = username;
-      document.getElementById('mainContent').classList.remove('hidden');
-      return true;
+      // 如果文件不存在，创建默认用户
+      const created = await this.createDefaultUsers();
+      if (created) {
+        this.users = DEFAULT_USERS;
+        this.initialized = true;
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('Auth init error:', err);
+      return false;
     }
-    
-    // 加载用户数据
-    async function loadUsers() {
-      const token = getToken();
-      
-      try {
-        const res = await fetch(`https://api.github.com/repos/${USER_REPO}/contents/users.json?ref=main&_=${Date.now()}`, {
-          headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
-        });
-        
-        if (res.ok) {
-          const data = await res.json();
-          const content = JSON.parse(fromBase64(data.content));
-          allUsers = content.users || [];
-          
-          // 更新统计
-          updateStats(content);
-          
-          // 渲染用户列表
-          renderUsers(allUsers);
-        } else {
-          throw new Error('加载失败');
+  }
+
+  // 从 GitHub 获取用户数据
+  async fetchUsers() {
+    try {
+      const res = await fetch(`https://api.github.com/repos/${this.repo}/contents/${AUTH_CONFIG.usersFile}?ref=main&_=${Date.now()}`, {
+        headers: {
+          'Authorization': `token ${this.token}`,
+          'Accept': 'application/vnd.github.v3+json'
         }
-      } catch (err) {
-        console.error('加载用户失败:', err);
-        document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="7" class="py-8 text-center text-red-500">加载失败，请刷新重试</td></tr>';
-      }
-    }
-    
-    // 更新统计
-    function updateStats(content) {
-      const users = content.users || [];
-      const stats = content.stats || {};
-      
-      document.getElementById('statTotalUsers').textContent = users.length;
-      document.getElementById('statActiveUsers').textContent = users.filter(u => u.status === 'active').length;
-      document.getElementById('statAdmins').textContent = users.filter(u => u.role === 'admin').length;
-      document.getElementById('statTotalLogins').textContent = stats.totalLogins || 0;
-      
-      // 更新最近注册
-      const recentDiv = document.getElementById('recentRegistrations');
-      if (stats.lastRegistration) {
-        recentDiv.innerHTML = `<p class="text-gray-900 font-medium">${formatDate(stats.lastRegistration)}</p>`;
-      }
-    }
-    
-    // 渲染用户列表
-    function renderUsers(users) {
-      const tbody = document.getElementById('usersTableBody');
-      
-      if (users.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-gray-400">暂无用户</td></tr>';
-        return;
-      }
-      
-      tbody.innerHTML = users.map(user => `
-        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-          <td class="py-4">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-medium">
-                ${(user.displayName || user.username).charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <p class="font-medium text-gray-900">${escapeHtml(user.displayName || user.username)}</p>
-                <p class="text-xs text-gray-500">@${escapeHtml(user.username)}</p>
-              </div>
-            </div>
-          </td>
-          <td class="py-4">
-            <code class="px-2 py-1 bg-gray-100 rounded text-sm font-mono">${user.uid}</code>
-          </td>
-          <td class="py-4">
-            <span class="px-2.5 py-1 rounded-full text-xs font-medium ${user.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'}">
-              ${user.role === 'admin' ? '管理员' : '用户'}
-            </span>
-          </td>
-          <td class="py-4">
-            <span class="px-2.5 py-1 rounded-full text-xs font-medium ${user.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
-              ${user.status === 'active' ? '活跃' : '禁用'}
-            </span>
-          </td>
-          <td class="py-4 text-sm text-gray-500">${formatDate(user.createdAt)}</td>
-          <td class="py-4 text-sm text-gray-500">${formatDate(user.lastLogin)}</td>
-          <td class="py-4">
-            <button onclick="showUserDetail('${user.uid}')" class="px-3 py-1.5 text-xs bg-violet-100 text-violet-700 rounded-lg hover:bg-violet-200 transition-colors">
-              详情
-            </button>
-          </td>
-        </tr>
-      `).join('');
-    }
-    
-    // 筛选用户
-    function filterUsers() {
-      const search = document.getElementById('userSearch').value.toLowerCase();
-      const roleFilter = document.getElementById('roleFilter').value;
-      const statusFilter = document.getElementById('statusFilter').value;
-      
-      let filtered = allUsers.filter(user => {
-        const matchSearch = !search || 
-          user.username.toLowerCase().includes(search) || 
-          user.uid.toLowerCase().includes(search) ||
-          (user.displayName && user.displayName.toLowerCase().includes(search));
-        const matchRole = roleFilter === 'all' || user.role === roleFilter;
-        const matchStatus = statusFilter === 'all' || user.status === statusFilter;
-        return matchSearch && matchRole && matchStatus;
       });
-      
-      renderUsers(filtered);
-    }
-    
-    // 显示用户详情
-    function showUserDetail(uid) {
-      const user = allUsers.find(u => u.uid === uid);
-      if (!user) return;
-      
-      document.getElementById('detailAvatar').textContent = (user.displayName || user.username).charAt(0).toUpperCase();
-      document.getElementById('detailName').textContent = user.displayName || user.username;
-      document.getElementById('detailUid').textContent = `UID: ${user.uid}`;
-      document.getElementById('detailRole').innerHTML = user.role === 'admin' 
-        ? '<span class="text-purple-600 font-medium">管理员</span>' 
-        : '普通用户';
-      document.getElementById('detailStatus').innerHTML = user.status === 'active'
-        ? '<span class="text-green-600">活跃</span>'
-        : '<span class="text-red-600">已禁用</span>';
-      document.getElementById('detailCreatedAt').textContent = formatDate(user.createdAt);
-      document.getElementById('detailLastLogin').textContent = formatDate(user.lastLogin);
-      document.getElementById('detailLoginCount').textContent = user.loginCount || 0;
-      document.getElementById('detailFriends').textContent = (user.friends || []).length;
-      
-      // 操作按钮
-      const actionsDiv = document.getElementById('detailActions');
-      if (user.role === 'admin') {
-        actionsDiv.innerHTML = `
-          <p class="text-sm text-purple-600 flex-1 font-medium">超级管理员</p>
-          <button onclick="removeAdmin('${uid}')" class="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-xl transition-colors text-sm">
-            取消管理员
-          </button>
-        `;
-      } else {
-        actionsDiv.innerHTML = `
-          <button onclick="setAdmin('${uid}')" class="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-xl transition-colors text-sm">
-            设为超级管理员
-          </button>
-          <button onclick="toggleUserStatus('${uid}')" class="flex-1 py-2.5 ${user.status === 'active' ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} text-white font-medium rounded-xl transition-colors text-sm">
-            ${user.status === 'active' ? '禁用用户' : '启用用户'}
-          </button>
-        `;
-      }
-      
-      document.getElementById('userDetailModal').classList.remove('hidden');
-      document.getElementById('userDetailModal').classList.add('flex');
-    }
-    
-    function closeUserDetailModal() {
-      document.getElementById('userDetailModal').classList.add('hidden');
-      document.getElementById('userDetailModal').classList.remove('flex');
-    }
-    
-    // 切换用户状态
-    async function toggleUserStatus(uid) {
-      const user = allUsers.find(u => u.uid === uid);
-      if (!user || user.role === 'admin') return;
-      
-      const token = getToken();
-      const newStatus = user.status === 'active' ? 'disabled' : 'active';
-      
-      try {
-        // 获取最新数据
-        const res = await fetch(`https://api.github.com/repos/${USER_REPO}/contents/users.json?ref=main`, {
-          headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
-        });
-        
+
+      if (res.ok) {
         const data = await res.json();
+        this.usersFileSha = data.sha;
         const content = JSON.parse(fromBase64(data.content));
-        
-        // 更新用户状态
-        const userIndex = content.users.findIndex(u => u.uid === uid);
-        if (userIndex !== -1) {
-          content.users[userIndex].status = newStatus;
-        }
-        
-        // 保存
-        const saveRes = await fetch(`https://api.github.com/repos/${USER_REPO}/contents/users.json`, {
+        return content;
+      } else if (res.status === 404) {
+        return null;
+      }
+      throw new Error(`Fetch users failed: ${res.status}`);
+    } catch (err) {
+      console.error('Fetch users error:', err);
+      return null;
+    }
+  }
+
+  // 保存用户数据到 GitHub
+  async saveUsers(commitMessage) {
+    if (!this.users || !this.usersFileSha) {
+      // 如果是新创建，使用无 sha 的 PUT
+      if (this.users && !this.usersFileSha) {
+        const res = await fetch(`https://api.github.com/repos/${this.repo}/contents/${AUTH_CONFIG.usersFile}`, {
           method: 'PUT',
-          headers: { 
-            'Authorization': `token ${token}`, 
+          headers: {
+            'Authorization': `token ${this.token}`,
             'Accept': 'application/vnd.github.v3+json',
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            message: `Admin: ${newStatus === 'disabled' ? 'Disable' : 'Enable'} user ${user.username} (${uid})`,
-            content: toBase64(JSON.stringify(content, null, 2)),
-            sha: data.sha
+            message: commitMessage,
+            content: toBase64(JSON.stringify(this.users, null, 2))
           })
         });
-        
-        if (saveRes.ok) {
-          showToast(`用户已${newStatus === 'disabled' ? '禁用' : '启用'}`);
-          closeUserDetailModal();
-          loadUsers();
-        } else {
-          throw new Error('保存失败');
+
+        if (res.ok) {
+          const data = await res.json();
+          this.usersFileSha = data.content.sha;
+          return true;
         }
-      } catch (err) {
-        showToast('操作失败，请重试', 'error');
       }
+      return false;
     }
-    
-    // 设为超级管理员
-    async function setAdmin(uid) {
-      if (!confirm('确定将此用户设为超级管理员？此用户将拥有管理面板访问权限。')) return;
-      
-      const token = getToken();
-      try {
-        const res = await fetch(`https://api.github.com/repos/${USER_REPO}/contents/users.json?ref=main`, {
-          headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
-        });
-        const data = await res.json();
-        const content = JSON.parse(fromBase64(data.content));
-        
-        const userIndex = content.users.findIndex(u => u.uid === uid);
-        if (userIndex !== -1) {
-          content.users[userIndex].role = 'admin';
-        }
-        
-        const saveRes = await fetch(`https://api.github.com/repos/${USER_REPO}/contents/users.json`, {
-          method: 'PUT',
-          headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: `Admin: Set ${content.users[userIndex]?.username || uid} as super admin`,
-            content: toBase64(JSON.stringify(content, null, 2)),
-            sha: data.sha
-          })
-        });
-        
-        if (saveRes.ok) {
-          showToast('已设为超级管理员');
-          closeUserDetailModal();
-          loadUsers();
-        } else {
-          throw new Error('保存失败');
-        }
-      } catch (err) {
-        showToast('操作失败，请重试', 'error');
-      }
-    }
-    
-    // 取消管理员
-    async function removeAdmin(uid) {
-      if (!confirm('确定取消此用户的管理员权限？')) return;
-      
-      const token = getToken();
-      try {
-        const res = await fetch(`https://api.github.com/repos/${USER_REPO}/contents/users.json?ref=main`, {
-          headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
-        });
-        const data = await res.json();
-        const content = JSON.parse(fromBase64(data.content));
-        
-        const userIndex = content.users.findIndex(u => u.uid === uid);
-        if (userIndex !== -1) {
-          content.users[userIndex].role = 'user';
-        }
-        
-        const saveRes = await fetch(`https://api.github.com/repos/${USER_REPO}/contents/users.json`, {
-          method: 'PUT',
-          headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: `Admin: Remove admin from ${content.users[userIndex]?.username || uid}`,
-            content: toBase64(JSON.stringify(content, null, 2)),
-            sha: data.sha
-          })
-        });
-        
-        if (saveRes.ok) {
-          showToast('已取消管理员权限');
-          closeUserDetailModal();
-          loadUsers();
-        } else {
-          throw new Error('保存失败');
-        }
-      } catch (err) {
-        showToast('操作失败，请重试', 'error');
-      }
-    }
-    
-    // 标签页切换
-    function switchTab(tab) {
-      const tabs = ['users', 'stats', 'logs'];
-      tabs.forEach(t => {
-        document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`).className = 
-          `px-6 py-4 text-sm font-medium ${t === tab ? 'text-violet-600 border-b-2 border-violet-600' : 'text-gray-500 hover:text-gray-700'}`;
-        document.getElementById(`panel${t.charAt(0).toUpperCase() + t.slice(1)}`).classList.toggle('hidden', t !== tab);
+
+    try {
+      const res = await fetch(`https://api.github.com/repos/${this.repo}/contents/${AUTH_CONFIG.usersFile}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${this.token}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: commitMessage,
+          content: toBase64(JSON.stringify(this.users, null, 2)),
+          sha: this.usersFileSha
+        })
       });
+
+      if (res.ok) {
+        const data = await res.json();
+        this.usersFileSha = data.content.sha;
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('Save users error:', err);
+      return false;
+    }
+  }
+
+  // 创建默认用户文件
+  async createDefaultUsers() {
+    try {
+      const res = await fetch(`https://api.github.com/repos/${this.repo}/contents/${AUTH_CONFIG.usersFile}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${this.token}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: 'Initialize user database v2.0 with UID system',
+          content: toBase64(JSON.stringify(DEFAULT_USERS, null, 2))
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        this.usersFileSha = data.content.sha;
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('Create default users error:', err);
+      return false;
+    }
+  }
+
+  // 通过用户名查找用户索引
+  findUserIndexByUsername(username) {
+    if (!this.users) return -1;
+    if (this.users.index && this.users.index.byUsername && this.users.index.byUsername[username] !== undefined) {
+      return this.users.index.byUsername[username];
+    }
+    return this.users.users.findIndex(u => u.username === username);
+  }
+
+  // 通过UID查找用户索引
+  findUserIndexByUid(uid) {
+    if (!this.users) return -1;
+    if (this.users.index && this.users.index.byUid && this.users.index.byUid[uid] !== undefined) {
+      return this.users.index.byUid[uid];
+    }
+    return this.users.users.findIndex(u => u.uid === uid);
+  }
+
+  // 验证用户登录（支持用户名或UID登录）
+  async validateUser(usernameOrUid, password) {
+    // 先尝试从 GitHub 获取用户
+    if (!this.initialized) {
+      await this.init();
+    }
+
+    const hashedPassword = hashPasswordSync(password);
+    
+    // 如果 GitHub 获取失败，使用本地缓存
+    if (!this.users) {
+      const localUser = AUTH_LOCAL_USERS.users.find(u => 
+        (u.username === usernameOrUid || u.uid === usernameOrUid) && 
+        u.passwordHash === hashedPassword
+      );
+      
+      if (localUser) {
+        return { success: true, user: { uid: localUser.uid, username: localUser.username, role: localUser.role } };
+      }
+      return { success: false, error: '用户名或密码错误' };
+    }
+
+    // 使用 GitHub 数据
+    const userIndex = this.findUserIndexByUsername(usernameOrUid);
+    const userByUidIndex = this.findUserIndexByUid(usernameOrUid);
+    const finalIndex = userIndex !== -1 ? userIndex : userByUidIndex;
+    
+    if (finalIndex === -1) {
+      return { success: false, error: '用户名或密码错误' };
+    }
+
+    const user = this.users.users[finalIndex];
+    
+    // 检查账户状态
+    if (user.status === 'disabled') {
+      return { success: false, error: '账户已被禁用' };
     }
     
+    if (user.passwordHash === hashedPassword) {
+      // 更新登录信息
+      user.lastLogin = new Date().toISOString();
+      user.loginCount = (user.loginCount || 0) + 1;
+      this.users.stats.totalLogins = (this.users.stats.totalLogins || 0) + 1;
+      
+      // 异步保存（不阻塞登录）
+      this.saveUsers(`User login: ${user.username} (UID: ${user.uid})`).catch(console.error);
+      
+      return { 
+        success: true, 
+        user: { 
+          uid: user.uid, 
+          username: user.username, 
+          displayName: user.displayName,
+          role: user.role,
+          profile: user.profile
+        } 
+      };
+    }
+    
+    return { success: false, error: '用户名或密码错误' };
+  }
+
+  // 检查用户是否存在
+  async userExists(username) {
+    if (!this.initialized) {
+      await this.init();
+    }
+    
+    if (!this.users) {
+      return AUTH_LOCAL_USERS.users.some(u => u.username === username);
+    }
+    
+    return this.findUserIndexByUsername(username) !== -1;
+  }
+
+  // 检查UID是否存在
+  async uidExists(uid) {
+    if (!this.initialized) {
+      await this.init();
+    }
+    
+    if (!this.users) return false;
+    return this.findUserIndexByUid(uid) !== -1;
+  }
+
+  // 注册新用户
+  async register(username, password, displayName = null, email = null) {
+    if (!this.initialized) {
+      await this.init();
+    }
+
+    if (!this.users) {
+      return { success: false, error: '系统暂时不可用，请稍后重试' };
+    }
+
+    // 验证用户名
+    if (!username || username.length < 2 || username.length > 20) {
+      return { success: false, error: '用户名长度需为2-20个字符' };
+    }
+
+    if (!/^[a-zA-Z0-9_\u4e00-\u9fa5]+$/.test(username)) {
+      return { success: false, error: '用户名只能包含字母、数字、下划线和中文' };
+    }
+
+    // 验证密码
+    if (!password || password.length < 4) {
+      return { success: false, error: '密码长度至少4个字符' };
+    }
+
+    if (await this.userExists(username)) {
+      return { success: false, error: '用户名已存在' };
+    }
+
+    // 检查邮箱是否已被使用
+    if (email && this.users.users.some(u => u.profile && u.profile.email === email)) {
+      return { success: false, error: '该邮箱已被注册' };
+    }
+
+    // 生成新UID
+    const newUid = generateUid(this.users.nextUid);
+    this.users.nextUid++;
+
+    const now = new Date().toISOString();
+    const newUser = {
+      uid: newUid,
+      username: username,
+      displayName: displayName || username,
+      passwordHash: hashPasswordSync(password),
+      role: 'user',
+      status: 'active',
+      createdAt: now,
+      lastLogin: null,
+      loginCount: 0,
+      friends: [],  // 新用户初始好友列表为空
+      profile: {
+        avatar: null,
+        bio: null,
+        email: email || null
+      }
+    };
+
+    // 添加用户
+    const newIndex = this.users.users.length;
+    this.users.users.push(newUser);
+
+    // 更新索引
+    if (!this.users.index) {
+      this.users.index = { byUid: {}, byUsername: {} };
+    }
+    this.users.index.byUid[newUid] = newIndex;
+    this.users.index.byUsername[username] = newIndex;
+
+    // 更新统计
+    if (!this.users.stats) {
+      this.users.stats = { totalUsers: 0, totalLogins: 0, lastRegistration: null };
+    }
+    this.users.stats.totalUsers++;
+    this.users.stats.lastRegistration = now;
+
+    // 保存到 GitHub
+    const saved = await this.saveUsers(`Register new user: ${username} (UID: ${newUid})`);
+    
+    if (saved) {
+      return { 
+        success: true, 
+        user: { 
+          uid: newUid, 
+          username: username, 
+          displayName: newUser.displayName,
+          role: newUser.role 
+        } 
+      };
+    }
+    
+    // 回滚
+    this.users.users.pop();
+    this.users.nextUid--;
+    delete this.users.index.byUid[newUid];
+    delete this.users.index.byUsername[username];
+    this.users.stats.totalUsers--;
+    
+    return { success: false, error: '注册失败，请重试' };
+  }
+
+  // 获取用户信息（通过UID或用户名）
+  async getUser(uidOrUsername) {
+    if (!this.initialized) {
+      await this.init();
+    }
+
+    if (!this.users) {
+      const localUser = AUTH_LOCAL_USERS.users.find(u => u.username === uidOrUsername || u.uid === uidOrUsername);
+      return localUser ? { uid: localUser.uid, username: localUser.username, role: localUser.role } : null;
+    }
+
+    let index = this.findUserIndexByUid(uidOrUsername);
+    if (index === -1) {
+      index = this.findUserIndexByUsername(uidOrUsername);
+    }
+    
+    if (index === -1) return null;
+    
+    const user = this.users.users[index];
+    return {
+      uid: user.uid,
+      username: user.username,
+      displayName: user.displayName,
+      role: user.role,
+      status: user.status,
+      createdAt: user.createdAt,
+      lastLogin: user.lastLogin,
+      loginCount: user.loginCount,
+      profile: user.profile
+    };
+  }
+
+  // 修改密码
+  async changePassword(username, oldPassword, newPassword) {
+    const validate = await this.validateUser(username, oldPassword);
+    if (!validate.success) {
+      return { success: false, error: '原密码错误' };
+    }
+
+    if (!this.users) {
+      return { success: false, error: '系统暂时不可用' };
+    }
+
+    const userIndex = this.findUserIndexByUsername(username);
+    if (userIndex === -1) {
+      return { success: false, error: '用户不存在' };
+    }
+
+    this.users.users[userIndex].passwordHash = hashPasswordSync(newPassword);
+    
+    const saved = await this.saveUsers(`Password changed: ${username}`);
+    return saved ? 
+      { success: true } : 
+      { success: false, error: '保存失败，请重试' };
+  }
+
+  // 更新用户资料
+  async updateProfile(username, profileData) {
+    if (!this.initialized) {
+      await this.init();
+    }
+
+    if (!this.users) {
+      return { success: false, error: '系统暂时不可用' };
+    }
+
+    const userIndex = this.findUserIndexByUsername(username);
+    if (userIndex === -1) {
+      return { success: false, error: '用户不存在' };
+    }
+
+    const user = this.users.users[userIndex];
+    user.profile = { ...user.profile, ...profileData };
+    if (profileData.displayName) {
+      user.displayName = profileData.displayName;
+    }
+
+    const saved = await this.saveUsers(`Profile updated: ${username}`);
+    return saved ? 
+      { success: true, user: this.getUser(username) } : 
+      { success: false, error: '保存失败，请重试' };
+  }
+
+  // 删除用户（仅管理员）
+  async deleteUser(adminUsername, targetUsernameOrUid) {
+    if (!AUTH_CONFIG.admins.includes(adminUsername) && !AUTH_CONFIG.admins.includes(await this.getUid(adminUsername))) {
+      return { success: false, error: '无权限' };
+    }
+
+    if (!this.users) {
+      return { success: false, error: '系统暂时不可用' };
+    }
+
+    // 查找目标用户
+    let targetIndex = this.findUserIndexByUsername(targetUsernameOrUid);
+    if (targetIndex === -1) {
+      targetIndex = this.findUserIndexByUid(targetUsernameOrUid);
+    }
+    
+    if (targetIndex === -1) {
+      return { success: false, error: '用户不存在' };
+    }
+
+    const targetUser = this.users.users[targetIndex];
+
+    // 不能删除管理员
+    if (targetUser.role === 'admin') {
+      return { success: false, error: '不能删除管理员账户' };
+    }
+
+    // 删除用户
+    const deletedUid = targetUser.uid;
+    const deletedUsername = targetUser.username;
+    this.users.users.splice(targetIndex, 1);
+
+    // 重建索引
+    this.rebuildIndex();
+
+    // 更新统计
+    this.users.stats.totalUsers--;
+
+    const saved = await this.saveUsers(`Delete user: ${deletedUsername} (UID: ${deletedUid})`);
+    return saved ? 
+      { success: true } : 
+      { success: false, error: '删除失败' };
+  }
+
+  // 重建索引
+  rebuildIndex() {
+    this.users.index = { byUid: {}, byUsername: {} };
+    this.users.users.forEach((user, index) => {
+      this.users.index.byUid[user.uid] = index;
+      this.users.index.byUsername[user.username] = index;
+    });
+  }
+
+  // 获取用户UID
+  async getUid(username) {
+    const user = await this.getUser(username);
+    return user ? user.uid : null;
+  }
+
+  // 获取所有用户（仅管理员）
+  async getAllUsers(adminUsername) {
+    const adminUid = await this.getUid(adminUsername);
+    if (!AUTH_CONFIG.admins.includes(adminUsername) && !AUTH_CONFIG.admins.includes(adminUid)) {
+      return { success: false, error: '无权限' };
+    }
+
+    if (!this.initialized) {
+      await this.init();
+    }
+
+    if (!this.users) {
+      return { success: true, users: AUTH_LOCAL_USERS.users.map(u => ({ uid: u.uid, username: u.username, role: u.role })) };
+    }
+
+    return { 
+      success: true, 
+      users: this.users.users.map(u => ({ 
+        uid: u.uid, 
+        username: u.username, 
+        displayName: u.displayName,
+        role: u.role, 
+        status: u.status,
+        createdAt: u.createdAt,
+        lastLogin: u.lastLogin,
+        loginCount: u.loginCount
+      })) 
+    };
+  }
+
+  // 获取统计信息
+  async getStats(adminUsername) {
+    if (!AUTH_CONFIG.admins.includes(adminUsername)) {
+      return { success: false, error: '无权限' };
+    }
+
+    if (!this.initialized) {
+      await this.init();
+    }
+
+    if (!this.users) {
+      return { success: false, error: '系统暂时不可用' };
+    }
+
+    return { 
+      success: true, 
+      stats: this.users.stats 
+    };
+  }
+
+  // 禁用/启用用户（仅管理员）
+  async toggleUserStatus(adminUsername, targetUsernameOrUid, status) {
+    if (!AUTH_CONFIG.admins.includes(adminUsername)) {
+      return { success: false, error: '无权限' };
+    }
+
+    if (!this.users) {
+      return { success: false, error: '系统暂时不可用' };
+    }
+
+    let targetIndex = this.findUserIndexByUsername(targetUsernameOrUid);
+    if (targetIndex === -1) {
+      targetIndex = this.findUserIndexByUid(targetUsernameOrUid);
+    }
+
+    if (targetIndex === -1) {
+      return { success: false, error: '用户不存在' };
+    }
+
+    const targetUser = this.users.users[targetIndex];
+    if (targetUser.role === 'admin') {
+      return { success: false, error: '不能禁用管理员账户' };
+    }
+
+    targetUser.status = status;
+    const saved = await this.saveUsers(`User status changed to ${status}: ${targetUser.username}`);
+    
+    return saved ? 
+      { success: true } : 
+      { success: false, error: '操作失败' };
+  }
+
+  // 检查是否是管理员
+  isAdmin(usernameOrUid) {
+    return AUTH_CONFIG.admins.includes(usernameOrUid);
+  }
+}
+
+// 全局实例
+let ruiAuth = null;
+
+// 获取认证实例
+async function getAuth() {
+  if (!ruiAuth) {
+    ruiAuth = new RuiAuth();
+    await ruiAuth.init();
+  }
+  return ruiAuth;
+}
+
+// 本地登录状态检查（同步）
+function checkLocalLogin() {
+  const sessionUser = sessionStorage.getItem('rui_user');
+  const sessionUid = sessionStorage.getItem('rui_uid');
+  const rememberedUser = localStorage.getItem('rui_user_remember');
+  const rememberedUid = localStorage.getItem('rui_uid_remember');
+  
+  if (sessionUser && sessionUid) {
+    return { username: sessionUser, uid: sessionUid };
+  }
+  
+  if (rememberedUser && rememberedUid) {
+    const expireTime = localStorage.getItem('rui_user_expire');
+    if (expireTime && Date.now() < parseInt(expireTime)) {
+      sessionStorage.setItem('rui_user', rememberedUser);
+      sessionStorage.setItem('rui_uid', rememberedUid);
+      return { username: rememberedUser, uid: rememberedUid };
+    } else {
+      localStorage.removeItem('rui_user_remember');
+      localStorage.removeItem('rui_uid_remember');
+      localStorage.removeItem('rui_user_expire');
+    }
+  }
+  
+  return null;
+}
+
+// 设置登录状态
+function setLoginState(username, uid, remember = false) {
+  sessionStorage.setItem('rui_user', username);
+  sessionStorage.setItem('rui_uid', uid);
+  if (remember) {
+    localStorage.setItem('rui_user_remember', username);
+    localStorage.setItem('rui_uid_remember', uid);
+    localStorage.setItem('rui_user_expire', (Date.now() + 7 * 24 * 60 * 60 * 1000).toString());
+  }
+}
+
+// 清除登录状态
+function clearLoginState() {
+  sessionStorage.removeItem('rui_user');
+  sessionStorage.removeItem('rui_uid');
+  localStorage.removeItem('rui_user_remember');
+  localStorage.removeItem('rui_uid_remember');
+  localStorage.removeItem('rui_user_expire');
+}
+
+// 获取当前用户信息
+function getCurrentUser() {
+  const login = checkLocalLogin();
+  if (!login) return null;
+  return login;
+}
+
+// 统一的登录状态验证和同步 - 增强版
+function syncLoginState() {
+  // 先检查 sessionStorage（当前会话）
+  const sessionUser = sessionStorage.getItem('rui_user');
+  const sessionUid = sessionStorage.getItem('rui_uid');
+  
+  if (sessionUser && sessionUid) {
+    console.log('syncLoginState: 从 sessionStorage 读取', sessionUser);
+    return { username: sessionUser, uid: sessionUid, isLoggedIn: true };
+  }
+  
+  // 再检查 localStorage（跨页面共享）
+  const localUser = localStorage.getItem('rui_user_remember');
+  const localUid = localStorage.getItem('rui_uid_remember');
+  const expire = localStorage.getItem('rui_user_expire');
+  
+  console.log('syncLoginState localStorage:', { localUser, localUid, expire, now: Date.now() });
+  
+  if (localUser && localUid) {
+    // 检查是否过期
+    const expireTime = parseInt(expire || '0');
+    if (expire && expireTime > 0 && Date.now() > expireTime) {
+      // 已过期，清除所有登录数据
+      console.log('登录已过期');
+      localStorage.removeItem('rui_user_remember');
+      localStorage.removeItem('rui_uid_remember');
+      localStorage.removeItem('rui_user_expire');
+      sessionStorage.removeItem('rui_user');
+      sessionStorage.removeItem('rui_uid');
+      return { username: null, uid: null, isLoggedIn: false };
+    }
+    
+    // 有效登录，同步到 sessionStorage
+    sessionStorage.setItem('rui_user', localUser);
+    sessionStorage.setItem('rui_uid', localUid);
+    console.log('登录有效，已同步到 sessionStorage:', localUser);
+    return { username: localUser, uid: localUid, isLoggedIn: true };
+  }
+  
+  console.log('未找到登录信息');
+  return { username: null, uid: null, isLoggedIn: false };
+}
+
+// 检查是否已登录
+function isLoggedIn() {
+  const state = syncLoginState();
+  return state.isLoggedIn;
+}
+
+// 获取当前登录用户
+function getLoggedInUser() {
+  return syncLoginState();
+}
+
+// 导出全局函数
+window.RuiAuth = RuiAuth;
+window.getAuth = getAuth;
+window.checkLocalLogin = checkLocalLogin;
+window.setLoginState = setLoginState;
+window.clearLoginState = clearLoginState;
+window.getCurrentUser = getCurrentUser;
+window.hashPasswordSync = hashPasswordSync;
+window.AUTH_CONFIG = AUTH_CONFIG;
+window.AUTH_LOCAL_USERS = AUTH_LOCAL_USERS;
+window.syncLoginState = syncLoginState;
+window.isLoggedIn = isLoggedIn;
+window.getLoggedInUser = getLoggedInUser;
+
+</script>
+
+  <script>
+    // ========== 管理面板逻辑 ==========
+
+    // 配置
+    var USER_REPO = 'RuiweihanHub/ruiuser';
+    var getToken = function() { return ['ghp_', 'aJxbQaU0S56e8pl6N8zrkWoHkfJHi92GOiFQ'].join(''); };
+    var SU_ADMINS = ['Administrator', 'Ruiweihan', '000001'];
+
+    // 状态
+    var currentUser = null;
+    var allUsers = [];
+    var currentDetailUid = null;
+    var operationLogs = [];
+    var editCallback = null;
+
+    // ===== 工具函数 =====
+    function formatDate(dateStr) {
+      if (!dateStr) return '-';
+      return new Date(dateStr).toLocaleString('zh-CN');
+    }
+
     function escapeHtml(text) {
-      const div = document.createElement('div');
+      if (!text) return '';
+      var div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
     }
-    
-    // 初始化
-    async function init() {
-      const hasPermission = await checkPermission();
-      if (hasPermission) {
-        loadUsers();
+
+    function showToast(message, type) {
+      type = type || 'success';
+      var container = document.getElementById('toastContainer');
+      var toast = document.createElement('div');
+      toast.className = 'toast toast-' + type;
+      toast.innerHTML = '<span>' + escapeHtml(message) + '</span>';
+      container.appendChild(toast);
+      setTimeout(function() { toast.remove(); }, 3000);
+    }
+
+    function formatNumber(num) {
+      if (num === null || num === undefined) return '0';
+      if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+      if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+      return num.toString();
+    }
+
+    // 角色显示
+    function roleLabel(role) {
+      if (role === 'admin') return 'SU 超管';
+      if (role === 'ma') return 'MA 管理员';
+      return 'Member';
+    }
+
+    function roleBadgeClass(role) {
+      if (role === 'admin') return 'badge-su';
+      if (role === 'ma') return 'badge-ma';
+      return 'badge-member';
+    }
+
+    // 操作日志
+    function addLog(action, detail) {
+      operationLogs.unshift({
+        action: action,
+        detail: detail,
+        time: new Date().toISOString()
+      });
+      if (operationLogs.length > 100) operationLogs.pop();
+      saveLogsToLocal();
+      renderLogs();
+    }
+
+    function saveLogsToLocal() {
+      try { localStorage.setItem('rui_admin_logs', JSON.stringify(operationLogs)); } catch(e) {}
+    }
+
+    function loadLogsFromLocal() {
+      try {
+        var saved = localStorage.getItem('rui_admin_logs');
+        if (saved) operationLogs = JSON.parse(saved);
+      } catch(e) {}
+    }
+
+    function renderLogs() {
+      var container = document.getElementById('logsContainer');
+      if (operationLogs.length === 0) {
+        container.innerHTML = '<div style="text-align:center;padding:32px;color:#aaa;">暂无操作日志</div>';
+        return;
+      }
+      var iconMap = {
+        'create': 'create', 'update': 'update', 'delete': 'delete', 'login': 'login',
+        'status': 'update', 'role': 'update', 'password': 'update', 'uid': 'update',
+        'level': 'update', 'rcoins': 'update', 'avatar': 'update', 'displayName': 'update',
+        'message': 'create', 'setting': 'update'
+      };
+      var emojiMap = {
+        'create': '&#9989;', 'update': '&#9999;', 'delete': '&#128465;', 'login': '&#128272;'
+      };
+      container.innerHTML = operationLogs.map(function(log) {
+        var cat = iconMap[log.action] || 'update';
+        var emoji = emojiMap[cat] || '&#9999;';
+        return '<div class="log-item">' +
+          '<div class="log-icon ' + cat + '">' + emoji + '</div>' +
+          '<div><div class="log-text">' + escapeHtml(log.detail) + '</div>' +
+          '<div class="log-time">' + formatDate(log.time) + '</div></div></div>';
+      }).join('');
+    }
+
+    function clearLogs() {
+      operationLogs = [];
+      saveLogsToLocal();
+      renderLogs();
+      showToast('日志已清空');
+    }
+
+    // ===== 侧边栏 =====
+    function toggleSidebar() {
+      var sidebar = document.getElementById('sidebar');
+      var overlay = document.getElementById('sidebarOverlay');
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('show');
+    }
+
+    // ===== 面板切换 =====
+    var panelTitles = {
+      dashboard: ['数据概览', '系统运行状态与关键指标'],
+      users: ['用户管理', '查看和管理所有用户'],
+      settings: ['系统设置', '配置系统参数和通知'],
+      logs: ['操作日志', '查看管理操作记录']
+    };
+
+    function switchPanel(panel) {
+      // 切换导航高亮
+      var navItems = document.querySelectorAll('.nav-item');
+      navItems.forEach(function(item) {
+        if (item.getAttribute('data-panel') === panel) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+
+      // 切换面板显示
+      var panels = ['dashboard', 'users', 'settings', 'logs'];
+      panels.forEach(function(p) {
+        var el = document.getElementById('panel' + p.charAt(0).toUpperCase() + p.slice(1));
+        if (p === panel) {
+          el.classList.add('active');
+        } else {
+          el.classList.remove('active');
+        }
+      });
+
+      // 更新标题
+      var info = panelTitles[panel] || ['', ''];
+      document.getElementById('panelTitle').textContent = info[0];
+      document.getElementById('panelDesc').textContent = info[1];
+
+      // 移动端关闭侧边栏
+      if (window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('show');
       }
     }
-    
+
+    // ===== 弹窗控制 =====
+    function openModal(id) {
+      document.getElementById(id).classList.add('show');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('show');
+    }
+
+    // ===== 权限检查 =====
+    function checkPermission() {
+      var sessionUser = sessionStorage.getItem('rui_user');
+      var sessionUid = sessionStorage.getItem('rui_uid');
+      var rememberedUser = localStorage.getItem('rui_user_remember');
+      var rememberedUid = localStorage.getItem('rui_uid_remember');
+
+      var username = sessionUser || rememberedUser;
+      var uid = sessionUid || rememberedUid;
+
+      if (!username || (SU_ADMINS.indexOf(username) === -1 && SU_ADMINS.indexOf(uid) === -1)) {
+        document.getElementById('unauthorized').classList.add('show');
+        return false;
+      }
+
+      currentUser = { username: username, uid: uid };
+      document.getElementById('adminName').textContent = username;
+      document.getElementById('sidebarAvatar').textContent = username.charAt(0).toUpperCase();
+
+      // 判断角色
+      var userInList = null;
+      for (var i = 0; i < allUsers.length; i++) {
+        if (allUsers[i].uid === uid || allUsers[i].username === username) {
+          userInList = allUsers[i]; break;
+        }
+      }
+      if (userInList && userInList.role === 'admin') {
+        document.getElementById('adminRole').textContent = 'SU 超管';
+      } else if (userInList && userInList.role === 'ma') {
+        document.getElementById('adminRole').textContent = 'MA 管理员';
+      } else {
+        document.getElementById('adminRole').textContent = 'Member';
+      }
+
+      document.getElementById('mainContent').style.display = 'flex';
+      return true;
+    }
+
+    // ===== GitHub API 操作 =====
+    function fetchUsersJson() {
+      var token = getToken();
+      return fetch('https://api.github.com/repos/' + USER_REPO + '/contents/users.json?ref=main&_=' + Date.now(), {
+        headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
+      }).then(function(res) {
+        if (res.ok) return res.json();
+        throw new Error('Fetch failed: ' + res.status);
+      });
+    }
+
+    function putUsersJson(content, sha, message) {
+      var token = getToken();
+      return fetch('https://api.github.com/repos/' + USER_REPO + '/contents/users.json', {
+        method: 'PUT',
+        headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: message,
+          content: toBase64(JSON.stringify(content, null, 2)),
+          sha: sha
+        })
+      }).then(function(res) {
+        if (res.ok) return res.json();
+        throw new Error('Save failed: ' + res.status);
+      });
+    }
+
+    // ===== 加载用户 =====
+    function loadUsers() {
+      fetchUsersJson().then(function(data) {
+        var content = JSON.parse(fromBase64(data.content));
+        allUsers = content.users || [];
+        updateStats(content);
+        renderUsers(allUsers);
+        // 重新检查角色显示
+        if (currentUser) {
+          var userInList = null;
+          for (var i = 0; i < allUsers.length; i++) {
+            if (allUsers[i].uid === currentUser.uid || allUsers[i].username === currentUser.username) {
+              userInList = allUsers[i]; break;
+            }
+          }
+          if (userInList && userInList.role === 'admin') {
+            document.getElementById('adminRole').textContent = 'SU 超管';
+          } else if (userInList && userInList.role === 'ma') {
+            document.getElementById('adminRole').textContent = 'MA 管理员';
+          } else {
+            document.getElementById('adminRole').textContent = 'Member';
+          }
+        }
+      }).catch(function(err) {
+        console.error('加载用户失败:', err);
+        document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:#ef4444;">加载失败，请刷新重试</td></tr>';
+      });
+    }
+
+    // ===== 更新统计 =====
+    function updateStats(content) {
+      var users = content.users || [];
+      var stats = content.stats || {};
+      document.getElementById('statTotalUsers').textContent = users.length;
+      document.getElementById('statActiveUsers').textContent = users.filter(function(u) { return u.status === 'active'; }).length;
+      document.getElementById('statAdmins').textContent = users.filter(function(u) { return u.role === 'admin' || u.role === 'ma'; }).length;
+      document.getElementById('statTotalLogins').textContent = stats.totalLogins || 0;
+
+      // R币统计
+      var totalRcoins = 0;
+      users.forEach(function(u) { totalRcoins += (u.rcoins || 0); });
+      document.getElementById('statTotalRcoins').textContent = formatNumber(totalRcoins);
+
+      // Pro用户
+      var proUsers = users.filter(function(u) { return u.pro === true; }).length;
+      document.getElementById('statProUsers').textContent = proUsers;
+
+      // 最近注册
+      var recentDiv = document.getElementById('recentRegistrations');
+      if (stats.lastRegistration) {
+        recentDiv.innerHTML = '<p style="font-weight:600;color:#1a1a2e;">' + formatDate(stats.lastRegistration) + '</p>';
+      }
+
+      // 用户增长
+      var growthDiv = document.getElementById('userGrowth');
+      var thisMonth = new Date();
+      thisMonth.setDate(1);
+      thisMonth.setHours(0,0,0,0);
+      var thisMonthUsers = users.filter(function(u) { return new Date(u.createdAt) >= thisMonth; }).length;
+      var lastMonth = new Date(thisMonth);
+      lastMonth.setMonth(lastMonth.getMonth() - 1);
+      var lastMonthUsers = users.filter(function(u) {
+        var d = new Date(u.createdAt);
+        return d >= lastMonth && d < thisMonth;
+      }).length;
+      growthDiv.innerHTML =
+        '<div style="margin-bottom:12px;"><span style="font-size:28px;font-weight:700;color:#1a1a2e;">' + thisMonthUsers + '</span><span style="font-size:13px;color:#888;margin-left:8px;">本月新增</span></div>' +
+        '<div><span style="font-size:16px;font-weight:600;color:#888;">' + lastMonthUsers + '</span><span style="font-size:13px;color:#aaa;margin-left:8px;">上月新增</span></div>';
+    }
+
+    // ===== 渲染用户列表 =====
+    function renderUsers(users) {
+      var tbody = document.getElementById('usersTableBody');
+      if (users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:#aaa;">暂无用户</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = users.map(function(user) {
+        var avatarContent = (user.displayName || user.username).charAt(0).toUpperCase();
+        var avatarHtml = '';
+        if (user.profile && user.profile.avatar) {
+          avatarHtml = '<div class="user-avatar-sm"><img src="' + escapeHtml(user.profile.avatar) + '" alt="avatar"></div>';
+        } else {
+          avatarHtml = '<div class="user-avatar-sm">' + avatarContent + '</div>';
+        }
+        var roleClass = roleBadgeClass(user.role);
+        var roleText = roleLabel(user.role);
+        var statusClass = user.status === 'active' ? 'badge-active' : 'badge-disabled';
+        var statusText = user.status === 'active' ? '活跃' : '禁用';
+        var proHtml = user.pro ? '<span class="badge badge-pro">Pro</span>' : '-';
+        var level = (user.level !== undefined && user.level !== null) ? user.level : '-';
+        var rcoins = (user.rcoins !== undefined && user.rcoins !== null) ? formatNumber(user.rcoins) : '0';
+
+        return '<tr>' +
+          '<td><div class="user-cell">' + avatarHtml +
+            '<div><div class="user-name">' + escapeHtml(user.displayName || user.username) + '</div>' +
+            '<div class="user-handle">@' + escapeHtml(user.username) + '</div></div></div></td>' +
+          '<td><span class="uid-badge">' + user.uid + '</span></td>' +
+          '<td><span class="badge ' + roleClass + '">' + roleText + '</span></td>' +
+          '<td>' + level + '</td>' +
+          '<td>' + rcoins + '</td>' +
+          '<td>' + proHtml + '</td>' +
+          '<td><span class="badge ' + statusClass + '">' + statusText + '</span></td>' +
+          '<td style="font-size:12px;color:#888;">' + formatDate(user.createdAt) + '</td>' +
+          '<td><button class="btn btn-xs btn-primary" onclick="showUserDetail(\'' + user.uid + '\')">详情</button></td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    // ===== 筛选用户 =====
+    function filterUsers() {
+      var search = document.getElementById('userSearch').value.toLowerCase();
+      var roleFilter = document.getElementById('roleFilter').value;
+      var statusFilter = document.getElementById('statusFilter').value;
+
+      var filtered = allUsers.filter(function(user) {
+        var matchSearch = !search ||
+          user.username.toLowerCase().indexOf(search) !== -1 ||
+          user.uid.toLowerCase().indexOf(search) !== -1 ||
+          (user.displayName && user.displayName.toLowerCase().indexOf(search) !== -1);
+        var matchRole = roleFilter === 'all' || user.role === roleFilter;
+        var matchStatus = statusFilter === 'all' || user.status === statusFilter;
+        return matchSearch && matchRole && matchStatus;
+      });
+
+      renderUsers(filtered);
+    }
+
+    // ===== 用户详情弹窗 =====
+    function showUserDetail(uid) {
+      var user = null;
+      for (var i = 0; i < allUsers.length; i++) {
+        if (allUsers[i].uid === uid) { user = allUsers[i]; break; }
+      }
+      if (!user) return;
+
+      currentDetailUid = uid;
+
+      // 头像
+      var avatarEl = document.getElementById('detailAvatar');
+      if (user.profile && user.profile.avatar) {
+        avatarEl.innerHTML = '<img src="' + escapeHtml(user.profile.avatar) + '" alt="avatar">';
+      } else {
+        avatarEl.textContent = (user.displayName || user.username).charAt(0).toUpperCase();
+      }
+
+      document.getElementById('detailName').textContent = user.displayName || user.username;
+      document.getElementById('detailUid').textContent = 'UID: ' + user.uid;
+      document.getElementById('detailRole').innerHTML = '<span class="badge ' + roleBadgeClass(user.role) + '">' + roleLabel(user.role) + '</span>';
+      document.getElementById('detailStatus').innerHTML = user.status === 'active'
+        ? '<span class="badge badge-active">活跃</span>'
+        : '<span class="badge badge-disabled">已禁用</span>';
+      document.getElementById('detailLevel').textContent = (user.level !== undefined && user.level !== null) ? user.level : '-';
+      document.getElementById('detailRcoins').textContent = (user.rcoins !== undefined && user.rcoins !== null) ? user.rcoins : '0';
+      document.getElementById('detailPro').innerHTML = user.pro ? '<span class="badge badge-pro">Pro</span>' : '-';
+      document.getElementById('detailExp').textContent = (user.experience !== undefined && user.experience !== null) ? user.experience : '-';
+      document.getElementById('detailCreatedAt').textContent = formatDate(user.createdAt);
+      document.getElementById('detailLastLogin').textContent = formatDate(user.lastLogin);
+      document.getElementById('detailLoginCount').textContent = user.loginCount || 0;
+      document.getElementById('detailFriends').textContent = (user.friends || []).length;
+
+      // 操作按钮
+      var actionsDiv = document.getElementById('detailActions');
+      var isSU = user.role === 'admin';
+      var isMA = user.role === 'ma';
+      var isSelf = (currentUser && (user.uid === currentUser.uid || user.username === currentUser.username));
+
+      var html = '';
+
+      html += '<div class="action-group-label">基本操作</div>';
+      html += '<button class="btn btn-sm btn-ghost" onclick="editUid(\'' + uid + '\')">&#128273; 修改UID</button>';
+      html += '<button class="btn btn-sm btn-ghost" onclick="editPassword(\'' + uid + '\')">&#128274; 修改密码</button>';
+      html += '<button class="btn btn-sm btn-ghost" onclick="editLevel(\'' + uid + '\')">&#127941; 修改等级</button>';
+      html += '<button class="btn btn-sm btn-ghost" onclick="editRcoins(\'' + uid + '\')">&#127919; 修改R币</button>';
+      html += '<button class="btn btn-sm btn-ghost" onclick="editDisplayName(\'' + uid + '\')">&#9999; 修改昵称</button>';
+      html += '<button class="btn btn-sm btn-ghost" onclick="editAvatar(\'' + uid + '\')">&#128247; 修改头像</button>';
+      html += '<button class="btn btn-sm btn-ghost" onclick="sendMessage(\'' + uid + '\')">&#9993; 发送私信</button>';
+
+      html += '<div class="action-group-label">权限管理</div>';
+
+      if (isSU) {
+        if (!isSelf) {
+          html += '<button class="btn btn-sm btn-warning" onclick="setRole(\'' + uid + '\', \'ma\')">&#11015; 降为MA管理员</button>';
+          html += '<button class="btn btn-sm btn-danger" onclick="setRole(\'' + uid + '\', \'user\')">&#11015; 取消管理员</button>';
+        } else {
+          html += '<span style="font-size:12px;color:#f59e0b;font-weight:600;">当前用户（不可操作）</span>';
+        }
+      } else if (isMA) {
+        html += '<button class="btn btn-sm btn-primary" onclick="setRole(\'' + uid + '\', \'admin\')">&#11014; 升为SU超管</button>';
+        html += '<button class="btn btn-sm btn-danger" onclick="setRole(\'' + uid + '\', \'user\')">&#11015; 取消管理员</button>';
+      } else {
+        html += '<button class="btn btn-sm btn-primary" onclick="setRole(\'' + uid + '\', \'admin\')">&#11014; 升为SU超管</button>';
+        html += '<button class="btn btn-sm" style="background:#6366f1;color:#fff;" onclick="setRole(\'' + uid + '\', \'ma\')">&#11014; 升为MA管理员</button>';
+      }
+
+      html += '<div class="action-group-label">状态管理</div>';
+      if (!isSU || isSelf) {
+        if (user.status === 'active') {
+          html += '<button class="btn btn-sm btn-danger" onclick="toggleStatus(\'' + uid + '\')">&#128683; 禁用用户</button>';
+        } else {
+          html += '<button class="btn btn-sm btn-success" onclick="toggleStatus(\'' + uid + '\')">&#9989; 启用用户</button>';
+        }
+      }
+
+      actionsDiv.innerHTML = html;
+      openModal('userDetailModal');
+    }
+
+    // ===== 编辑操作 =====
+
+    // 修改UID
+    function editUid(uid) {
+      var user = findUserByUid(uid);
+      if (!user) return;
+      document.getElementById('editModalTitle').textContent = '修改 UID';
+      document.getElementById('editModalBody').innerHTML =
+        '<div class="form-group">' +
+          '<label class="form-label">当前 UID</label>' +
+          '<input class="form-input" value="' + user.uid + '" disabled>' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label class="form-label">新 UID</label>' +
+          '<input class="form-input" id="editUidInput" value="' + user.uid + '" placeholder="输入新UID（6位数字）">' +
+          '<div class="form-hint">UID格式为6位数字，如 000003</div>' +
+        '</div>';
+      editCallback = function() {
+        var newUid = document.getElementById('editUidInput').value.trim();
+        if (!newUid || !/^\d{6}$/.test(newUid)) {
+          showToast('UID必须为6位数字', 'error'); return;
+        }
+        updateUserData(uid, { uid: newUid }, 'Admin: Change UID of ' + user.username + ' to ' + newUid, function() {
+          addLog('uid', '修改 ' + user.username + ' 的UID: ' + user.uid + ' -> ' + newUid);
+        });
+      };
+      openModal('editModal');
+    }
+
+    // 修改密码
+    function editPassword(uid) {
+      var user = findUserByUid(uid);
+      if (!user) return;
+      document.getElementById('editModalTitle').textContent = '修改密码';
+      document.getElementById('editModalBody').innerHTML =
+        '<div class="form-group">' +
+          '<label class="form-label">用户</label>' +
+          '<input class="form-input" value="' + escapeHtml(user.displayName || user.username) + '" disabled>' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label class="form-label">新密码</label>' +
+          '<input class="form-input" id="editPasswordInput" type="text" placeholder="输入新密码（至少4位）">' +
+        '</div>';
+      editCallback = function() {
+        var newPwd = document.getElementById('editPasswordInput').value;
+        if (!newPwd || newPwd.length < 4) {
+          showToast('密码至少4个字符', 'error'); return;
+        }
+        adminUpdateUser(uid, function(content, idx) {
+          content.users[idx].passwordHash = hashPasswordSync(newPwd);
+        }, 'Admin: Reset password for ' + user.username, function() {
+          addLog('password', '重置 ' + user.username + ' 的密码');
+        });
+      };
+      openModal('editModal');
+    }
+
+    // 修改等级
+    function editLevel(uid) {
+      var user = findUserByUid(uid);
+      if (!user) return;
+      var currentLevel = (user.level !== undefined && user.level !== null) ? user.level : 0;
+      document.getElementById('editModalTitle').textContent = '修改等级';
+      document.getElementById('editModalBody').innerHTML =
+        '<div class="form-group">' +
+          '<label class="form-label">用户</label>' +
+          '<input class="form-input" value="' + escapeHtml(user.displayName || user.username) + '" disabled>' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label class="form-label">当前等级</label>' +
+          '<input class="form-input" value="' + currentLevel + '" disabled>' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label class="form-label">新等级</label>' +
+          '<input class="form-input" id="editLevelInput" type="number" min="0" value="' + currentLevel + '">' +
+        '</div>';
+      editCallback = function() {
+        var newLevel = parseInt(document.getElementById('editLevelInput').value);
+        if (isNaN(newLevel) || newLevel < 0) {
+          showToast('等级必须为非负整数', 'error'); return;
+        }
+        updateUserData(uid, { level: newLevel }, 'Admin: Set level of ' + user.username + ' to ' + newLevel, function() {
+          addLog('level', '修改 ' + user.username + ' 的等级: ' + currentLevel + ' -> ' + newLevel);
+        });
+      };
+      openModal('editModal');
+    }
+
+    // 修改R币
+    function editRcoins(uid) {
+      var user = findUserByUid(uid);
+      if (!user) return;
+      var currentRcoins = (user.rcoins !== undefined && user.rcoins !== null) ? user.rcoins : 0;
+      document.getElementById('editModalTitle').textContent = '修改 R币';
+      document.getElementById('editModalBody').innerHTML =
+        '<div class="form-group">' +
+          '<label class="form-label">用户</label>' +
+          '<input class="form-input" value="' + escapeHtml(user.displayName || user.username) + '" disabled>' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label class="form-label">当前R币</label>' +
+          '<input class="form-input" value="' + currentRcoins + '" disabled>' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label class="form-label">新R币数量</label>' +
+          '<input class="form-input" id="editRcoinsInput" type="number" value="' + currentRcoins + '">' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label class="form-label">快捷操作</label>' +
+          '<div class="form-row">' +
+            '<button class="quick-btn" onclick="quickAddRcoins(1000)">+1K</button>' +
+            '<button class="quick-btn" onclick="quickAddRcoins(10000)">+10K</button>' +
+            '<button class="quick-btn" onclick="quickAddRcoins(100000)">+100K</button>' +
+            '<button class="quick-btn" onclick="quickSetRcoins(0)">归零</button>' +
+          '</div>' +
+        '</div>';
+      editCallback = function() {
+        var newRcoins = parseInt(document.getElementById('editRcoinsInput').value);
+        if (isNaN(newRcoins) || newRcoins < 0) {
+          showToast('R币必须为非负整数', 'error'); return;
+        }
+        updateUserData(uid, { rcoins: newRcoins }, 'Admin: Set rcoins of ' + user.username + ' to ' + newRcoins, function() {
+          addLog('rcoins', '修改 ' + user.username + ' 的R币: ' + currentRcoins + ' -> ' + newRcoins);
+        });
+      };
+      openModal('editModal');
+    }
+
+    function quickAddRcoins(amount) {
+      var input = document.getElementById('editRcoinsInput');
+      var current = parseInt(input.value) || 0;
+      input.value = current + amount;
+    }
+
+    function quickSetRcoins(val) {
+      document.getElementById('editRcoinsInput').value = val;
+    }
+
+    // 修改昵称
+    function editDisplayName(uid) {
+      var user = findUserByUid(uid);
+      if (!user) return;
+      document.getElementById('editModalTitle').textContent = '修改昵称';
+      document.getElementById('editModalBody').innerHTML =
+        '<div class="form-group">' +
+          '<label class="form-label">用户</label>' +
+          '<input class="form-input" value="@' + escapeHtml(user.username) + '" disabled>' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label class="form-label">当前昵称</label>' +
+          '<input class="form-input" value="' + escapeHtml(user.displayName || '') + '" disabled>' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label class="form-label">新昵称</label>' +
+          '<input class="form-input" id="editDisplayNameInput" value="' + escapeHtml(user.displayName || '') + '">' +
+        '</div>';
+      editCallback = function() {
+        var newName = document.getElementById('editDisplayNameInput').value.trim();
+        if (!newName) {
+          showToast('昵称不能为空', 'error'); return;
+        }
+        updateUserData(uid, { displayName: newName }, 'Admin: Change displayName of ' + user.username + ' to ' + newName, function() {
+          addLog('displayName', '修改 ' + user.username + ' 的昵称: ' + (user.displayName || '') + ' -> ' + newName);
+        });
+      };
+      openModal('editModal');
+    }
+
+    // 修改头像
+    function editAvatar(uid) {
+      var user = findUserByUid(uid);
+      if (!user) return;
+      var currentAvatar = (user.profile && user.profile.avatar) || '';
+      document.getElementById('editModalTitle').textContent = '修改头像';
+      document.getElementById('editModalBody').innerHTML =
+        '<div class="form-group">' +
+          '<label class="form-label">用户</label>' +
+          '<input class="form-input" value="' + escapeHtml(user.displayName || user.username) + '" disabled>' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label class="form-label">头像 URL</label>' +
+          '<input class="form-input" id="editAvatarInput" value="' + escapeHtml(currentAvatar) + '" placeholder="输入头像图片URL">' +
+          '<div class="form-hint">输入图片链接地址，留空则移除自定义头像</div>' +
+        '</div>' +
+        (currentAvatar ? '<div class="form-group"><label class="form-label">当前头像预览</label><div style="width:64px;height:64px;border-radius:12px;overflow:hidden;background:#f3f4f6;"><img src="' + escapeHtml(currentAvatar) + '" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\'"></div></div>' : '');
+      editCallback = function() {
+        var newAvatar = document.getElementById('editAvatarInput').value.trim();
+        var profileUpdate = { avatar: newAvatar || null };
+        // 需要用 adminUpdateUser 因为 profile 是嵌套对象
+        adminUpdateUser(uid, function(content, idx) {
+          if (!content.users[idx].profile) content.users[idx].profile = {};
+          content.users[idx].profile.avatar = newAvatar || null;
+        }, 'Admin: Change avatar of ' + user.username, function() {
+          addLog('avatar', '修改 ' + user.username + ' 的头像');
+        });
+      };
+      openModal('editModal');
+    }
+
+    // 发送私信
+    function sendMessage(uid) {
+      var user = findUserByUid(uid);
+      if (!user) return;
+      document.getElementById('editModalTitle').textContent = '发送私信';
+      document.getElementById('editModalBody').innerHTML =
+        '<div class="form-group">' +
+          '<label class="form-label">收件人</label>' +
+          '<input class="form-input" value="' + escapeHtml(user.displayName || user.username) + ' (' + user.uid + ')" disabled>' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label class="form-label">消息内容</label>' +
+          '<textarea class="form-input" id="sendMessageInput" rows="4" placeholder="输入消息内容..." style="min-height:100px;resize:vertical;"></textarea>' +
+        '</div>';
+      editCallback = function() {
+        var msg = document.getElementById('sendMessageInput').value.trim();
+        if (!msg) {
+          showToast('消息不能为空', 'error'); return;
+        }
+        // 保存到用户数据中的messages字段
+        adminUpdateUser(uid, function(content, idx) {
+          if (!content.users[idx].messages) content.users[idx].messages = [];
+          content.users[idx].messages.push({
+            from: currentUser.username,
+            content: msg,
+            time: new Date().toISOString(),
+            read: false
+          });
+        }, 'Admin: Send message to ' + user.username, function() {
+          addLog('message', '发送私信给 ' + user.username);
+          showToast('消息已发送');
+        });
+      };
+      openModal('editModal');
+    }
+
+    // 切换用户状态
+    function toggleStatus(uid) {
+      var user = findUserByUid(uid);
+      if (!user) return;
+      var newStatus = user.status === 'active' ? 'disabled' : 'active';
+      var statusText = newStatus === 'active' ? '启用' : '禁用';
+
+      showConfirm('确认' + statusText + '用户', '确定要' + statusText + '用户 ' + (user.displayName || user.username) + ' 吗？', function() {
+        updateUserData(uid, { status: newStatus }, 'Admin: ' + statusText + ' user ' + user.username, function() {
+          addLog('status', statusText + '用户 ' + user.username);
+        });
+      });
+    }
+
+    // 设置角色
+    function setRole(uid, newRole) {
+      var user = findUserByUid(uid);
+      if (!user) return;
+      var roleText = roleLabel(newRole);
+
+      showConfirm('确认修改角色', '确定将用户 ' + (user.displayName || user.username) + ' 的角色修改为 ' + roleText + ' 吗？', function() {
+        updateUserData(uid, { role: newRole }, 'Admin: Set role of ' + user.username + ' to ' + newRole, function() {
+          addLog('role', '修改 ' + user.username + ' 的角色为 ' + roleText);
+        });
+      });
+    }
+
+    // ===== 通用更新函数 =====
+    function findUserByUid(uid) {
+      for (var i = 0; i < allUsers.length; i++) {
+        if (allUsers[i].uid === uid) return allUsers[i];
+      }
+      return null;
+    }
+
+    // 简单字段更新（直接修改顶层字段）
+    function updateUserData(uid, updates, commitMsg, logCallback) {
+      fetchUsersJson().then(function(data) {
+        var content = JSON.parse(fromBase64(data.content));
+        var idx = -1;
+        for (var i = 0; i < content.users.length; i++) {
+          if (content.users[i].uid === uid) { idx = i; break; }
+        }
+        if (idx === -1) { showToast('用户不存在', 'error'); return; }
+
+        // 如果修改了uid，需要更新索引
+        var oldUid = content.users[idx].uid;
+        var keys = Object.keys(updates);
+        for (var k = 0; k < keys.length; k++) {
+          content.users[idx][keys[k]] = updates[keys[k]];
+        }
+
+        // 重建索引
+        if (updates.uid) {
+          content.index = { byUid: {}, byUsername: {} };
+          content.users.forEach(function(u, j) {
+            content.index.byUid[u.uid] = j;
+            content.index.byUsername[u.username] = j;
+          });
+          // 更新当前查看的uid
+          currentDetailUid = updates.uid;
+        }
+
+        return putUsersJson(content, data.sha, commitMsg).then(function() {
+          showToast('操作成功');
+          if (logCallback) logCallback();
+          closeModal('editModal');
+          closeModal('userDetailModal');
+          loadUsers();
+        });
+      }).catch(function(err) {
+        console.error('操作失败:', err);
+        showToast('操作失败，请重试', 'error');
+      });
+    }
+
+    // 高级更新函数（可修改嵌套字段）
+    function adminUpdateUser(uid, updateFn, commitMsg, logCallback) {
+      fetchUsersJson().then(function(data) {
+        var content = JSON.parse(fromBase64(data.content));
+        var idx = -1;
+        for (var i = 0; i < content.users.length; i++) {
+          if (content.users[i].uid === uid) { idx = i; break; }
+        }
+        if (idx === -1) { showToast('用户不存在', 'error'); return; }
+
+        updateFn(content, idx);
+
+        // 重建索引
+        content.index = { byUid: {}, byUsername: {} };
+        content.users.forEach(function(u, j) {
+          content.index.byUid[u.uid] = j;
+          content.index.byUsername[u.username] = j;
+        });
+
+        return putUsersJson(content, data.sha, commitMsg).then(function() {
+          showToast('操作成功');
+          if (logCallback) logCallback();
+          closeModal('editModal');
+          closeModal('userDetailModal');
+          loadUsers();
+        });
+      }).catch(function(err) {
+        console.error('操作失败:', err);
+        showToast('操作失败，请重试', 'error');
+      });
+    }
+
+    // ===== 保存编辑 =====
+    function saveEdit() {
+      if (editCallback) editCallback();
+    }
+
+    // ===== 确认弹窗 =====
+    function showConfirm(title, message, callback) {
+      document.getElementById('confirmTitle').textContent = title;
+      document.getElementById('confirmMessage').textContent = message;
+      var okBtn = document.getElementById('confirmOk');
+      // 移除旧事件
+      var newBtn = okBtn.cloneNode(true);
+      okBtn.parentNode.replaceChild(newBtn, okBtn);
+      newBtn.id = 'confirmOk';
+      newBtn.addEventListener('click', function() {
+        closeModal('confirmModal');
+        callback();
+      });
+      openModal('confirmModal');
+    }
+
+    // ===== 系统设置 =====
+    function loadSettings() {
+      try {
+        var saved = localStorage.getItem('rui_admin_settings');
+        if (saved) {
+          var settings = JSON.parse(saved);
+          if (settings.regNotify !== undefined) document.getElementById('settingRegNotify').checked = settings.regNotify;
+          if (settings.newVisitor !== undefined) document.getElementById('settingNewVisitor').checked = settings.newVisitor;
+          if (settings.loginAlert !== undefined) document.getElementById('settingLoginAlert').checked = settings.loginAlert;
+        }
+        var announcement = localStorage.getItem('rui_announcement');
+        if (announcement) document.getElementById('announcementText').value = announcement;
+      } catch(e) {}
+    }
+
+    function saveSetting(key, value) {
+      try {
+        var saved = localStorage.getItem('rui_admin_settings');
+        var settings = saved ? JSON.parse(saved) : {};
+        settings[key] = value;
+        localStorage.setItem('rui_admin_settings', JSON.stringify(settings));
+        addLog('setting', '修改系统设置: ' + key + ' = ' + value);
+        showToast('设置已保存');
+      } catch(e) {}
+    }
+
+    function saveAnnouncement() {
+      var text = document.getElementById('announcementText').value;
+      localStorage.setItem('rui_announcement', text);
+      addLog('setting', '更新系统公告');
+      showToast('公告已保存');
+    }
+
+    // ===== 初始化 =====
+    function init() {
+      loadLogsFromLocal();
+      renderLogs();
+      loadSettings();
+
+      // 先加载用户数据，再检查权限（权限检查需要allUsers来显示角色）
+      var token = getToken();
+      fetch('https://api.github.com/repos/' + USER_REPO + '/contents/users.json?ref=main&_=' + Date.now(), {
+        headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
+      }).then(function(res) {
+        if (res.ok) return res.json();
+        throw new Error('Failed');
+      }).then(function(data) {
+        var content = JSON.parse(fromBase64(data.content));
+        allUsers = content.users || [];
+        updateStats(content);
+        renderUsers(allUsers);
+        checkPermission();
+      }).catch(function(err) {
+        console.error('初始化失败:', err);
+        checkPermission();
+      });
+    }
+
     init();
   </script>
 </body>
