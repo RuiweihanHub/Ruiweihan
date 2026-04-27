@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>管理员面板 - Rui Hub</title>
@@ -12,78 +15,81 @@
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-    /* Toggle switch */
     .toggle-switch { position: relative; width: 44px; height: 24px; cursor: pointer; display: inline-block; }
     .toggle-switch input { display: none; }
-    .toggle-slider {
-      position: absolute; inset: 0; background: #d1d5db; border-radius: 24px; transition: 0.2s;
-    }
-    .toggle-slider::before {
-      content: ''; position: absolute; width: 18px; height: 18px; background: #fff;
-      border-radius: 50%; top: 3px; left: 3px; transition: 0.2s;
-    }
+    .toggle-slider { position: absolute; inset: 0; background: #d1d5db; border-radius: 24px; transition: 0.2s; }
+    .toggle-slider::before { content: ''; position: absolute; width: 18px; height: 18px; background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: 0.2s; }
     .toggle-switch input:checked + .toggle-slider { background: #7c3aed; }
     .toggle-switch input:checked + .toggle-slider::before { left: 23px; }
 
-    /* Inline edit field */
     .detail-field.editing .detail-field-value { display: none; }
     .detail-field.editing .detail-field-edit { display: block; }
     .detail-field.editing .detail-field-actions { display: flex; }
     .detail-field-edit { display: none; }
     .detail-field-actions { display: none; }
 
-    /* Avatar hover overlay */
     .avatar-edit-overlay { display: none; }
     .avatar-wrap:hover .avatar-edit-overlay { display: flex; }
 
-    /* Animations */
     @keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
     .toast-anim { animation: toastIn 0.3s ease-out; }
-
     @keyframes modalIn { from { opacity: 0; transform: translateY(20px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
     .modal-anim { animation: modalIn 0.25s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .fade-in { animation: fadeIn 0.3s ease-out; }
 
-    /* Sidebar responsive */
     @media (max-width: 768px) {
       .sidebar { transform: translateX(-100%); }
       .sidebar.open { transform: translateX(0); }
     }
+
+    .sortable-ghost { opacity: 0.4; }
+    .drag-handle { cursor: grab; }
+    .drag-handle:active { cursor: grabbing; }
   </style>
 </head>
-<body class="min-h-screen bg-gray-50 text-gray-900">
+<body class="min-h-screen bg-white text-gray-900">
 
-  <!-- Unauthorized overlay -->
+  <!-- ==================== Unauthorized Overlay ==================== -->
   <div id="unauthorized" class="hidden fixed inset-0 z-[100] bg-white flex items-center justify-center">
     <div class="text-center p-8">
       <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center text-4xl mx-auto mb-4">&#128683;</div>
       <h2 class="text-2xl font-bold text-gray-900">访问受限</h2>
       <p class="text-gray-500 mt-2">您没有权限访问此页面</p>
-      <a href="index.html" class="inline-block mt-6 px-6 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors">返回首页</a>
+      <a href="/ruiweihan/index.html" class="inline-block mt-6 px-6 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors">返回首页</a>
+    </div>
+  </div>
+
+  <!-- Loading overlay -->
+  <div id="loadingOverlay" class="fixed inset-0 z-[99] bg-white flex items-center justify-center">
+    <div class="text-center">
+      <div class="w-10 h-10 border-2 border-gray-200 border-t-violet-600 rounded-full animate-spin mx-auto mb-4"></div>
+      <p class="text-sm text-gray-500">正在验证权限...</p>
     </div>
   </div>
 
   <!-- Mobile sidebar overlay -->
   <div id="sidebarOverlay" class="hidden fixed inset-0 bg-black/40 z-30" onclick="toggleSidebar()"></div>
 
-  <!-- Main layout -->
+  <!-- ==================== Main Layout ==================== -->
   <div id="mainContent" class="hidden min-h-screen flex flex-col">
 
-    <!-- Top navigation bar (matching homepage) -->
+    <!-- Top navigation bar -->
     <nav class="w-full px-6 py-4 bg-white border-b border-gray-100 sticky top-0 z-20">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-8">
           <button class="md:hidden p-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors" onclick="toggleSidebar()">
             <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
           </button>
-          <a href="index.html" class="text-xl font-semibold text-gray-900 hover:text-violet-600 transition-colors">Rui</a>
+          <a href="/ruiweihan/index.html" class="text-xl font-semibold text-gray-900 hover:text-violet-600 transition-colors">Rui</a>
           <div class="hidden md:flex items-center gap-6 text-sm">
-            <a href="index.html" class="text-gray-500 hover:text-gray-900 transition-colors">首页</a>
-            <a href="chat.html" class="text-gray-500 hover:text-gray-900 transition-colors">聊天</a>
-            <a href="ruiflow.html" class="text-gray-500 hover:text-gray-900 transition-colors">论坛</a>
+            <a href="/ruiweihan/index.html" class="text-gray-500 hover:text-gray-900 transition-colors">首页</a>
+            <a href="/ruiweihan/chat.html" class="text-gray-500 hover:text-gray-900 transition-colors">聊天</a>
+            <a href="/ruiweihan/ruiflow.html" class="text-gray-500 hover:text-gray-900 transition-colors">论坛</a>
           </div>
         </div>
         <div class="flex items-center gap-3">
-          <button onclick="loadUsers()" class="px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors">&#8635; 刷新</button>
+          <button onclick="refreshData()" class="px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors">&#8635; 刷新</button>
           <div class="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg">
             <div id="navAvatar" class="w-6 h-6 rounded-md overflow-hidden flex-shrink-0 bg-gray-200"></div>
             <span id="navAdminName" class="text-sm text-gray-700 font-medium">管理员</span>
@@ -95,19 +101,23 @@
     <!-- Body: sidebar + content -->
     <div class="flex flex-1">
 
-      <!-- Left sidebar (light) -->
+      <!-- ==================== Left Sidebar ==================== -->
       <aside id="sidebar" class="sidebar fixed md:sticky top-0 md:top-auto left-0 z-40 md:z-0 w-60 h-screen bg-white border-r border-gray-100 flex flex-col transition-transform duration-300 md:transform-none">
         <div class="p-5 border-b border-gray-100">
           <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider">管理面板</h2>
         </div>
-        <nav class="flex-1 p-3 space-y-1">
-          <button class="nav-item w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors text-gray-500 hover:bg-gray-50 hover:text-gray-900" data-panel="dashboard" onclick="switchPanel('dashboard')">
+        <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
+          <button class="nav-item w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors text-violet-600 bg-violet-50" data-panel="dashboard" onclick="switchPanel('dashboard')">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
             数据概览
           </button>
           <button class="nav-item w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors text-gray-500 hover:bg-gray-50 hover:text-gray-900" data-panel="users" onclick="switchPanel('users')">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
             用户管理
+          </button>
+          <button class="nav-item w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors text-gray-500 hover:bg-gray-50 hover:text-gray-900" data-panel="website" onclick="switchPanel('website')">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+            网站管理
           </button>
           <button class="nav-item w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors text-gray-500 hover:bg-gray-50 hover:text-gray-900" data-panel="settings" onclick="switchPanel('settings')">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -117,18 +127,21 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
             操作日志
           </button>
+          <button class="nav-item w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors text-gray-500 hover:bg-gray-50 hover:text-gray-900" data-panel="messages" onclick="switchPanel('messages')">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            私信管理
+          </button>
         </nav>
         <div class="p-4 border-t border-gray-100">
-          <a href="index.html" class="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors">
+          <a href="/ruiweihan/index.html" class="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             返回首页
           </a>
         </div>
       </aside>
 
-      <!-- Main content area -->
-      <main class="flex-1 min-w-0">
-        <!-- Panel header -->
+      <!-- ==================== Main Content Area ==================== -->
+      <main class="flex-1 min-w-0 bg-gray-50">
         <div class="px-6 md:px-8 pt-6 pb-2">
           <h1 id="panelTitle" class="text-xl font-bold text-gray-900">数据概览</h1>
           <p id="panelDesc" class="text-sm text-gray-500 mt-1">系统运行状态与关键指标</p>
@@ -137,48 +150,45 @@
         <div class="px-6 md:px-8 pb-8">
 
           <!-- ===== Dashboard Panel ===== -->
-          <div id="panelDashboard" class="panel">
-            <!-- Stats grid -->
+          <div id="panelDashboard" class="panel fade-in">
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
               <div class="bg-white border border-gray-100 rounded-xl p-5 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center text-lg flex-shrink-0">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197"/></svg>
+                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center flex-shrink-0">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                 </div>
                 <div><div class="text-xs text-gray-500">总用户数</div><div class="text-xl font-bold text-gray-900" id="statTotalUsers">-</div></div>
               </div>
               <div class="bg-white border border-gray-100 rounded-xl p-5 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-green-50 text-green-500 flex items-center justify-center text-lg flex-shrink-0">
+                <div class="w-10 h-10 rounded-lg bg-green-50 text-green-500 flex items-center justify-center flex-shrink-0">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
                 <div><div class="text-xs text-gray-500">活跃用户</div><div class="text-xl font-bold text-gray-900" id="statActiveUsers">-</div></div>
               </div>
               <div class="bg-white border border-gray-100 rounded-xl p-5 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-violet-50 text-violet-500 flex items-center justify-center text-lg flex-shrink-0">
+                <div class="w-10 h-10 rounded-lg bg-violet-50 text-violet-500 flex items-center justify-center flex-shrink-0">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                 </div>
                 <div><div class="text-xs text-gray-500">管理员</div><div class="text-xl font-bold text-gray-900" id="statAdmins">-</div></div>
               </div>
               <div class="bg-white border border-gray-100 rounded-xl p-5 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center text-lg flex-shrink-0">
+                <div class="w-10 h-10 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center flex-shrink-0">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                 </div>
                 <div><div class="text-xs text-gray-500">总登录次数</div><div class="text-xl font-bold text-gray-900" id="statTotalLogins">-</div></div>
               </div>
               <div class="bg-white border border-gray-100 rounded-xl p-5 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center text-lg flex-shrink-0">
+                <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center flex-shrink-0">
                   <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.736 6.979C9.208 6.193 9.696 6 10 6c.304 0 .792.193 1.264.979a1 1 0 001.715-1.029C12.279 4.784 11.232 4 10 4s-2.279.784-2.979 1.95c-.285.475-.507 1-.67 1.55H6a1 1 0 000 2h.013a9.358 9.358 0 000 1H6a1 1 0 100 2h.351c.163.55.385 1.075.67 1.55C7.721 15.216 8.768 16 10 16s2.279-.784 2.979-1.95a1 1 0 10-1.715-1.029C10.792 13.807 10.304 14 10 14c-.304 0-.792-.193-1.264-.979a5.514 5.514 0 01-.453-.521H10a1 1 0 100-2H7.958a7.33 7.33 0 010-1H10a1 1 0 100-2H8.283c.14-.18.3-.362.453-.521z"/></svg>
                 </div>
                 <div><div class="text-xs text-gray-500">R币流通</div><div class="text-xl font-bold text-gray-900" id="statTotalRcoins">-</div></div>
               </div>
               <div class="bg-white border border-gray-100 rounded-xl p-5 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-rose-50 text-rose-500 flex items-center justify-center text-lg flex-shrink-0">
+                <div class="w-10 h-10 rounded-lg bg-rose-50 text-rose-500 flex items-center justify-center flex-shrink-0">
                   <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                 </div>
                 <div><div class="text-xs text-gray-500">Pro 用户</div><div class="text-xl font-bold text-gray-900" id="statProUsers">-</div></div>
               </div>
             </div>
-
-            <!-- Growth & Recent -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="bg-white border border-gray-100 rounded-xl overflow-hidden">
                 <div class="px-5 py-4 border-b border-gray-50"><h3 class="text-sm font-semibold text-gray-900">&#128202; 用户增长</h3></div>
@@ -195,7 +205,6 @@
           <div id="panelUsers" class="panel hidden">
             <div class="bg-white border border-gray-100 rounded-xl overflow-hidden">
               <div class="p-5">
-                <!-- Toolbar -->
                 <div class="flex flex-wrap items-center gap-3 mb-4">
                   <div class="relative flex-1 min-w-[200px]">
                     <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -213,7 +222,6 @@
                     <option value="disabled">禁用</option>
                   </select>
                 </div>
-                <!-- Table -->
                 <div class="overflow-x-auto">
                   <table class="w-full">
                     <thead>
@@ -238,9 +246,61 @@
             </div>
           </div>
 
+          <!-- ===== User Detail Panel ===== -->
+          <div id="panelUserDetail" class="panel hidden">
+            <div class="bg-white border border-gray-100 rounded-xl overflow-hidden">
+              <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-gray-900" id="detailPanelTitle">用户详情</h3>
+                <button onclick="backToUsers()" class="px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors">&#8592; 返回列表</button>
+              </div>
+              <div class="p-6">
+                <div class="flex items-center gap-5 mb-6 pb-6 border-b border-gray-100">
+                  <div class="avatar-wrap relative cursor-pointer flex-shrink-0" onclick="editAvatarInline()">
+                    <div id="inlineAvatar" class="w-20 h-20 rounded-2xl overflow-hidden bg-gray-100 flex items-center justify-center"></div>
+                    <div class="avatar-edit-overlay absolute inset-0 rounded-2xl bg-black/50 items-center justify-center text-white text-xs font-medium">更换</div>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-xl font-bold text-gray-900" id="inlineName">用户名</div>
+                    <div class="text-sm text-gray-500 mt-1" id="inlineUid">UID: -</div>
+                    <div class="flex flex-wrap gap-1.5 mt-2" id="inlineBadges"></div>
+                  </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6" id="inlineFields"></div>
+                <div class="flex flex-wrap gap-2 pt-5 border-t border-gray-100" id="inlineActions"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== Website Management Panel ===== -->
+          <div id="panelWebsite" class="panel hidden">
+            <!-- Homepage Buttons -->
+            <div class="bg-white border border-gray-100 rounded-xl overflow-hidden mb-4">
+              <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-gray-900">&#128204; 首页快捷入口</h3>
+                <button onclick="addHomepageButton()" class="px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-xl hover:bg-gray-800 transition-colors">+ 添加入口</button>
+              </div>
+              <div class="p-5">
+                <div id="homepageButtonsList" class="space-y-2">
+                  <div class="text-center py-6 text-gray-400 text-sm">加载中...</div>
+                </div>
+              </div>
+            </div>
+            <!-- Toolbox Items -->
+            <div class="bg-white border border-gray-100 rounded-xl overflow-hidden">
+              <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-gray-900">&#128230; 百宝箱项目</h3>
+                <button onclick="addToolboxItem()" class="px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-xl hover:bg-gray-800 transition-colors">+ 添加项目</button>
+              </div>
+              <div class="p-5">
+                <div id="toolboxItemsList" class="space-y-2">
+                  <div class="text-center py-6 text-gray-400 text-sm">加载中...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- ===== Settings Panel ===== -->
           <div id="panelSettings" class="panel hidden">
-            <!-- Notification settings -->
             <div class="bg-white border border-gray-100 rounded-xl overflow-hidden mb-4">
               <div class="px-5 py-4 border-b border-gray-50"><h3 class="text-sm font-semibold text-gray-900">&#9881; 通知设置</h3></div>
               <div class="p-5">
@@ -249,7 +309,7 @@
                   <label class="toggle-switch"><input type="checkbox" id="settingRegNotify" onchange="saveSetting('regNotify', this.checked)"><span class="toggle-slider"></span></label>
                 </div>
                 <div class="flex items-center justify-between py-4 border-b border-gray-50">
-                  <div><h4 class="text-sm font-semibold text-gray-900">新访客显示</h4><p class="text-xs text-gray-500 mt-1">在面板中显示新访客信息</p></div>
+                  <div><h4 class="text-sm font-semibold text-gray-900">新访客显示</h4><p class="text-xs text-gray-500 mt-1">首次访问网站时显示欢迎通知</p></div>
                   <label class="toggle-switch"><input type="checkbox" id="settingNewVisitor" onchange="saveSetting('newVisitor', this.checked)"><span class="toggle-slider"></span></label>
                 </div>
                 <div class="flex items-center justify-between py-4">
@@ -258,13 +318,25 @@
                 </div>
               </div>
             </div>
-            <!-- Announcement -->
             <div class="bg-white border border-gray-100 rounded-xl overflow-hidden">
-              <div class="px-5 py-4 border-b border-gray-50"><h3 class="text-sm font-semibold text-gray-900">&#128227; 系统公告</h3></div>
+              <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-gray-900">&#128227; 系统公告</h3>
+                <label class="toggle-switch"><input type="checkbox" id="settingAnnouncementEnabled" onchange="saveSetting('announcementEnabled', this.checked)"><span class="toggle-slider"></span></label>
+              </div>
               <div class="p-5">
-                <label class="block text-sm font-medium text-gray-700 mb-2">公告内容</label>
                 <textarea id="announcementText" class="w-full min-h-[120px] p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-300 focus:bg-white transition-colors resize-y" placeholder="输入系统公告内容..."></textarea>
                 <button onclick="saveAnnouncement()" class="mt-3 px-5 py-2 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors">保存公告</button>
+              </div>
+            </div>
+            <!-- First Visitor Notification -->
+            <div class="bg-white border border-gray-100 rounded-xl overflow-hidden mt-4">
+              <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-gray-900">&#127881; 首次访问通知</h3>
+                <label class="toggle-switch"><input type="checkbox" id="settingVisitorNotification" onchange="saveSetting('visitorNotification', this.checked)"><span class="toggle-slider"></span></label>
+              </div>
+              <div class="p-5">
+                <textarea id="visitorNotificationText" class="w-full min-h-[80px] p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-300 focus:bg-white transition-colors resize-y" placeholder="首次访问通知内容..."></textarea>
+                <button onclick="saveVisitorNotification()" class="mt-3 px-5 py-2 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors">保存通知</button>
               </div>
             </div>
           </div>
@@ -276,36 +348,40 @@
                 <h3 class="text-sm font-semibold text-gray-900">&#128220; 操作日志</h3>
                 <button onclick="clearLogs()" class="px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors">清空日志</button>
               </div>
-              <div class="p-5 max-h-96 overflow-y-auto" id="logsContainer">
+              <div class="p-5 max-h-[600px] overflow-y-auto" id="logsContainer">
                 <div class="text-center py-10 text-gray-400 text-sm">暂无操作日志</div>
               </div>
             </div>
           </div>
 
-          <!-- ===== User Detail Panel ===== -->
-          <div id="panelUserDetail" class="panel hidden">
-            <div class="bg-white border border-gray-100 rounded-xl overflow-hidden">
-              <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
-                <h3 class="text-sm font-semibold text-gray-900" id="detailPanelTitle">用户详情</h3>
-                <button onclick="backToUsers()" class="px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors">&#8592; 返回列表</button>
-              </div>
-              <div class="p-6">
-                <!-- User header -->
-                <div class="flex items-center gap-5 mb-6 pb-6 border-b border-gray-100">
-                  <div class="avatar-wrap relative cursor-pointer flex-shrink-0" onclick="editAvatarInline(currentDetailUid)">
-                    <div id="inlineAvatar" class="w-20 h-20 rounded-2xl overflow-hidden bg-gray-100"></div>
-                    <div class="avatar-edit-overlay absolute inset-0 rounded-2xl bg-black/50 items-center justify-center text-white text-xs font-medium">更换</div>
+          <!-- ===== Messages Panel ===== -->
+          <div id="panelMessages" class="panel hidden">
+            <!-- Send message -->
+            <div class="bg-white border border-gray-100 rounded-xl overflow-hidden mb-4">
+              <div class="px-5 py-4 border-b border-gray-50"><h3 class="text-sm font-semibold text-gray-900">&#9993; 发送私信</h3></div>
+              <div class="p-5">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">收件人（用户名或UID）</label>
+                    <input type="text" id="msgRecipient" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-300 focus:bg-white transition-colors" placeholder="输入用户名或UID">
                   </div>
-                  <div class="flex-1 min-w-0">
-                    <div class="text-xl font-bold text-gray-900" id="inlineName">用户名</div>
-                    <div class="text-sm text-gray-500 mt-1" id="inlineUid">UID: -</div>
-                    <div class="flex flex-wrap gap-1.5 mt-2" id="inlineBadges"></div>
+                  <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">标题</label>
+                    <input type="text" id="msgTitle" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-300 focus:bg-white transition-colors" placeholder="消息标题">
                   </div>
                 </div>
-                <!-- Editable fields -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6" id="inlineFields"></div>
-                <!-- Action buttons -->
-                <div class="flex flex-wrap gap-2 pt-5 border-t border-gray-100" id="inlineActions"></div>
+                <div class="mb-3">
+                  <label class="block text-xs font-medium text-gray-600 mb-1">内容</label>
+                  <textarea id="msgContent" class="w-full min-h-[100px] p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-300 focus:bg-white transition-colors resize-y" placeholder="输入消息内容..."></textarea>
+                </div>
+                <button onclick="sendPrivateMessage()" class="px-5 py-2 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors">发送</button>
+              </div>
+            </div>
+            <!-- Message history -->
+            <div class="bg-white border border-gray-100 rounded-xl overflow-hidden">
+              <div class="px-5 py-4 border-b border-gray-50"><h3 class="text-sm font-semibold text-gray-900">&#128172; 私信记录</h3></div>
+              <div class="p-5 max-h-[500px] overflow-y-auto" id="messagesContainer">
+                <div class="text-center py-10 text-gray-400 text-sm">暂无私信记录</div>
               </div>
             </div>
           </div>
@@ -315,7 +391,7 @@
     </div>
   </div>
 
-  <!-- Confirm modal -->
+  <!-- ==================== Confirm Modal ==================== -->
   <div id="confirmModal" class="hidden fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="modal-anim bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
       <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
@@ -334,51 +410,51 @@
     </div>
   </div>
 
-  <!-- Toast container -->
+  <!-- ==================== R币操作 Modal ==================== -->
+  <div id="rcoinModal" class="hidden fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="modal-anim bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+        <h3 class="text-base font-bold text-gray-900">R币充值</h3>
+        <button onclick="closeModal('rcoinModal')" class="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition-colors">
+          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="p-5">
+        <p class="text-sm text-gray-600 mb-3">当前R币: <span id="rcoinCurrent" class="font-bold text-gray-900">0</span></p>
+        <div class="flex gap-2 mb-3">
+          <button onclick="setRcoinMode('add')" id="rcoinModeAdd" class="flex-1 py-2 text-sm font-medium rounded-xl bg-violet-100 text-violet-700 border border-violet-200 transition-colors">增加</button>
+          <button onclick="setRcoinMode('subtract')" id="rcoinModeSubtract" class="flex-1 py-2 text-sm font-medium rounded-xl bg-gray-100 text-gray-600 border border-gray-200 transition-colors">减少</button>
+          <button onclick="setRcoinMode('set')" id="rcoinModeSet" class="flex-1 py-2 text-sm font-medium rounded-xl bg-gray-100 text-gray-600 border border-gray-200 transition-colors">设置</button>
+        </div>
+        <input type="number" id="rcoinAmount" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-300 focus:bg-white transition-colors" placeholder="输入数量" min="0">
+      </div>
+      <div class="px-5 py-4 border-t border-gray-100 flex justify-end gap-2">
+        <button onclick="closeModal('rcoinModal')" class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">取消</button>
+        <button onclick="applyRcoinChange()" class="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Toast Container ==================== -->
   <div id="toastContainer" class="fixed top-4 right-4 z-[60] flex flex-col gap-2"></div>
 
   <!-- Hidden file input for avatar upload -->
   <input type="file" id="avatarFileInput" accept="image/*" class="hidden">
 
+  <!-- ==================== INLINED RuiAuth System ==================== -->
   <script>
-/**
- * Rui Hub 用户管理系统 v2.1
- * 支持 UID 系统
- * 
- * UID 格式：
- * - Administrator: 特殊管理员UID（保持 Administrator）
- * - 普通用户: 6位数字，如 000001, 000002, ...
- * 
- * 更新日志 v2.1:
- * - 增强跨页面登录状态同步
- * - 添加更详细的调试日志
- */
+// ============================================================
+// RuiAuth v2.1 - Inlined to avoid Cloudflare 301 cache issues
+// ============================================================
 
-// 版本号（用于防止缓存）
-const AUTH_VERSION = '2.1';
-console.log('auth.js 版本:', AUTH_VERSION, '加载时间:', new Date().toLocaleString());
-
-// GitHub 配置
 const AUTH_CONFIG = {
   repo: 'RuiweihanHub/ruiuser',
   getToken: () => ['ghp_', 'aJxbQaU0S56e8pl6N8zrkWoHkfJHi92GOiFQ'].join(''),
   admins: ['Administrator', 'Ruiweihan', '000001'],
   usersFile: 'users.json',
-  profilesDir: 'profiles'  // 用户详情目录
+  profilesDir: 'profiles'
 };
 
-// 安全的密码哈希函数（SHA-256 简化版）
-async function hashPassword(password) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password + 'ruihub_salt_2024');
-  
-  // 使用 SubtleCrypto 进行 SHA-256 哈希
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-// 同步密码哈希（用于本地验证，简化版）
 function hashPasswordSync(password) {
   let hash = 0;
   const str = password + 'ruihub_salt_2024';
@@ -389,7 +465,14 @@ function hashPasswordSync(password) {
   return Math.abs(hash).toString(36).padStart(8, '0');
 }
 
-// Base64 编码（支持中文）
+async function hashPassword(password) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password + 'ruihub_salt_2024');
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 function toBase64(str) {
   const bytes = new TextEncoder().encode(str);
   let binary = '';
@@ -399,7 +482,6 @@ function toBase64(str) {
   return btoa(binary);
 }
 
-// Base64 解码（支持中文）
 function fromBase64(base64) {
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
@@ -409,90 +491,22 @@ function fromBase64(base64) {
   return new TextDecoder().decode(bytes);
 }
 
-// 生成6位UID
 function generateUid(number) {
   return number.toString().padStart(6, '0');
 }
 
-// 默认用户数据（v2.1 带好友系统）
 const DEFAULT_USERS = {
   version: '2.1',
-  nextUid: 3,  // 下一个可用的UID数字
+  nextUid: 3,
   users: [
-    {
-      uid: 'Administrator',
-      username: 'Administrator',
-      displayName: '系统管理员',
-      passwordHash: '1u98e9',
-      role: 'admin',
-      status: 'active',
-      createdAt: '2024-01-01T00:00:00Z',
-      lastLogin: null,
-      loginCount: 0,
-      friends: ['000001', '000002'],
-      profile: {
-        avatar: null,
-        bio: '系统管理员账户',
-        email: null
-      }
-    },
-    {
-      uid: '000001',
-      username: 'Ruiweihan',
-      displayName: 'Ruiweihan',
-      passwordHash: '6052ni',
-      role: 'admin',
-      status: 'active',
-      createdAt: '2024-01-01T00:00:00Z',
-      lastLogin: null,
-      loginCount: 0,
-      friends: ['Administrator', '000002'],
-      profile: {
-        avatar: null,
-        bio: '创始人',
-        email: null
-      }
-    },
-    {
-      uid: '000002',
-      username: 'Xvjiarui',
-      displayName: 'Xvjiarui',
-      passwordHash: 'o7dyuk',
-      role: 'user',
-      status: 'active',
-      createdAt: '2024-01-01T00:00:00Z',
-      lastLogin: null,
-      loginCount: 0,
-      friends: ['Administrator', '000001'],
-      profile: {
-        avatar: null,
-        bio: null,
-        email: null
-      }
-    }
+    { uid: 'Administrator', username: 'Administrator', displayName: '系统管理员', passwordHash: '1u98e9', role: 'admin', status: 'active', createdAt: '2024-01-01T00:00:00Z', lastLogin: null, loginCount: 0, friends: ['000001', '000002'], profile: { avatar: null, bio: '系统管理员账户', email: null } },
+    { uid: '000001', username: 'Ruiweihan', displayName: 'Ruiweihan', passwordHash: '6052ni', role: 'admin', status: 'active', createdAt: '2024-01-01T00:00:00Z', lastLogin: null, loginCount: 0, friends: ['Administrator', '000002'], profile: { avatar: null, bio: '创始人', email: null } },
+    { uid: '000002', username: 'Xvjiarui', displayName: 'Xvjiarui', passwordHash: 'o7dyuk', role: 'user', status: 'active', createdAt: '2024-01-01T00:00:00Z', lastLogin: null, loginCount: 0, friends: ['Administrator', '000001'], profile: { avatar: null, bio: null, email: null } }
   ],
-  // 索引：快速查找
-  index: {
-    byUid: {
-      'Administrator': 0,
-      '000001': 1,
-      '000002': 2
-    },
-    byUsername: {
-      'Administrator': 0,
-      'Ruiweihan': 1,
-      'Xvjiarui': 2
-    }
-  },
-  // 统计信息
-  stats: {
-    totalUsers: 3,
-    totalLogins: 0,
-    lastRegistration: '2024-01-01T00:00:00Z'
-  }
+  index: { byUid: { 'Administrator': 0, '000001': 1, '000002': 2 }, byUsername: { 'Administrator': 0, 'Ruiweihan': 1, 'Xvjiarui': 2 } },
+  stats: { totalUsers: 3, totalLogins: 0, lastRegistration: '2024-01-01T00:00:00Z' }
 };
 
-// 本地缓存用户（用于GitHub不可用时）
 const AUTH_LOCAL_USERS = {
   users: [
     { uid: 'Administrator', username: 'Administrator', passwordHash: hashPasswordSync('admin123'), role: 'admin' },
@@ -501,7 +515,6 @@ const AUTH_LOCAL_USERS = {
   ]
 };
 
-// 用户管理类
 class RuiAuth {
   constructor() {
     this.token = AUTH_CONFIG.getToken();
@@ -511,10 +524,8 @@ class RuiAuth {
     this.initialized = false;
   }
 
-  // 初始化：检查或创建用户数据文件
   async init() {
     if (this.initialized) return true;
-    
     try {
       const users = await this.fetchUsers();
       if (users) {
@@ -522,8 +533,6 @@ class RuiAuth {
         this.initialized = true;
         return true;
       }
-      
-      // 如果文件不存在，创建默认用户
       const created = await this.createDefaultUsers();
       if (created) {
         this.users = DEFAULT_USERS;
@@ -537,21 +546,15 @@ class RuiAuth {
     }
   }
 
-  // 从 GitHub 获取用户数据
   async fetchUsers() {
     try {
       const res = await fetch(`https://api.github.com/repos/${this.repo}/contents/${AUTH_CONFIG.usersFile}?ref=main&_=${Date.now()}`, {
-        headers: {
-          'Authorization': `token ${this.token}`,
-          'Accept': 'application/vnd.github.v3+json'
-        }
+        headers: { 'Authorization': `token ${this.token}`, 'Accept': 'application/vnd.github.v3+json' }
       });
-
       if (res.ok) {
         const data = await res.json();
         this.usersFileSha = data.sha;
-        const content = JSON.parse(fromBase64(data.content));
-        return content;
+        return JSON.parse(fromBase64(data.content));
       } else if (res.status === 404) {
         return null;
       }
@@ -562,48 +565,16 @@ class RuiAuth {
     }
   }
 
-  // 保存用户数据到 GitHub
   async saveUsers(commitMessage) {
-    if (!this.users || !this.usersFileSha) {
-      // 如果是新创建，使用无 sha 的 PUT
-      if (this.users && !this.usersFileSha) {
-        const res = await fetch(`https://api.github.com/repos/${this.repo}/contents/${AUTH_CONFIG.usersFile}`, {
-          method: 'PUT',
-          headers: {
-            'Authorization': `token ${this.token}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            message: commitMessage,
-            content: toBase64(JSON.stringify(this.users, null, 2))
-          })
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          this.usersFileSha = data.content.sha;
-          return true;
-        }
-      }
-      return false;
-    }
-
+    if (!this.users) return false;
     try {
+      const body = { message: commitMessage, content: toBase64(JSON.stringify(this.users, null, 2)) };
+      if (this.usersFileSha) body.sha = this.usersFileSha;
       const res = await fetch(`https://api.github.com/repos/${this.repo}/contents/${AUTH_CONFIG.usersFile}`, {
         method: 'PUT',
-        headers: {
-          'Authorization': `token ${this.token}`,
-          'Accept': 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          message: commitMessage,
-          content: toBase64(JSON.stringify(this.users, null, 2)),
-          sha: this.usersFileSha
-        })
+        headers: { 'Authorization': `token ${this.token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
       });
-
       if (res.ok) {
         const data = await res.json();
         this.usersFileSha = data.content.sha;
@@ -616,22 +587,13 @@ class RuiAuth {
     }
   }
 
-  // 创建默认用户文件
   async createDefaultUsers() {
     try {
       const res = await fetch(`https://api.github.com/repos/${this.repo}/contents/${AUTH_CONFIG.usersFile}`, {
         method: 'PUT',
-        headers: {
-          'Authorization': `token ${this.token}`,
-          'Accept': 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          message: 'Initialize user database v2.0 with UID system',
-          content: toBase64(JSON.stringify(DEFAULT_USERS, null, 2))
-        })
+        headers: { 'Authorization': `token ${this.token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: 'Initialize user database v2.1', content: toBase64(JSON.stringify(DEFAULT_USERS, null, 2)) })
       });
-
       if (res.ok) {
         const data = await res.json();
         this.usersFileSha = data.content.sha;
@@ -644,7 +606,6 @@ class RuiAuth {
     }
   }
 
-  // 通过用户名查找用户索引
   findUserIndexByUsername(username) {
     if (!this.users) return -1;
     if (this.users.index && this.users.index.byUsername && this.users.index.byUsername[username] !== undefined) {
@@ -653,7 +614,6 @@ class RuiAuth {
     return this.users.users.findIndex(u => u.username === username);
   }
 
-  // 通过UID查找用户索引
   findUserIndexByUid(uid) {
     if (!this.users) return -1;
     if (this.users.index && this.users.index.byUid && this.users.index.byUid[uid] !== undefined) {
@@ -662,318 +622,108 @@ class RuiAuth {
     return this.users.users.findIndex(u => u.uid === uid);
   }
 
-  // 验证用户登录（支持用户名或UID登录）
   async validateUser(usernameOrUid, password) {
-    // 先尝试从 GitHub 获取用户
-    if (!this.initialized) {
-      await this.init();
-    }
-
+    if (!this.initialized) await this.init();
     const hashedPassword = hashPasswordSync(password);
-    
-    // 如果 GitHub 获取失败，使用本地缓存
     if (!this.users) {
-      const localUser = AUTH_LOCAL_USERS.users.find(u => 
-        (u.username === usernameOrUid || u.uid === usernameOrUid) && 
-        u.passwordHash === hashedPassword
-      );
-      
-      if (localUser) {
-        return { success: true, user: { uid: localUser.uid, username: localUser.username, role: localUser.role } };
-      }
+      const localUser = AUTH_LOCAL_USERS.users.find(u => (u.username === usernameOrUid || u.uid === usernameOrUid) && u.passwordHash === hashedPassword);
+      if (localUser) return { success: true, user: { uid: localUser.uid, username: localUser.username, role: localUser.role } };
       return { success: false, error: '用户名或密码错误' };
     }
-
-    // 使用 GitHub 数据
     const userIndex = this.findUserIndexByUsername(usernameOrUid);
     const userByUidIndex = this.findUserIndexByUid(usernameOrUid);
     const finalIndex = userIndex !== -1 ? userIndex : userByUidIndex;
-    
-    if (finalIndex === -1) {
-      return { success: false, error: '用户名或密码错误' };
-    }
-
+    if (finalIndex === -1) return { success: false, error: '用户名或密码错误' };
     const user = this.users.users[finalIndex];
-    
-    // 检查账户状态
-    if (user.status === 'disabled') {
-      return { success: false, error: '账户已被禁用' };
-    }
-    
+    if (user.status === 'disabled') return { success: false, error: '账户已被禁用' };
     if (user.passwordHash === hashedPassword) {
-      // 更新登录信息
       user.lastLogin = new Date().toISOString();
       user.loginCount = (user.loginCount || 0) + 1;
       this.users.stats.totalLogins = (this.users.stats.totalLogins || 0) + 1;
-      
-      // 异步保存（不阻塞登录）
       this.saveUsers(`User login: ${user.username} (UID: ${user.uid})`).catch(console.error);
-      
-      return { 
-        success: true, 
-        user: { 
-          uid: user.uid, 
-          username: user.username, 
-          displayName: user.displayName,
-          role: user.role,
-          profile: user.profile
-        } 
-      };
+      return { success: true, user: { uid: user.uid, username: user.username, displayName: user.displayName, role: user.role, profile: user.profile } };
     }
-    
     return { success: false, error: '用户名或密码错误' };
   }
 
-  // 检查用户是否存在
   async userExists(username) {
-    if (!this.initialized) {
-      await this.init();
-    }
-    
-    if (!this.users) {
-      return AUTH_LOCAL_USERS.users.some(u => u.username === username);
-    }
-    
+    if (!this.initialized) await this.init();
+    if (!this.users) return AUTH_LOCAL_USERS.users.some(u => u.username === username);
     return this.findUserIndexByUsername(username) !== -1;
   }
 
-  // 检查UID是否存在
   async uidExists(uid) {
-    if (!this.initialized) {
-      await this.init();
-    }
-    
+    if (!this.initialized) await this.init();
     if (!this.users) return false;
     return this.findUserIndexByUid(uid) !== -1;
   }
 
-  // 注册新用户
   async register(username, password, displayName = null, email = null) {
-    if (!this.initialized) {
-      await this.init();
-    }
-
-    if (!this.users) {
-      return { success: false, error: '系统暂时不可用，请稍后重试' };
-    }
-
-    // 验证用户名
-    if (!username || username.length < 2 || username.length > 20) {
-      return { success: false, error: '用户名长度需为2-20个字符' };
-    }
-
-    if (!/^[a-zA-Z0-9_\u4e00-\u9fa5]+$/.test(username)) {
-      return { success: false, error: '用户名只能包含字母、数字、下划线和中文' };
-    }
-
-    // 验证密码
-    if (!password || password.length < 4) {
-      return { success: false, error: '密码长度至少4个字符' };
-    }
-
-    if (await this.userExists(username)) {
-      return { success: false, error: '用户名已存在' };
-    }
-
-    // 检查邮箱是否已被使用
-    if (email && this.users.users.some(u => u.profile && u.profile.email === email)) {
-      return { success: false, error: '该邮箱已被注册' };
-    }
-
-    // 生成新UID
+    if (!this.initialized) await this.init();
+    if (!this.users) return { success: false, error: '系统暂时不可用' };
+    if (!username || username.length < 2 || username.length > 20) return { success: false, error: '用户名长度需为2-20个字符' };
+    if (!/^[a-zA-Z0-9_\u4e00-\u9fa5]+$/.test(username)) return { success: false, error: '用户名只能包含字母、数字、下划线和中文' };
+    if (!password || password.length < 4) return { success: false, error: '密码长度至少4个字符' };
+    if (await this.userExists(username)) return { success: false, error: '用户名已存在' };
+    if (email && this.users.users.some(u => u.profile && u.profile.email === email)) return { success: false, error: '该邮箱已被注册' };
     const newUid = generateUid(this.users.nextUid);
     this.users.nextUid++;
-
     const now = new Date().toISOString();
-    const newUser = {
-      uid: newUid,
-      username: username,
-      displayName: displayName || username,
-      passwordHash: hashPasswordSync(password),
-      role: 'user',
-      status: 'active',
-      createdAt: now,
-      lastLogin: null,
-      loginCount: 0,
-      friends: [],  // 新用户初始好友列表为空
-      profile: {
-        avatar: null,
-        bio: null,
-        email: email || null
-      }
-    };
-
-    // 添加用户
+    const newUser = { uid: newUid, username, displayName: displayName || username, passwordHash: hashPasswordSync(password), role: 'user', status: 'active', createdAt: now, lastLogin: null, loginCount: 0, friends: [], profile: { avatar: null, bio: null, email: email || null } };
     const newIndex = this.users.users.length;
     this.users.users.push(newUser);
-
-    // 更新索引
-    if (!this.users.index) {
-      this.users.index = { byUid: {}, byUsername: {} };
-    }
+    if (!this.users.index) this.users.index = { byUid: {}, byUsername: {} };
     this.users.index.byUid[newUid] = newIndex;
     this.users.index.byUsername[username] = newIndex;
-
-    // 更新统计
-    if (!this.users.stats) {
-      this.users.stats = { totalUsers: 0, totalLogins: 0, lastRegistration: null };
-    }
+    if (!this.users.stats) this.users.stats = { totalUsers: 0, totalLogins: 0, lastRegistration: null };
     this.users.stats.totalUsers++;
     this.users.stats.lastRegistration = now;
-
-    // 保存到 GitHub
     const saved = await this.saveUsers(`Register new user: ${username} (UID: ${newUid})`);
-    
-    if (saved) {
-      return { 
-        success: true, 
-        user: { 
-          uid: newUid, 
-          username: username, 
-          displayName: newUser.displayName,
-          role: newUser.role 
-        } 
-      };
-    }
-    
-    // 回滚
+    if (saved) return { success: true, user: { uid: newUid, username, displayName: newUser.displayName, role: newUser.role } };
     this.users.users.pop();
     this.users.nextUid--;
     delete this.users.index.byUid[newUid];
     delete this.users.index.byUsername[username];
     this.users.stats.totalUsers--;
-    
     return { success: false, error: '注册失败，请重试' };
   }
 
-  // 获取用户信息（通过UID或用户名）
   async getUser(uidOrUsername) {
-    if (!this.initialized) {
-      await this.init();
-    }
-
+    if (!this.initialized) await this.init();
     if (!this.users) {
       const localUser = AUTH_LOCAL_USERS.users.find(u => u.username === uidOrUsername || u.uid === uidOrUsername);
       return localUser ? { uid: localUser.uid, username: localUser.username, role: localUser.role } : null;
     }
-
     let index = this.findUserIndexByUid(uidOrUsername);
-    if (index === -1) {
-      index = this.findUserIndexByUsername(uidOrUsername);
-    }
-    
+    if (index === -1) index = this.findUserIndexByUsername(uidOrUsername);
     if (index === -1) return null;
-    
     const user = this.users.users[index];
-    return {
-      uid: user.uid,
-      username: user.username,
-      displayName: user.displayName,
-      role: user.role,
-      status: user.status,
-      createdAt: user.createdAt,
-      lastLogin: user.lastLogin,
-      loginCount: user.loginCount,
-      profile: user.profile
-    };
+    return { uid: user.uid, username: user.username, displayName: user.displayName, role: user.role, status: user.status, createdAt: user.createdAt, lastLogin: user.lastLogin, loginCount: user.loginCount, profile: user.profile, level: user.level, rcoins: user.rcoins, isPro: user.isPro, friends: user.friends };
   }
 
-  // 修改密码
   async changePassword(username, oldPassword, newPassword) {
     const validate = await this.validateUser(username, oldPassword);
-    if (!validate.success) {
-      return { success: false, error: '原密码错误' };
-    }
-
-    if (!this.users) {
-      return { success: false, error: '系统暂时不可用' };
-    }
-
+    if (!validate.success) return { success: false, error: '原密码错误' };
+    if (!this.users) return { success: false, error: '系统暂时不可用' };
     const userIndex = this.findUserIndexByUsername(username);
-    if (userIndex === -1) {
-      return { success: false, error: '用户不存在' };
-    }
-
+    if (userIndex === -1) return { success: false, error: '用户不存在' };
     this.users.users[userIndex].passwordHash = hashPasswordSync(newPassword);
-    
     const saved = await this.saveUsers(`Password changed: ${username}`);
-    return saved ? 
-      { success: true } : 
-      { success: false, error: '保存失败，请重试' };
+    return saved ? { success: true } : { success: false, error: '保存失败' };
   }
 
-  // 更新用户资料
   async updateProfile(username, profileData) {
-    if (!this.initialized) {
-      await this.init();
-    }
-
-    if (!this.users) {
-      return { success: false, error: '系统暂时不可用' };
-    }
-
+    if (!this.initialized) await this.init();
+    if (!this.users) return { success: false, error: '系统暂时不可用' };
     const userIndex = this.findUserIndexByUsername(username);
-    if (userIndex === -1) {
-      return { success: false, error: '用户不存在' };
-    }
-
+    if (userIndex === -1) return { success: false, error: '用户不存在' };
     const user = this.users.users[userIndex];
     user.profile = { ...user.profile, ...profileData };
-    if (profileData.displayName) {
-      user.displayName = profileData.displayName;
-    }
-
+    if (profileData.displayName) user.displayName = profileData.displayName;
     const saved = await this.saveUsers(`Profile updated: ${username}`);
-    return saved ? 
-      { success: true, user: this.getUser(username) } : 
-      { success: false, error: '保存失败，请重试' };
+    return saved ? { success: true } : { success: false, error: '保存失败' };
   }
 
-  // 删除用户（仅管理员）
-  async deleteUser(adminUsername, targetUsernameOrUid) {
-    if (!AUTH_CONFIG.admins.includes(adminUsername) && !AUTH_CONFIG.admins.includes(await this.getUid(adminUsername))) {
-      return { success: false, error: '无权限' };
-    }
-
-    if (!this.users) {
-      return { success: false, error: '系统暂时不可用' };
-    }
-
-    // 查找目标用户
-    let targetIndex = this.findUserIndexByUsername(targetUsernameOrUid);
-    if (targetIndex === -1) {
-      targetIndex = this.findUserIndexByUid(targetUsernameOrUid);
-    }
-    
-    if (targetIndex === -1) {
-      return { success: false, error: '用户不存在' };
-    }
-
-    const targetUser = this.users.users[targetIndex];
-
-    // 不能删除管理员
-    if (targetUser.role === 'admin') {
-      return { success: false, error: '不能删除管理员账户' };
-    }
-
-    // 删除用户
-    const deletedUid = targetUser.uid;
-    const deletedUsername = targetUser.username;
-    this.users.users.splice(targetIndex, 1);
-
-    // 重建索引
-    this.rebuildIndex();
-
-    // 更新统计
-    this.users.stats.totalUsers--;
-
-    const saved = await this.saveUsers(`Delete user: ${deletedUsername} (UID: ${deletedUid})`);
-    return saved ? 
-      { success: true } : 
-      { success: false, error: '删除失败' };
-  }
-
-  // 重建索引
   rebuildIndex() {
     this.users.index = { byUid: {}, byUsername: {} };
     this.users.users.forEach((user, index) => {
@@ -982,104 +732,13 @@ class RuiAuth {
     });
   }
 
-  // 获取用户UID
-  async getUid(username) {
-    const user = await this.getUser(username);
-    return user ? user.uid : null;
-  }
-
-  // 获取所有用户（仅管理员）
-  async getAllUsers(adminUsername) {
-    const adminUid = await this.getUid(adminUsername);
-    if (!AUTH_CONFIG.admins.includes(adminUsername) && !AUTH_CONFIG.admins.includes(adminUid)) {
-      return { success: false, error: '无权限' };
-    }
-
-    if (!this.initialized) {
-      await this.init();
-    }
-
-    if (!this.users) {
-      return { success: true, users: AUTH_LOCAL_USERS.users.map(u => ({ uid: u.uid, username: u.username, role: u.role })) };
-    }
-
-    return { 
-      success: true, 
-      users: this.users.users.map(u => ({ 
-        uid: u.uid, 
-        username: u.username, 
-        displayName: u.displayName,
-        role: u.role, 
-        status: u.status,
-        createdAt: u.createdAt,
-        lastLogin: u.lastLogin,
-        loginCount: u.loginCount
-      })) 
-    };
-  }
-
-  // 获取统计信息
-  async getStats(adminUsername) {
-    if (!AUTH_CONFIG.admins.includes(adminUsername)) {
-      return { success: false, error: '无权限' };
-    }
-
-    if (!this.initialized) {
-      await this.init();
-    }
-
-    if (!this.users) {
-      return { success: false, error: '系统暂时不可用' };
-    }
-
-    return { 
-      success: true, 
-      stats: this.users.stats 
-    };
-  }
-
-  // 禁用/启用用户（仅管理员）
-  async toggleUserStatus(adminUsername, targetUsernameOrUid, status) {
-    if (!AUTH_CONFIG.admins.includes(adminUsername)) {
-      return { success: false, error: '无权限' };
-    }
-
-    if (!this.users) {
-      return { success: false, error: '系统暂时不可用' };
-    }
-
-    let targetIndex = this.findUserIndexByUsername(targetUsernameOrUid);
-    if (targetIndex === -1) {
-      targetIndex = this.findUserIndexByUid(targetUsernameOrUid);
-    }
-
-    if (targetIndex === -1) {
-      return { success: false, error: '用户不存在' };
-    }
-
-    const targetUser = this.users.users[targetIndex];
-    if (targetUser.role === 'admin') {
-      return { success: false, error: '不能禁用管理员账户' };
-    }
-
-    targetUser.status = status;
-    const saved = await this.saveUsers(`User status changed to ${status}: ${targetUser.username}`);
-    
-    return saved ? 
-      { success: true } : 
-      { success: false, error: '操作失败' };
-  }
-
-  // 检查是否是管理员
   isAdmin(usernameOrUid) {
     return AUTH_CONFIG.admins.includes(usernameOrUid);
   }
 }
 
-// 全局实例
+// Global instance
 let ruiAuth = null;
-
-// 获取认证实例
 async function getAuth() {
   if (!ruiAuth) {
     ruiAuth = new RuiAuth();
@@ -1088,84 +747,17 @@ async function getAuth() {
   return ruiAuth;
 }
 
-// 本地登录状态检查（同步）
-function checkLocalLogin() {
-  const sessionUser = sessionStorage.getItem('rui_user');
-  const sessionUid = sessionStorage.getItem('rui_uid');
-  const rememberedUser = localStorage.getItem('rui_user_remember');
-  const rememberedUid = localStorage.getItem('rui_uid_remember');
-  
-  if (sessionUser && sessionUid) {
-    return { username: sessionUser, uid: sessionUid };
-  }
-  
-  if (rememberedUser && rememberedUid) {
-    const expireTime = localStorage.getItem('rui_user_expire');
-    if (expireTime && Date.now() < parseInt(expireTime)) {
-      sessionStorage.setItem('rui_user', rememberedUser);
-      sessionStorage.setItem('rui_uid', rememberedUid);
-      return { username: rememberedUser, uid: rememberedUid };
-    } else {
-      localStorage.removeItem('rui_user_remember');
-      localStorage.removeItem('rui_uid_remember');
-      localStorage.removeItem('rui_user_expire');
-    }
-  }
-  
-  return null;
-}
-
-// 设置登录状态
-function setLoginState(username, uid, remember = false) {
-  sessionStorage.setItem('rui_user', username);
-  sessionStorage.setItem('rui_uid', uid);
-  if (remember) {
-    localStorage.setItem('rui_user_remember', username);
-    localStorage.setItem('rui_uid_remember', uid);
-    localStorage.setItem('rui_user_expire', (Date.now() + 7 * 24 * 60 * 60 * 1000).toString());
-  }
-}
-
-// 清除登录状态
-function clearLoginState() {
-  sessionStorage.removeItem('rui_user');
-  sessionStorage.removeItem('rui_uid');
-  localStorage.removeItem('rui_user_remember');
-  localStorage.removeItem('rui_uid_remember');
-  localStorage.removeItem('rui_user_expire');
-}
-
-// 获取当前用户信息
-function getCurrentUser() {
-  const login = checkLocalLogin();
-  if (!login) return null;
-  return login;
-}
-
-// 统一的登录状态验证和同步 - 增强版
+// Login state helpers
 function syncLoginState() {
-  // 先检查 sessionStorage（当前会话）
   const sessionUser = sessionStorage.getItem('rui_user');
   const sessionUid = sessionStorage.getItem('rui_uid');
-  
-  if (sessionUser && sessionUid) {
-    console.log('syncLoginState: 从 sessionStorage 读取', sessionUser);
-    return { username: sessionUser, uid: sessionUid, isLoggedIn: true };
-  }
-  
-  // 再检查 localStorage（跨页面共享）
+  if (sessionUser && sessionUid) return { username: sessionUser, uid: sessionUid, isLoggedIn: true };
   const localUser = localStorage.getItem('rui_user_remember');
   const localUid = localStorage.getItem('rui_uid_remember');
   const expire = localStorage.getItem('rui_user_expire');
-  
-  console.log('syncLoginState localStorage:', { localUser, localUid, expire, now: Date.now() });
-  
   if (localUser && localUid) {
-    // 检查是否过期
     const expireTime = parseInt(expire || '0');
     if (expire && expireTime > 0 && Date.now() > expireTime) {
-      // 已过期，清除所有登录数据
-      console.log('登录已过期');
       localStorage.removeItem('rui_user_remember');
       localStorage.removeItem('rui_uid_remember');
       localStorage.removeItem('rui_user_expire');
@@ -1173,892 +765,1316 @@ function syncLoginState() {
       sessionStorage.removeItem('rui_uid');
       return { username: null, uid: null, isLoggedIn: false };
     }
-    
-    // 有效登录，同步到 sessionStorage
     sessionStorage.setItem('rui_user', localUser);
     sessionStorage.setItem('rui_uid', localUid);
-    console.log('登录有效，已同步到 sessionStorage:', localUser);
     return { username: localUser, uid: localUid, isLoggedIn: true };
   }
-  
-  console.log('未找到登录信息');
   return { username: null, uid: null, isLoggedIn: false };
 }
 
-// 检查是否已登录
-function isLoggedIn() {
-  const state = syncLoginState();
-  return state.isLoggedIn;
+// ============================================================
+// DEFAULT SVG AVATAR
+// ============================================================
+const DEFAULT_AVATAR_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+
+function renderAvatar(avatar, size) {
+  if (avatar) {
+    return `<img src="${avatar}" class="w-full h-full object-cover" alt="avatar">`;
+  }
+  return `<div class="w-full h-full flex items-center justify-center bg-gray-50 p-1/4">${DEFAULT_AVATAR_SVG}</div>`;
 }
 
-// 获取当前登录用户
-function getLoggedInUser() {
-  return syncLoginState();
+function renderAvatarSmall(avatar) {
+  if (avatar) {
+    return `<img src="${avatar}" class="w-full h-full object-cover rounded-md" alt="avatar">`;
+  }
+  return `<div class="w-full h-full flex items-center justify-center bg-gray-50 rounded-md p-0.5">${DEFAULT_AVATAR_SVG}</div>`;
 }
 
-// 导出全局函数
-window.RuiAuth = RuiAuth;
-window.getAuth = getAuth;
-window.checkLocalLogin = checkLocalLogin;
-window.setLoginState = setLoginState;
-window.clearLoginState = clearLoginState;
-window.getCurrentUser = getCurrentUser;
-window.hashPasswordSync = hashPasswordSync;
-window.AUTH_CONFIG = AUTH_CONFIG;
-window.AUTH_LOCAL_USERS = AUTH_LOCAL_USERS;
-window.syncLoginState = syncLoginState;
-window.isLoggedIn = isLoggedIn;
-window.getLoggedInUser = getLoggedInUser;
+// ============================================================
+// SITE SETTINGS MANAGEMENT
+// ============================================================
 
-  </script>
+const DEFAULT_SITE_SETTINGS = {
+  homepageButtons: [
+    { icon: "📁", name: "项目", url: "/ruiweihan/projects.html" },
+    { icon: "📦", name: "百宝箱", url: "/ruiweihan/toolbox.html" },
+    { icon: "☁️", name: "云盘", url: "/ruiweihan/cloud.html" },
+    { icon: "💬", name: "聊天", url: "/ruiweihan/chat.html" },
+    { icon: "🌊", name: "论坛", url: "/ruiweihan/ruiflow.html" },
+    { icon: "📚", name: "学习", url: "/ruiweihan/learn.html", badge: "NEW" }
+  ],
+  toolboxItems: [
+    { icon: "⛏️", name: "Eaglercraft", desc: "在线玩MC 1.12", url: "/ruiweihan/eaglercraft.html" }
+  ],
+  announcement: { enabled: true, message: "Welcome to Rui Hub!" },
+  firstVisitorNotification: { enabled: true, message: "这是你第一次访问我们的网站。" },
+  settings: { regNotify: true, newVisitor: true, loginAlert: true }
+};
 
-  <script>
-    // ========== Admin Panel Logic ==========
+let siteSettings = null;
+let siteSettingsSha = null;
 
-    // DEFAULT_AVATAR - SVG person icon (same as chat.html)
-    var DEFAULT_AVATAR = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" rx="8" fill="#e5e7eb"/><circle cx="50" cy="38" r="18" fill="#9ca3af"/><ellipse cx="50" cy="85" rx="30" ry="22" fill="#9ca3af"/></svg>'
-    )));
-
-    // Config
-    var USER_REPO = 'RuiweihanHub/ruiuser';
-    var getToken = function() { return ['ghp_', 'aJxbQaU0S56e8pl6N8zrkWoHkfJHi92GOiFQ'].join(''); };
-    var SU_ADMINS = ['Administrator', 'Ruiweihan', '000001'];
-
-    // State
-    var currentUser = null;
-    var allUsers = [];
-    var currentDetailUid = null;
-    var operationLogs = [];
-
-    // ===== Avatar rendering function =====
-    function renderAvatar(avatarData, size) {
-      size = size || 36;
-      var url = (avatarData && (avatarData.startsWith('http') || avatarData.startsWith('data:'))) ? avatarData : DEFAULT_AVATAR;
-      return '<img src="' + escapeHtml(url) + '" alt="" style="width:' + size + 'px;height:' + size + 'px;border-radius:8px;object-fit:cover;background:#e5e7eb;" onerror="this.onerror=null;this.src=\'' + DEFAULT_AVATAR.replace(/'/g, "\\'") + '\'">';
+async function fetchSiteSettings() {
+  try {
+    const token = AUTH_CONFIG.getToken();
+    const res = await fetch(`https://api.github.com/repos/${AUTH_CONFIG.repo}/contents/site-settings.json?ref=main&_=${Date.now()}`, {
+      headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      siteSettingsSha = data.sha;
+      siteSettings = JSON.parse(fromBase64(data.content));
+      return siteSettings;
+    } else if (res.status === 404) {
+      // Create default
+      siteSettings = DEFAULT_SITE_SETTINGS;
+      await saveSiteSettings('Initialize site settings');
+      return siteSettings;
     }
+    return null;
+  } catch (err) {
+    console.error('Fetch site settings error:', err);
+    siteSettings = DEFAULT_SITE_SETTINGS;
+    return siteSettings;
+  }
+}
 
-    function getUserAvatar(uid) {
-      var localAvatar = localStorage.getItem('rui_avatar_' + uid);
-      if (localAvatar) return localAvatar;
-      for (var i = 0; i < allUsers.length; i++) {
-        if (allUsers[i].uid === uid && allUsers[i].profile && allUsers[i].profile.avatar) {
-          return allUsers[i].profile.avatar;
-        }
-      }
-      return null;
-    }
-
-    // ===== Utility functions =====
-    function formatDate(dateStr) {
-      if (!dateStr) return '-';
-      return new Date(dateStr).toLocaleString('zh-CN');
-    }
-
-    function escapeHtml(text) {
-      if (!text) return '';
-      var div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-
-    function showToast(message, type) {
-      type = type || 'success';
-      var container = document.getElementById('toastContainer');
-      var toast = document.createElement('div');
-      var bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-gray-800';
-      toast.className = 'toast-anim ' + bgColor + ' text-white text-sm font-medium px-5 py-3 rounded-xl shadow-lg flex items-center gap-2';
-      toast.innerHTML = '<span>' + escapeHtml(message) + '</span>';
-      container.appendChild(toast);
-      setTimeout(function() { toast.remove(); }, 3000);
-    }
-
-    function formatNumber(num) {
-      if (num === null || num === undefined) return '0';
-      if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-      if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-      return num.toString();
-    }
-
-    // Role display
-    function roleLabel(role) {
-      if (role === 'admin') return 'SU 超管';
-      if (role === 'ma') return 'MA 管理员';
-      return 'Member';
-    }
-
-    function roleBadgeClass(role) {
-      if (role === 'admin') return 'bg-amber-50 text-amber-800';
-      if (role === 'ma') return 'bg-indigo-50 text-indigo-800';
-      return 'bg-gray-100 text-gray-600';
-    }
-
-    // ===== Operation logs =====
-    function addLog(action, detail) {
-      operationLogs.unshift({
-        action: action,
-        detail: detail,
-        time: new Date().toISOString()
-      });
-      if (operationLogs.length > 100) operationLogs.pop();
-      saveLogsToLocal();
-      renderLogs();
-    }
-
-    function saveLogsToLocal() {
-      try { localStorage.setItem('rui_admin_logs', JSON.stringify(operationLogs)); } catch(e) {}
-    }
-
-    function loadLogsFromLocal() {
-      try {
-        var saved = localStorage.getItem('rui_admin_logs');
-        if (saved) operationLogs = JSON.parse(saved);
-      } catch(e) {}
-    }
-
-    function renderLogs() {
-      var container = document.getElementById('logsContainer');
-      if (operationLogs.length === 0) {
-        container.innerHTML = '<div class="text-center py-10 text-gray-400 text-sm">暂无操作日志</div>';
-        return;
-      }
-      var iconColorMap = {
-        'create': 'bg-green-50 text-green-500',
-        'update': 'bg-blue-50 text-blue-500',
-        'delete': 'bg-red-50 text-red-500',
-        'login': 'bg-violet-50 text-violet-500',
-        'status': 'bg-blue-50 text-blue-500',
-        'role': 'bg-violet-50 text-violet-500',
-        'password': 'bg-amber-50 text-amber-500',
-        'uid': 'bg-blue-50 text-blue-500',
-        'level': 'bg-blue-50 text-blue-500',
-        'rcoins': 'bg-amber-50 text-amber-500',
-        'avatar': 'bg-blue-50 text-blue-500',
-        'displayName': 'bg-blue-50 text-blue-500',
-        'message': 'bg-green-50 text-green-500',
-        'setting': 'bg-blue-50 text-blue-500'
-      };
-      var iconMap = {
-        'create': '&#9989;', 'update': '&#9999;', 'delete': '&#128465;', 'login': '&#128272;'
-      };
-      var catMap = {
-        'create': 'create', 'update': 'update', 'delete': 'delete', 'login': 'login',
-        'status': 'update', 'role': 'update', 'password': 'update', 'uid': 'update',
-        'level': 'update', 'rcoins': 'update', 'avatar': 'update', 'displayName': 'update',
-        'message': 'create', 'setting': 'update'
-      };
-      container.innerHTML = operationLogs.map(function(log) {
-        var cat = catMap[log.action] || 'update';
-        var colorClass = iconColorMap[log.action] || 'bg-blue-50 text-blue-500';
-        var emoji = iconMap[cat] || '&#9999;';
-        return '<div class="flex items-start gap-3 py-3 border-b border-gray-50 last:border-0">' +
-          '<div class="w-8 h-8 rounded-lg flex items-center justify-center text-sm flex-shrink-0 ' + colorClass + '">' + emoji + '</div>' +
-          '<div class="flex-1 min-w-0"><div class="text-sm text-gray-700">' + escapeHtml(log.detail) + '</div>' +
-          '<div class="text-xs text-gray-400 mt-0.5">' + formatDate(log.time) + '</div></div></div>';
-      }).join('');
-    }
-
-    function clearLogs() {
-      operationLogs = [];
-      saveLogsToLocal();
-      renderLogs();
-      showToast('日志已清空');
-    }
-
-    // ===== Sidebar =====
-    function toggleSidebar() {
-      var sidebar = document.getElementById('sidebar');
-      var overlay = document.getElementById('sidebarOverlay');
-      sidebar.classList.toggle('open');
-      overlay.classList.toggle('hidden');
-    }
-
-    // ===== Panel switching =====
-    var panelTitles = {
-      dashboard: ['数据概览', '系统运行状态与关键指标'],
-      users: ['用户管理', '查看和管理所有用户'],
-      settings: ['系统设置', '配置系统参数和通知'],
-      logs: ['操作日志', '查看管理操作记录'],
-      userDetail: ['用户详情', '查看和编辑用户信息']
-    };
-
-    function switchPanel(panel) {
-      // Nav highlight
-      var navItems = document.querySelectorAll('.nav-item');
-      navItems.forEach(function(item) {
-        if (item.getAttribute('data-panel') === panel) {
-          item.classList.add('bg-violet-50', 'text-violet-700');
-          item.classList.remove('text-gray-500', 'hover:bg-gray-50', 'hover:text-gray-900');
-        } else {
-          item.classList.remove('bg-violet-50', 'text-violet-700');
-          item.classList.add('text-gray-500', 'hover:bg-gray-50', 'hover:text-gray-900');
-        }
-      });
-
-      // Panel visibility
-      var panels = ['dashboard', 'users', 'settings', 'logs', 'userDetail'];
-      panels.forEach(function(p) {
-        var el = document.getElementById('panel' + p.charAt(0).toUpperCase() + p.slice(1));
-        if (p === panel) {
-          el.classList.remove('hidden');
-        } else {
-          el.classList.add('hidden');
-        }
-      });
-
-      // Title
-      var info = panelTitles[panel] || ['', ''];
-      document.getElementById('panelTitle').textContent = info[0];
-      document.getElementById('panelDesc').textContent = info[1];
-
-      // Mobile: close sidebar
-      if (window.innerWidth <= 768) {
-        document.getElementById('sidebar').classList.remove('open');
-        document.getElementById('sidebarOverlay').classList.add('hidden');
-      }
-    }
-
-    // ===== Modal =====
-    function openModal(id) {
-      document.getElementById(id).classList.remove('hidden');
-    }
-
-    function closeModal(id) {
-      document.getElementById(id).classList.add('hidden');
-    }
-
-    // ===== Permission check =====
-    function checkPermission() {
-      var sessionUser = sessionStorage.getItem('rui_user');
-      var sessionUid = sessionStorage.getItem('rui_uid');
-      var rememberedUser = localStorage.getItem('rui_user_remember');
-      var rememberedUid = localStorage.getItem('rui_uid_remember');
-
-      var username = sessionUser || rememberedUser;
-      var uid = sessionUid || rememberedUid;
-
-      if (!username || (SU_ADMINS.indexOf(username) === -1 && SU_ADMINS.indexOf(uid) === -1)) {
-        document.getElementById('unauthorized').classList.remove('hidden');
-        document.getElementById('unauthorized').classList.add('flex');
-        return false;
-      }
-
-      currentUser = { username: username, uid: uid };
-      document.getElementById('navAdminName').textContent = username;
-
-      // Show admin avatar in nav
-      var adminAvatar = getUserAvatar(uid);
-      document.getElementById('navAvatar').innerHTML = renderAvatar(adminAvatar, 24);
-
-      document.getElementById('mainContent').classList.remove('hidden');
-      document.getElementById('mainContent').classList.add('flex');
+async function saveSiteSettings(commitMessage) {
+  try {
+    const token = AUTH_CONFIG.getToken();
+    const body = { message: commitMessage, content: toBase64(JSON.stringify(siteSettings, null, 2)) };
+    if (siteSettingsSha) body.sha = siteSettingsSha;
+    const res = await fetch(`https://api.github.com/repos/${AUTH_CONFIG.repo}/contents/site-settings.json`, {
+      method: 'PUT',
+      headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      siteSettingsSha = data.content.sha;
       return true;
     }
+    return false;
+  } catch (err) {
+    console.error('Save site settings error:', err);
+    return false;
+  }
+}
 
-    // ===== GitHub API =====
-    function fetchUsersJson() {
-      var token = getToken();
-      return fetch('https://api.github.com/repos/' + USER_REPO + '/contents/users.json?ref=main&_=' + Date.now(), {
-        headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
-      }).then(function(res) {
-        if (res.ok) return res.json();
-        throw new Error('Fetch failed: ' + res.status);
-      });
+// ============================================================
+// PRIVATE MESSAGES MANAGEMENT
+// ============================================================
+
+let messagesData = null;
+let messagesSha = null;
+
+async function fetchMessages() {
+  try {
+    const token = AUTH_CONFIG.getToken();
+    const res = await fetch(`https://api.github.com/repos/${AUTH_CONFIG.repo}/contents/messages.json?ref=main&_=${Date.now()}`, {
+      headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      messagesSha = data.sha;
+      messagesData = JSON.parse(fromBase64(data.content));
+      return messagesData;
+    } else if (res.status === 404) {
+      messagesData = { messages: [] };
+      await saveMessages('Initialize messages');
+      return messagesData;
     }
+    return null;
+  } catch (err) {
+    console.error('Fetch messages error:', err);
+    messagesData = { messages: [] };
+    return messagesData;
+  }
+}
 
-    function putUsersJson(content, sha, message) {
-      var token = getToken();
-      return fetch('https://api.github.com/repos/' + USER_REPO + '/contents/users.json', {
-        method: 'PUT',
-        headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: message,
-          content: toBase64(JSON.stringify(content, null, 2)),
-          sha: sha
-        })
-      }).then(function(res) {
-        if (res.ok) return res.json();
-        throw new Error('Save failed: ' + res.status);
-      });
+async function saveMessages(commitMessage) {
+  try {
+    const token = AUTH_CONFIG.getToken();
+    const body = { message: commitMessage, content: toBase64(JSON.stringify(messagesData, null, 2)) };
+    if (messagesSha) body.sha = messagesSha;
+    const res = await fetch(`https://api.github.com/repos/${AUTH_CONFIG.repo}/contents/messages.json`, {
+      method: 'PUT',
+      headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      messagesSha = data.content.sha;
+      return true;
     }
+    return false;
+  } catch (err) {
+    console.error('Save messages error:', err);
+    return false;
+  }
+}
 
-    // ===== Load users =====
-    function loadUsers() {
-      fetchUsersJson().then(function(data) {
-        var content = JSON.parse(fromBase64(data.content));
-        allUsers = content.users || [];
-        updateStats(content);
-        renderUsers(allUsers);
-        // Refresh nav avatar
-        if (currentUser) {
-          var adminAvatar = getUserAvatar(currentUser.uid);
-          document.getElementById('navAvatar').innerHTML = renderAvatar(adminAvatar, 24);
-        }
-      }).catch(function(err) {
-        console.error('加载用户失败:', err);
-        document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="9" class="text-center py-10 text-red-500 text-sm">加载失败，请刷新重试</td></tr>';
-      });
+// ============================================================
+// OPERATION LOGS
+// ============================================================
+
+let operationLogs = [];
+
+function addLog(action, detail) {
+  operationLogs.unshift({
+    time: new Date().toLocaleString('zh-CN'),
+    action: action,
+    detail: detail || '',
+    admin: currentAdmin || 'Unknown'
+  });
+  if (operationLogs.length > 200) operationLogs = operationLogs.slice(0, 200);
+  renderLogs();
+}
+
+function clearLogs() {
+  showConfirm('清空日志', '确定要清空所有操作日志吗？', () => {
+    operationLogs = [];
+    renderLogs();
+    showToast('日志已清空', 'success');
+  });
+}
+
+function renderLogs() {
+  const container = document.getElementById('logsContainer');
+  if (!operationLogs.length) {
+    container.innerHTML = '<div class="text-center py-10 text-gray-400 text-sm">暂无操作日志</div>';
+    return;
+  }
+  container.innerHTML = operationLogs.map(log => `
+    <div class="flex items-start gap-3 py-3 border-b border-gray-50 last:border-0">
+      <div class="w-2 h-2 rounded-full bg-violet-400 mt-1.5 flex-shrink-0"></div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-medium text-gray-900">${escapeHtml(log.action)}</span>
+          <span class="text-xs text-gray-400">${log.time}</span>
+          <span class="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded">${escapeHtml(log.admin)}</span>
+        </div>
+        ${log.detail ? `<p class="text-xs text-gray-500 mt-1">${escapeHtml(log.detail)}</p>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// ADMIN PANEL LOGIC
+// ============================================================
+
+let currentAdmin = null;
+let currentAdminUid = null;
+let currentDetailUid = null;
+let currentRcoinMode = 'add';
+
+// Panel titles and descriptions
+const panelInfo = {
+  dashboard: { title: '数据概览', desc: '系统运行状态与关键指标' },
+  users: { title: '用户管理', desc: '管理所有注册用户' },
+  website: { title: '网站管理', desc: '管理首页入口与百宝箱内容' },
+  settings: { title: '系统设置', desc: '通知、公告与系统配置' },
+  logs: { title: '操作日志', desc: '查看所有管理操作记录' },
+  messages: { title: '私信管理', desc: '发送和查看私信' }
+};
+
+function switchPanel(panel) {
+  // Update nav items
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    const isActive = btn.dataset.panel === panel;
+    btn.className = `nav-item w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${isActive ? 'text-violet-600 bg-violet-50' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`;
+  });
+
+  // Update title
+  const info = panelInfo[panel] || { title: panel, desc: '' };
+  document.getElementById('panelTitle').textContent = info.title;
+  document.getElementById('panelDesc').textContent = info.desc;
+
+  // Show/hide panels
+  document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
+  const panelEl = document.getElementById('panel' + panel.charAt(0).toUpperCase() + panel.slice(1));
+  if (panelEl) {
+    panelEl.classList.remove('hidden');
+    panelEl.classList.add('fade-in');
+  }
+
+  // Close mobile sidebar
+  if (window.innerWidth < 768) {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.add('hidden');
+  }
+}
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('hidden');
+}
+
+// ============================================================
+// TOAST NOTIFICATIONS
+// ============================================================
+
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const colors = {
+    success: 'bg-green-50 border-green-200 text-green-800',
+    error: 'bg-red-50 border-red-200 text-red-800',
+    info: 'bg-blue-50 border-blue-200 text-blue-800',
+    warning: 'bg-amber-50 border-amber-200 text-amber-800'
+  };
+  const icons = {
+    success: '<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>',
+    error: '<svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>',
+    info: '<svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+    warning: '<svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>'
+  };
+  const toast = document.createElement('div');
+  toast.className = `toast-anim flex items-center gap-2 px-4 py-3 border rounded-xl shadow-lg ${colors[type] || colors.info}`;
+  toast.innerHTML = `${icons[type] || icons.info}<span class="text-sm font-medium">${escapeHtml(message)}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(40px)';
+    toast.style.transition = 'all 0.3s ease';
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// ============================================================
+// CONFIRM MODAL
+// ============================================================
+
+let confirmCallback = null;
+
+function showConfirm(title, message, onConfirm) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMessage').textContent = message;
+  confirmCallback = onConfirm;
+  document.getElementById('confirmModal').classList.remove('hidden');
+  document.getElementById('confirmModal').classList.add('flex');
+  document.getElementById('confirmOk').onclick = () => {
+    closeModal('confirmModal');
+    if (confirmCallback) confirmCallback();
+  };
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.add('hidden');
+  document.getElementById(id).classList.remove('flex');
+}
+
+// ============================================================
+// AUTH & INIT
+// ============================================================
+
+async function initAdmin() {
+  const loginState = syncLoginState();
+  if (!loginState.isLoggedIn) {
+    showUnauthorized();
+    return;
+  }
+
+  currentAdmin = loginState.username;
+  currentAdminUid = loginState.uid;
+
+  // Check admin permission
+  if (!AUTH_CONFIG.admins.includes(currentAdmin) && !AUTH_CONFIG.admins.includes(currentAdminUid)) {
+    showUnauthorized();
+    return;
+  }
+
+  // Show main content
+  document.getElementById('loadingOverlay').classList.add('hidden');
+  document.getElementById('mainContent').classList.remove('hidden');
+
+  // Set nav admin name
+  document.getElementById('navAdminName').textContent = currentAdmin;
+
+  // Load admin avatar
+  try {
+    const auth = await getAuth();
+    const adminUser = await auth.getUser(currentAdmin);
+    if (adminUser && adminUser.profile && adminUser.profile.avatar) {
+      document.getElementById('navAvatar').innerHTML = `<img src="${adminUser.profile.avatar}" class="w-full h-full object-cover rounded-md" alt="avatar">`;
+    } else {
+      document.getElementById('navAvatar').innerHTML = `<div class="w-full h-full flex items-center justify-center bg-gray-50 rounded-md p-0.5">${DEFAULT_AVATAR_SVG}</div>`;
     }
+  } catch (e) {
+    document.getElementById('navAvatar').innerHTML = `<div class="w-full h-full flex items-center justify-center bg-gray-50 rounded-md p-0.5">${DEFAULT_AVATAR_SVG}</div>`;
+  }
 
-    // ===== Update stats =====
-    function updateStats(content) {
-      var users = content.users || [];
-      var stats = content.stats || {};
-      document.getElementById('statTotalUsers').textContent = users.length;
-      document.getElementById('statActiveUsers').textContent = users.filter(function(u) { return u.status === 'active'; }).length;
-      document.getElementById('statAdmins').textContent = users.filter(function(u) { return u.role === 'admin' || u.role === 'ma'; }).length;
-      document.getElementById('statTotalLogins').textContent = stats.totalLogins || 0;
+  // Load data
+  await loadUsers();
+  await fetchSiteSettings();
+  await fetchMessages();
+  renderDashboard();
+  renderWebsitePanel();
+  renderSettingsPanel();
+  renderLogs();
+  renderMessages();
+}
 
-      var totalRcoins = 0;
-      users.forEach(function(u) { totalRcoins += (u.rcoins || 0); });
-      document.getElementById('statTotalRcoins').textContent = formatNumber(totalRcoins);
+function showUnauthorized() {
+  document.getElementById('loadingOverlay').classList.add('hidden');
+  document.getElementById('unauthorized').classList.remove('hidden');
+  document.getElementById('unauthorized').classList.add('flex');
+}
 
-      var proUsers = users.filter(function(u) { return u.pro === true; }).length;
-      document.getElementById('statProUsers').textContent = proUsers;
+// ============================================================
+// DASHBOARD
+// ============================================================
 
-      // Recent registrations
-      var recentDiv = document.getElementById('recentRegistrations');
-      if (stats.lastRegistration) {
-        recentDiv.innerHTML = '<p class="font-semibold text-gray-900">' + formatDate(stats.lastRegistration) + '</p>';
-      }
+function renderDashboard() {
+  if (!ruiAuth || !ruiAuth.users) return;
+  const users = ruiAuth.users.users;
+  const total = users.length;
+  const active = users.filter(u => u.status === 'active').length;
+  const admins = users.filter(u => u.role === 'admin').length;
+  const totalLogins = ruiAuth.users.stats ? ruiAuth.users.stats.totalLogins || 0 : 0;
+  const totalRcoins = users.reduce((sum, u) => sum + (u.rcoins || 0), 0);
+  const proUsers = users.filter(u => u.isPro).length;
 
-      // User growth
-      var growthDiv = document.getElementById('userGrowth');
-      var thisMonth = new Date();
-      thisMonth.setDate(1);
-      thisMonth.setHours(0,0,0,0);
-      var thisMonthUsers = users.filter(function(u) { return new Date(u.createdAt) >= thisMonth; }).length;
-      var lastMonth = new Date(thisMonth);
-      lastMonth.setMonth(lastMonth.getMonth() - 1);
-      var lastMonthUsers = users.filter(function(u) {
-        var d = new Date(u.createdAt);
-        return d >= lastMonth && d < thisMonth;
-      }).length;
-      growthDiv.innerHTML =
-        '<div class="mb-3"><span class="text-2xl font-bold text-gray-900">' + thisMonthUsers + '</span><span class="text-sm text-gray-500 ml-2">本月新增</span></div>' +
-        '<div><span class="text-base font-semibold text-gray-500">' + lastMonthUsers + '</span><span class="text-sm text-gray-400 ml-2">上月新增</span></div>';
+  document.getElementById('statTotalUsers').textContent = total;
+  document.getElementById('statActiveUsers').textContent = active;
+  document.getElementById('statAdmins').textContent = admins;
+  document.getElementById('statTotalLogins').textContent = totalLogins;
+  document.getElementById('statTotalRcoins').textContent = totalRcoins;
+  document.getElementById('statProUsers').textContent = proUsers;
+
+  // Recent registrations
+  const recentEl = document.getElementById('recentRegistrations');
+  const recentUsers = [...users].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+  if (recentUsers.length) {
+    recentEl.innerHTML = recentUsers.map(u => `
+      <div class="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
+        <div class="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">${renderAvatarSmall(u.profile ? u.profile.avatar : null)}</div>
+        <div class="flex-1 min-w-0">
+          <div class="text-sm font-medium text-gray-900 truncate">${escapeHtml(u.displayName || u.username)}</div>
+          <div class="text-xs text-gray-400">${u.uid}</div>
+        </div>
+        <div class="text-xs text-gray-400">${formatDate(u.createdAt)}</div>
+      </div>
+    `).join('');
+  }
+
+  // User growth
+  const growthEl = document.getElementById('userGrowth');
+  const byMonth = {};
+  users.forEach(u => {
+    const d = new Date(u.createdAt);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    byMonth[key] = (byMonth[key] || 0) + 1;
+  });
+  const keys = Object.keys(byMonth).sort().slice(-6);
+  if (keys.length) {
+    const max = Math.max(...keys.map(k => byMonth[k]), 1);
+    growthEl.innerHTML = `<div class="flex items-end gap-3 h-32">${keys.map(k => {
+      const pct = (byMonth[k] / max) * 100;
+      return `<div class="flex-1 flex flex-col items-center gap-1">
+        <div class="text-xs text-gray-500">${byMonth[k]}</div>
+        <div class="w-full bg-violet-100 rounded-t" style="height:${Math.max(pct, 4)}%"></div>
+        <div class="text-[10px] text-gray-400">${k.slice(5)}</div>
+      </div>`;
+    }).join('')}</div>`;
+  }
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '-';
+  try {
+    return new Date(dateStr).toLocaleDateString('zh-CN');
+  } catch (e) {
+    return dateStr;
+  }
+}
+
+// ============================================================
+// USER MANAGEMENT
+// ============================================================
+
+async function loadUsers() {
+  try {
+    const auth = await getAuth();
+    // Re-fetch to get latest
+    const fresh = await auth.fetchUsers();
+    if (fresh) auth.users = fresh;
+    renderUsersTable();
+    renderDashboard();
+  } catch (err) {
+    console.error('Load users error:', err);
+    showToast('加载用户数据失败', 'error');
+  }
+}
+
+function renderUsersTable() {
+  if (!ruiAuth || !ruiAuth.users) return;
+  const search = document.getElementById('userSearch').value.toLowerCase().trim();
+  const roleFilter = document.getElementById('roleFilter').value;
+  const statusFilter = document.getElementById('statusFilter').value;
+
+  let users = ruiAuth.users.users;
+  if (search) {
+    users = users.filter(u =>
+      (u.username && u.username.toLowerCase().includes(search)) ||
+      (u.displayName && u.displayName.toLowerCase().includes(search)) ||
+      (u.uid && u.uid.toLowerCase().includes(search))
+    );
+  }
+  if (roleFilter !== 'all') {
+    if (roleFilter === 'admin') users = users.filter(u => u.role === 'admin');
+    else if (roleFilter === 'ma') users = users.filter(u => u.role === 'ma');
+    else users = users.filter(u => u.role === 'user');
+  }
+  if (statusFilter !== 'all') {
+    users = users.filter(u => u.status === statusFilter);
+  }
+
+  const tbody = document.getElementById('usersTableBody');
+  if (!users.length) {
+    tbody.innerHTML = '<tr><td colspan="9" class="text-center py-10 text-gray-400 text-sm">无匹配用户</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = users.map(u => {
+    const roleLabel = u.role === 'admin' ? '<span class="text-xs px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 font-medium">SU</span>' :
+                     u.role === 'ma' ? '<span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-medium">MA</span>' :
+                     '<span class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 font-medium">Member</span>';
+    const statusLabel = u.status === 'active' ?
+      '<span class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">活跃</span>' :
+      '<span class="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700">禁用</span>';
+    const proLabel = u.isPro ? '<span class="text-xs px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">&#9733; Pro</span>' : '<span class="text-xs text-gray-400">-</span>';
+
+    return `<tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+      <td class="py-3 px-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">${renderAvatarSmall(u.profile ? u.profile.avatar : null)}</div>
+          <div><div class="text-sm font-medium text-gray-900">${escapeHtml(u.displayName || u.username)}</div><div class="text-xs text-gray-400">@${escapeHtml(u.username)}</div></div>
+        </div>
+      </td>
+      <td class="py-3 px-3 text-sm text-gray-600 font-mono">${escapeHtml(u.uid)}</td>
+      <td class="py-3 px-3">${roleLabel}</td>
+      <td class="py-3 px-3 text-sm text-gray-600">LV${u.level || 0}</td>
+      <td class="py-3 px-3 text-sm text-gray-600">${u.rcoins || 0}</td>
+      <td class="py-3 px-3">${proLabel}</td>
+      <td class="py-3 px-3">${statusLabel}</td>
+      <td class="py-3 px-3 text-xs text-gray-400">${formatDate(u.createdAt)}</td>
+      <td class="py-3 px-3">
+        <button onclick="viewUserDetail('${escapeHtml(u.uid)}')" class="px-2 py-1 text-xs font-medium text-violet-600 hover:text-violet-800 hover:bg-violet-50 rounded-lg transition-colors">详情</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterUsers() {
+  renderUsersTable();
+}
+
+// ============================================================
+// USER DETAIL (INLINE EDITING)
+// ============================================================
+
+function viewUserDetail(uid) {
+  currentDetailUid = uid;
+  switchPanel('users');
+  // Hide users list, show detail
+  document.getElementById('panelUsers').classList.add('hidden');
+  document.getElementById('panelUserDetail').classList.remove('hidden');
+  document.getElementById('panelTitle').textContent = '用户详情';
+  document.getElementById('panelDesc').textContent = '查看和编辑用户信息';
+
+  const user = getUserByUid(uid);
+  if (!user) {
+    showToast('用户不存在', 'error');
+    backToUsers();
+    return;
+  }
+  renderUserDetail(user);
+}
+
+function getUserByUid(uid) {
+  if (!ruiAuth || !ruiAuth.users) return null;
+  const index = ruiAuth.findUserIndexByUid(uid);
+  if (index === -1) return null;
+  return ruiAuth.users.users[index];
+}
+
+function getUserByUsername(username) {
+  if (!ruiAuth || !ruiAuth.users) return null;
+  const index = ruiAuth.findUserIndexByUsername(username);
+  if (index === -1) return null;
+  return ruiAuth.users.users[index];
+}
+
+function renderUserDetail(user) {
+  // Avatar
+  document.getElementById('inlineAvatar').innerHTML = renderAvatar(user.profile ? user.profile.avatar : null);
+
+  // Name and UID
+  document.getElementById('inlineName').textContent = user.displayName || user.username;
+  document.getElementById('inlineUid').textContent = `UID: ${user.uid}`;
+
+  // Badges
+  const badges = [];
+  if (user.role === 'admin') badges.push('<span class="text-xs px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 font-medium">SU 超管</span>');
+  else if (user.role === 'ma') badges.push('<span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-medium">MA 管理员</span>');
+  else badges.push('<span class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 font-medium">Member</span>');
+  if (user.isPro) badges.push('<span class="text-xs px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">&#9733; Pro</span>');
+  if (user.status === 'active') badges.push('<span class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">活跃</span>');
+  else badges.push('<span class="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700">禁用</span>');
+  document.getElementById('inlineBadges').innerHTML = badges.join('');
+
+  // Editable fields
+  const fields = [
+    { label: '用户名', key: 'username', value: user.username, type: 'text', editable: false },
+    { label: 'UID', key: 'uid', value: user.uid, type: 'text', editable: true, uidEdit: true },
+    { label: '显示名', key: 'displayName', value: user.displayName || '', type: 'text', editable: true },
+    { label: '等级', key: 'level', value: user.level || 0, type: 'number', min: 0, max: 9, editable: true },
+    { label: 'R币', key: 'rcoins', value: user.rcoins || 0, type: 'rcoin', editable: true },
+    { label: '邮箱', key: 'email', value: (user.profile && user.profile.email) || '', type: 'text', editable: true },
+    { label: '简介', key: 'bio', value: (user.profile && user.profile.bio) || '', type: 'text', editable: true },
+    { label: '注册时间', key: 'createdAt', value: formatDate(user.createdAt), type: 'text', editable: false },
+    { label: '最后登录', key: 'lastLogin', value: user.lastLogin ? new Date(user.lastLogin).toLocaleString('zh-CN') : '从未', type: 'text', editable: false },
+    { label: '登录次数', key: 'loginCount', value: user.loginCount || 0, type: 'text', editable: false },
+  ];
+
+  document.getElementById('inlineFields').innerHTML = fields.map(f => {
+    if (f.type === 'rcoin') {
+      return `<div class="detail-field bg-gray-50 border border-gray-100 rounded-xl p-4">
+        <div class="text-xs text-gray-500 mb-1">${f.label}</div>
+        <div class="flex items-center gap-2">
+          <span class="detail-field-value text-sm font-semibold text-gray-900">${f.value}</span>
+          <div class="detail-field-edit">
+            <span class="text-sm font-semibold text-gray-900">${f.value}</span>
+          </div>
+          <button onclick="openRcoinModal()" class="px-2 py-1 text-xs font-medium bg-violet-100 text-violet-700 rounded-lg hover:bg-violet-200 transition-colors">充值</button>
+        </div>
+        <div class="detail-field-actions mt-2 gap-2"></div>
+      </div>`;
     }
-
-    // ===== Render users table =====
-    function renderUsers(users) {
-      var tbody = document.getElementById('usersTableBody');
-      if (users.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-10 text-gray-400 text-sm">暂无用户</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = users.map(function(user) {
-        var avatarSrc = getUserAvatar(user.uid);
-        var avatarHtml = renderAvatar(avatarSrc, 36);
-        var roleClass = roleBadgeClass(user.role);
-        var roleText = roleLabel(user.role);
-        var statusClass = user.status === 'active' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700';
-        var statusText = user.status === 'active' ? '活跃' : '禁用';
-        var proHtml = user.pro ? '<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700">Pro</span>' : '-';
-        var level = (user.level !== undefined && user.level !== null) ? user.level : '-';
-        var rcoins = (user.rcoins !== undefined && user.rcoins !== null) ? formatNumber(user.rcoins) : '0';
-
-        return '<tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors cursor-pointer" onclick="showUserDetail(\'' + user.uid + '\')">' +
-          '<td class="py-3 px-3"><div class="flex items-center gap-2.5">' + avatarHtml +
-            '<div><div class="text-sm font-semibold text-gray-900">' + escapeHtml(user.displayName || user.username) + '</div>' +
-            '<div class="text-xs text-gray-400">@' + escapeHtml(user.username) + '</div></div></div></td>' +
-          '<td class="py-3 px-3"><span class="inline-block px-2 py-0.5 bg-gray-100 rounded-md text-xs font-mono text-gray-600">' + user.uid + '</span></td>' +
-          '<td class="py-3 px-3"><span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold ' + roleClass + '">' + roleText + '</span></td>' +
-          '<td class="py-3 px-3 text-sm text-gray-700">' + level + '</td>' +
-          '<td class="py-3 px-3 text-sm text-gray-700">' + rcoins + '</td>' +
-          '<td class="py-3 px-3 text-sm">' + proHtml + '</td>' +
-          '<td class="py-3 px-3"><span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold ' + statusClass + '">' + statusText + '</span></td>' +
-          '<td class="py-3 px-3 text-xs text-gray-400">' + formatDate(user.createdAt) + '</td>' +
-          '<td class="py-3 px-3"><button class="px-3 py-1 bg-gray-900 text-white text-xs font-medium rounded-lg hover:bg-gray-800 transition-colors" onclick="event.stopPropagation();showUserDetail(\'' + user.uid + '\')">详情</button></td>' +
-        '</tr>';
-      }).join('');
+    if (!f.editable) {
+      return `<div class="bg-gray-50 border border-gray-100 rounded-xl p-4">
+        <div class="text-xs text-gray-500 mb-1">${f.label}</div>
+        <div class="text-sm text-gray-900">${escapeHtml(String(f.value))}</div>
+      </div>`;
     }
+    const inputId = `edit_${f.key}`;
+    return `<div class="detail-field bg-gray-50 border border-gray-100 rounded-xl p-4" id="field_${f.key}">
+      <div class="text-xs text-gray-500 mb-1">${f.label}</div>
+      <span class="detail-field-value text-sm text-gray-900">${escapeHtml(String(f.value))}</span>
+      <div class="detail-field-edit">
+        <input type="${f.type}" id="${inputId}" value="${escapeHtml(String(f.value))}" class="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-violet-300 transition-colors" ${f.min !== undefined ? `min="${f.min}"` : ''} ${f.max !== undefined ? `max="${f.max}"` : ''}>
+        ${f.uidEdit ? '<p class="text-xs text-amber-500 mt-1">修改UID需谨慎，确保不会与其他用户冲突</p>' : ''}
+      </div>
+      <div class="detail-field-actions mt-2 gap-2">
+        <button onclick="saveField('${f.key}')" class="px-2 py-1 text-xs font-medium bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">保存</button>
+        <button onclick="cancelField('${f.key}', '${escapeHtml(String(f.value))}')" class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors">取消</button>
+      </div>
+      <button onclick="startEdit('${f.key}')" class="mt-1 text-xs text-violet-600 hover:text-violet-800 transition-colors">编辑</button>
+    </div>`;
+  }).join('');
 
-    // ===== Filter users =====
-    function filterUsers() {
-      var search = document.getElementById('userSearch').value.toLowerCase();
-      var roleFilter = document.getElementById('roleFilter').value;
-      var statusFilter = document.getElementById('statusFilter').value;
+  // Action buttons
+  const actions = [];
 
-      var filtered = allUsers.filter(function(user) {
-        var matchSearch = !search ||
-          user.username.toLowerCase().indexOf(search) !== -1 ||
-          user.uid.toLowerCase().indexOf(search) !== -1 ||
-          (user.displayName && user.displayName.toLowerCase().indexOf(search) !== -1);
-        var matchRole = roleFilter === 'all' || user.role === roleFilter;
-        var matchStatus = statusFilter === 'all' || user.status === statusFilter;
-        return matchSearch && matchRole && matchStatus;
-      });
+  // Reset password
+  actions.push(`<button onclick="resetPasswordInline()" class="px-3 py-2 bg-gray-100 text-gray-700 text-xs font-medium rounded-xl hover:bg-gray-200 transition-colors">重置密码</button>`);
 
-      renderUsers(filtered);
+  // Toggle Pro
+  actions.push(`<button onclick="togglePro()" class="px-3 py-2 ${user.isPro ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-700'} text-xs font-medium rounded-xl hover:opacity-80 transition-colors">${user.isPro ? '取消 Pro' : '设为 Pro'}</button>`);
+
+  // Change role
+  if (user.role === 'admin') {
+    actions.push(`<button onclick="changeRole('ma')" class="px-3 py-2 bg-blue-100 text-blue-700 text-xs font-medium rounded-xl hover:opacity-80 transition-colors">降为 MA</button>`);
+    actions.push(`<button onclick="changeRole('user')" class="px-3 py-2 bg-gray-100 text-gray-700 text-xs font-medium rounded-xl hover:bg-gray-200 transition-colors">降为 Member</button>`);
+  } else if (user.role === 'ma') {
+    actions.push(`<button onclick="changeRole('admin')" class="px-3 py-2 bg-violet-100 text-violet-700 text-xs font-medium rounded-xl hover:opacity-80 transition-colors">升为 SU</button>`);
+    actions.push(`<button onclick="changeRole('user')" class="px-3 py-2 bg-gray-100 text-gray-700 text-xs font-medium rounded-xl hover:bg-gray-200 transition-colors">降为 Member</button>`);
+  } else {
+    actions.push(`<button onclick="changeRole('admin')" class="px-3 py-2 bg-violet-100 text-violet-700 text-xs font-medium rounded-xl hover:opacity-80 transition-colors">升为 SU</button>`);
+    actions.push(`<button onclick="changeRole('ma')" class="px-3 py-2 bg-blue-100 text-blue-700 text-xs font-medium rounded-xl hover:opacity-80 transition-colors">升为 MA</button>`);
+  }
+
+  // Toggle status
+  if (user.status === 'active') {
+    actions.push(`<button onclick="toggleUserStatus('disabled')" class="px-3 py-2 bg-red-100 text-red-700 text-xs font-medium rounded-xl hover:opacity-80 transition-colors">禁用用户</button>`);
+  } else {
+    actions.push(`<button onclick="toggleUserStatus('active')" class="px-3 py-2 bg-green-100 text-green-700 text-xs font-medium rounded-xl hover:opacity-80 transition-colors">启用用户</button>`);
+  }
+
+  // Remove avatar
+  if (user.profile && user.profile.avatar) {
+    actions.push(`<button onclick="removeAvatar()" class="px-3 py-2 bg-gray-100 text-gray-700 text-xs font-medium rounded-xl hover:bg-gray-200 transition-colors">移除头像</button>`);
+  }
+
+  // Send message
+  actions.push(`<button onclick="sendMsgToUser('${escapeHtml(user.uid)}')" class="px-3 py-2 bg-gray-100 text-gray-700 text-xs font-medium rounded-xl hover:bg-gray-200 transition-colors">发送私信</button>`);
+
+  document.getElementById('inlineActions').innerHTML = actions.join('');
+}
+
+function startEdit(key) {
+  const field = document.getElementById('field_' + key);
+  if (field) field.classList.add('editing');
+}
+
+function cancelField(key, originalValue) {
+  const field = document.getElementById('field_' + key);
+  if (field) {
+    field.classList.remove('editing');
+    const input = document.getElementById('edit_' + key);
+    if (input) input.value = originalValue;
+  }
+}
+
+async function saveField(key) {
+  const user = getUserByUid(currentDetailUid);
+  if (!user) return;
+
+  const input = document.getElementById('edit_' + key);
+  if (!input) return;
+  const newValue = input.value.trim();
+
+  if (key === 'uid') {
+    // Validate UID - must not conflict
+    if (!newValue) { showToast('UID不能为空', 'error'); return; }
+    const existing = ruiAuth.findUserIndexByUid(newValue);
+    if (existing !== -1 && ruiAuth.users.users[existing].username !== user.username) {
+      showToast('该UID已被其他用户使用', 'error');
+      return;
     }
+    // Update index
+    delete ruiAuth.users.index.byUid[user.uid];
+    user.uid = newValue;
+    ruiAuth.users.index.byUid[newValue] = ruiAuth.findUserIndexByUsername(user.username);
+    currentDetailUid = newValue;
+  } else if (key === 'displayName') {
+    user.displayName = newValue;
+  } else if (key === 'level') {
+    const lv = parseInt(newValue);
+    if (isNaN(lv) || lv < 0 || lv > 9) { showToast('等级范围为0-9', 'error'); return; }
+    user.level = lv;
+  } else if (key === 'email') {
+    if (!user.profile) user.profile = { avatar: null, bio: null, email: null };
+    user.profile.email = newValue || null;
+  } else if (key === 'bio') {
+    if (!user.profile) user.profile = { avatar: null, bio: null, email: null };
+    user.profile.bio = newValue || null;
+  }
 
-    // ===== User detail panel =====
-    function showUserDetail(uid) {
-      var user = findUserByUid(uid);
+  const saved = await ruiAuth.saveUsers(`Admin: Update ${key} for ${user.username}`);
+  if (saved) {
+    showToast(`${key} 已更新`, 'success');
+    addLog(`修改用户字段`, `${user.username}: ${key} → ${newValue}`);
+    renderUserDetail(user);
+    renderUsersTable();
+  } else {
+    showToast('保存失败', 'error');
+  }
+}
+
+// Reset password
+async function resetPasswordInline() {
+  const user = getUserByUid(currentDetailUid);
+  if (!user) return;
+
+  const newPassword = prompt(`为 ${user.username} 设置新密码（至少4个字符）：`);
+  if (!newPassword || newPassword.length < 4) {
+    if (newPassword !== null) showToast('密码长度至少4个字符', 'error');
+    return;
+  }
+
+  const idx = ruiAuth.findUserIndexByUsername(user.username);
+  ruiAuth.users.users[idx].passwordHash = hashPasswordSync(newPassword);
+  const saved = await ruiAuth.saveUsers(`Admin: Reset password for ${user.username}`);
+  if (saved) {
+    showToast('密码已重置', 'success');
+    addLog('重置密码', `用户: ${user.username}`);
+  } else {
+    showToast('保存失败', 'error');
+  }
+}
+
+// Toggle Pro
+async function togglePro() {
+  const user = getUserByUid(currentDetailUid);
+  if (!user) return;
+  user.isPro = !user.isPro;
+  const saved = await ruiAuth.saveUsers(`Admin: Toggle Pro for ${user.username} → ${user.isPro}`);
+  if (saved) {
+    showToast(user.isPro ? '已设为 Pro' : '已取消 Pro', 'success');
+    addLog('切换Pro状态', `${user.username}: ${user.isPro ? 'Pro' : '普通'}`);
+    renderUserDetail(user);
+    renderUsersTable();
+  } else {
+    showToast('保存失败', 'error');
+  }
+}
+
+// Change role
+async function changeRole(newRole) {
+  const user = getUserByUid(currentDetailUid);
+  if (!user) return;
+  const roleNames = { admin: 'SU 超管', ma: 'MA 管理员', user: 'Member' };
+  showConfirm('变更角色', `确定将 ${user.username} 的角色从 ${roleNames[user.role] || user.role} 变更为 ${roleNames[newRole]}？`, async () => {
+    user.role = newRole;
+    const saved = await ruiAuth.saveUsers(`Admin: Change role for ${user.username} → ${newRole}`);
+    if (saved) {
+      showToast('角色已变更', 'success');
+      addLog('变更角色', `${user.username}: ${roleNames[newRole]}`);
+      renderUserDetail(user);
+      renderUsersTable();
+    } else {
+      showToast('保存失败', 'error');
+    }
+  });
+}
+
+// Toggle user status
+async function toggleUserStatus(newStatus) {
+  const user = getUserByUid(currentDetailUid);
+  if (!user) return;
+  const action = newStatus === 'disabled' ? '禁用' : '启用';
+  showConfirm(`${action}用户`, `确定要${action}用户 ${user.username} 吗？`, async () => {
+    user.status = newStatus;
+    const saved = await ruiAuth.saveUsers(`Admin: ${action} user ${user.username}`);
+    if (saved) {
+      showToast(`用户已${action}`, 'success');
+      addLog(`${action}用户`, user.username);
+      renderUserDetail(user);
+      renderUsersTable();
+    } else {
+      showToast('保存失败', 'error');
+    }
+  });
+}
+
+// Avatar editing
+function editAvatarInline() {
+  const input = document.getElementById('avatarFileInput');
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 500000) {
+      showToast('图片大小不能超过500KB', 'error');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const base64 = ev.target.result;
+      const user = getUserByUid(currentDetailUid);
       if (!user) return;
-
-      currentDetailUid = uid;
-
-      // Avatar
-      var avatarSrc = getUserAvatar(uid);
-      document.getElementById('inlineAvatar').innerHTML = renderAvatar(avatarSrc, 80);
-
-      // Name and UID
-      document.getElementById('inlineName').textContent = user.displayName || user.username;
-      document.getElementById('inlineUid').textContent = 'UID: ' + user.uid + '  |  @' + user.username;
-
-      // Badges
-      var badgesHtml = '<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold ' + roleBadgeClass(user.role) + '">' + roleLabel(user.role) + '</span>';
-      badgesHtml += user.status === 'active'
-        ? '<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-50 text-green-700">活跃</span>'
-        : '<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-50 text-red-700">已禁用</span>';
-      if (user.pro) badgesHtml += '<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700">Pro</span>';
-      document.getElementById('inlineBadges').innerHTML = badgesHtml;
-
-      // Editable fields
-      var currentLevel = (user.level !== undefined && user.level !== null) ? user.level : 0;
-      var currentRcoins = (user.rcoins !== undefined && user.rcoins !== null) ? user.rcoins : 0;
-      var currentExp = (user.experience !== undefined && user.experience !== null) ? user.experience : 0;
-
-      var fields = [
-        { id: 'uid', label: 'UID', value: user.uid, type: 'text', editable: true, hint: '6位数字' },
-        { id: 'displayName', label: '昵称', value: user.displayName || '', type: 'text', editable: true },
-        { id: 'level', label: '等级', value: currentLevel, type: 'number', editable: true },
-        { id: 'rcoins', label: 'R币', value: currentRcoins, type: 'number', editable: true, quickBtns: true },
-        { id: 'experience', label: '经验值', value: currentExp, type: 'number', editable: true },
-        { id: 'username', label: '用户名', value: user.username, type: 'text', editable: false },
-        { id: 'role', label: '角色', value: roleLabel(user.role), type: 'select', editable: false, displayRole: true },
-        { id: 'status', label: '状态', value: user.status === 'active' ? '活跃' : '已禁用', type: 'text', editable: false },
-        { id: 'createdAt', label: '注册时间', value: formatDate(user.createdAt), type: 'text', editable: false },
-        { id: 'lastLogin', label: '最后登录', value: formatDate(user.lastLogin), type: 'text', editable: false },
-        { id: 'loginCount', label: '登录次数', value: user.loginCount || 0, type: 'number', editable: false },
-        { id: 'friends', label: '好友数量', value: (user.friends || []).length, type: 'number', editable: false }
-      ];
-
-      var fieldsHtml = fields.map(function(f) {
-        var editBtn = f.editable ? ' <button class="text-[11px] text-violet-600 hover:text-violet-800 hover:underline bg-transparent border-none cursor-pointer p-0" onclick="startInlineEdit(\'' + f.id + '\', \'' + uid + '\')">编辑</button>' : '';
-        var valueHtml = '';
-        if (f.id === 'role') {
-          valueHtml = '<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold ' + roleBadgeClass(user.role) + '">' + roleLabel(user.role) + '</span>';
-        } else if (f.id === 'status') {
-          valueHtml = user.status === 'active' ? '<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-50 text-green-700">活跃</span>' : '<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-50 text-red-700">已禁用</span>';
-        } else {
-          valueHtml = escapeHtml(String(f.value));
-        }
-
-        var editInput = '';
-        if (f.type === 'number') {
-          editInput = '<input class="detail-field-edit w-full px-2.5 py-1.5 bg-white border border-violet-300 rounded-lg text-sm focus:outline-none" id="edit_' + f.id + '" type="number" value="' + f.value + '">';
-        } else {
-          editInput = '<input class="detail-field-edit w-full px-2.5 py-1.5 bg-white border border-violet-300 rounded-lg text-sm focus:outline-none" id="edit_' + f.id + '" type="text" value="' + escapeHtml(String(f.value)) + '"' + (f.hint ? ' placeholder="' + f.hint + '"' : '') + '>';
-        }
-
-        var quickBtnsHtml = '';
-        if (f.quickBtns) {
-          quickBtnsHtml = '<div class="detail-field-actions gap-1.5 mt-1.5">' +
-            '<button class="px-2 py-0.5 text-[10px] rounded-md border border-gray-200 bg-white text-gray-600 hover:border-violet-300 hover:text-violet-600 hover:bg-violet-50 cursor-pointer" onclick="quickAddInline(\'edit_rcoins\', 1000)">+1K</button>' +
-            '<button class="px-2 py-0.5 text-[10px] rounded-md border border-gray-200 bg-white text-gray-600 hover:border-violet-300 hover:text-violet-600 hover:bg-violet-50 cursor-pointer" onclick="quickAddInline(\'edit_rcoins\', 10000)">+10K</button>' +
-            '<button class="px-2 py-0.5 text-[10px] rounded-md border border-gray-200 bg-white text-gray-600 hover:border-violet-300 hover:text-violet-600 hover:bg-violet-50 cursor-pointer" onclick="quickAddInline(\'edit_rcoins\', 100000)">+100K</button>' +
-            '<button class="px-2 py-0.5 text-[10px] rounded-md border border-gray-200 bg-white text-gray-600 hover:border-violet-300 hover:text-violet-600 hover:bg-violet-50 cursor-pointer" onclick="document.getElementById(\'edit_rcoins\').value=0">归零</button></div>';
-        }
-
-        var saveCancelBtns = '<div class="detail-field-actions gap-1.5 mt-1.5">' +
-          '<button class="px-3 py-1 bg-gray-900 text-white text-[11px] font-medium rounded-lg hover:bg-gray-800 cursor-pointer" onclick="saveInlineEdit(\'' + f.id + '\', \'' + uid + '\')">保存</button>' +
-          '<button class="px-3 py-1 bg-gray-100 text-gray-600 text-[11px] font-medium rounded-lg hover:bg-gray-200 cursor-pointer" onclick="cancelInlineEdit(\'' + f.id + '\')">取消</button></div>';
-
-        return '<div class="detail-field px-4 py-3 bg-gray-50 rounded-xl border border-transparent hover:border-gray-200 transition-colors" id="field_' + f.id + '">' +
-          '<div class="flex items-center justify-between mb-1"><span class="text-[11px] font-semibold text-gray-400 uppercase">' + f.label + '</span>' + editBtn + '</div>' +
-          '<div class="detail-field-value text-sm font-semibold text-gray-900 min-h-[24px] flex items-center gap-2">' + valueHtml + '</div>' +
-          editInput +
-          (quickBtnsHtml ? quickBtnsHtml + saveCancelBtns : (!f.editable ? '' : saveCancelBtns)) +
-        '</div>';
-      }).join('');
-
-      document.getElementById('inlineFields').innerHTML = fieldsHtml;
-
-      // Action buttons
-      var isSU = user.role === 'admin';
-      var isMA = user.role === 'ma';
-      var isSelf = (currentUser && (user.uid === currentUser.uid || user.username === currentUser.username));
-
-      var actionsHtml = '';
-      actionsHtml += '<div class="w-full text-[11px] font-bold text-gray-400 uppercase mt-2 mb-1">头像管理</div>';
-      actionsHtml += '<button class="px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors cursor-pointer" onclick="editAvatarInline(\'' + uid + '\')">&#128247; 修改头像</button>';
-      actionsHtml += '<button class="px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors cursor-pointer" onclick="removeAvatar(\'' + uid + '\')">&#128465; 移除头像</button>';
-
-      actionsHtml += '<div class="w-full text-[11px] font-bold text-gray-400 uppercase mt-4 mb-1">私信</div>';
-      actionsHtml += '<button class="px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors cursor-pointer" onclick="sendMessage(\'' + uid + '\')">&#9993; 发送私信</button>';
-
-      actionsHtml += '<div class="w-full text-[11px] font-bold text-gray-400 uppercase mt-4 mb-1">密码管理</div>';
-      actionsHtml += '<button class="px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors cursor-pointer" onclick="resetPassword(\'' + uid + '\')">&#128272; 重置密码</button>';
-
-      actionsHtml += '<div class="w-full text-[11px] font-bold text-gray-400 uppercase mt-4 mb-1">授权管理</div>';
-      if (isSU && !isSelf) {
-        actionsHtml += '<button class="px-3 py-1.5 bg-amber-50 text-amber-700 text-xs font-medium rounded-lg hover:bg-amber-100 transition-colors cursor-pointer" onclick="setRole(\'' + uid + '\', \'ma\')">&#11015; 降为MA</button>';
-        actionsHtml += '<button class="px-3 py-1.5 bg-red-50 text-red-700 text-xs font-medium rounded-lg hover:bg-red-100 transition-colors cursor-pointer" onclick="setRole(\'' + uid + '\', \'user\')">&#11015; 取消管理员</button>';
-      } else if (isMA) {
-        actionsHtml += '<button class="px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg hover:bg-gray-800 transition-colors cursor-pointer" onclick="setRole(\'' + uid + '\', \'admin\')">&#11014; 升为SU超管</button>';
-        actionsHtml += '<button class="px-3 py-1.5 bg-red-50 text-red-700 text-xs font-medium rounded-lg hover:bg-red-100 transition-colors cursor-pointer" onclick="setRole(\'' + uid + '\', \'user\')">&#11015; 取消管理员</button>';
+      if (!user.profile) user.profile = { avatar: null, bio: null, email: null };
+      user.profile.avatar = base64;
+      const saved = await ruiAuth.saveUsers(`Admin: Update avatar for ${user.username}`);
+      if (saved) {
+        showToast('头像已更新', 'success');
+        addLog('更新头像', user.username);
+        renderUserDetail(user);
+        renderUsersTable();
       } else {
-        actionsHtml += '<button class="px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg hover:bg-gray-800 transition-colors cursor-pointer" onclick="setRole(\'' + uid + '\', \'admin\')">&#11014; 升为SU超管</button>';
-        actionsHtml += '<button class="px-3 py-1.5 bg-violet-50 text-violet-700 text-xs font-medium rounded-lg hover:bg-violet-100 transition-colors cursor-pointer" onclick="setRole(\'' + uid + '\', \'ma\')">&#11014; 升为MA</button>';
+        showToast('保存失败', 'error');
       }
+    };
+    reader.readAsDataURL(file);
+    input.value = '';
+  };
+  input.click();
+}
 
-      actionsHtml += '<div class="w-full text-[11px] font-bold text-gray-400 uppercase mt-4 mb-1">状态管理</div>';
-      if (!isSU || isSelf) {
-        if (user.status === 'active') {
-          actionsHtml += '<button class="px-3 py-1.5 bg-red-50 text-red-700 text-xs font-medium rounded-lg hover:bg-red-100 transition-colors cursor-pointer" onclick="toggleStatus(\'' + uid + '\')">&#128683; 禁用用户</button>';
-        } else {
-          actionsHtml += '<button class="px-3 py-1.5 bg-green-50 text-green-700 text-xs font-medium rounded-lg hover:bg-green-100 transition-colors cursor-pointer" onclick="toggleStatus(\'' + uid + '\')">&#9989; 启用用户</button>';
-        }
-      }
-      if (isSU && isSelf) {
-        actionsHtml += '<span class="text-xs text-amber-600 font-semibold">当前用户（不可操作自身权限和状态）</span>';
-      }
-
-      document.getElementById('inlineActions').innerHTML = actionsHtml;
-
-      // Switch to detail panel
-      switchPanel('userDetail');
+async function removeAvatar() {
+  const user = getUserByUid(currentDetailUid);
+  if (!user) return;
+  showConfirm('移除头像', `确定要移除 ${user.username} 的头像吗？`, async () => {
+    if (!user.profile) user.profile = { avatar: null, bio: null, email: null };
+    user.profile.avatar = null;
+    const saved = await ruiAuth.saveUsers(`Admin: Remove avatar for ${user.username}`);
+    if (saved) {
+      showToast('头像已移除', 'success');
+      addLog('移除头像', user.username);
+      renderUserDetail(user);
+      renderUsersTable();
+    } else {
+      showToast('保存失败', 'error');
     }
+  });
+}
 
-    // ===== Inline editing =====
-    function backToUsers() {
-      switchPanel('users');
+// R币操作
+function openRcoinModal() {
+  const user = getUserByUid(currentDetailUid);
+  if (!user) return;
+  document.getElementById('rcoinCurrent').textContent = user.rcoins || 0;
+  document.getElementById('rcoinAmount').value = '';
+  currentRcoinMode = 'add';
+  updateRcoinModeUI();
+  document.getElementById('rcoinModal').classList.remove('hidden');
+  document.getElementById('rcoinModal').classList.add('flex');
+}
+
+function setRcoinMode(mode) {
+  currentRcoinMode = mode;
+  updateRcoinModeUI();
+}
+
+function updateRcoinModeUI() {
+  const addBtn = document.getElementById('rcoinModeAdd');
+  const subBtn = document.getElementById('rcoinModeSubtract');
+  const setBtn = document.getElementById('rcoinModeSet');
+  addBtn.className = `flex-1 py-2 text-sm font-medium rounded-xl transition-colors ${currentRcoinMode === 'add' ? 'bg-violet-100 text-violet-700 border border-violet-200' : 'bg-gray-100 text-gray-600 border border-gray-200'}`;
+  subBtn.className = `flex-1 py-2 text-sm font-medium rounded-xl transition-colors ${currentRcoinMode === 'subtract' ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-gray-100 text-gray-600 border border-gray-200'}`;
+  setBtn.className = `flex-1 py-2 text-sm font-medium rounded-xl transition-colors ${currentRcoinMode === 'set' ? 'bg-blue-100 text-blue-700 border border-blue-200' : 'bg-gray-100 text-gray-600 border border-gray-200'}`;
+}
+
+async function applyRcoinChange() {
+  const user = getUserByUid(currentDetailUid);
+  if (!user) return;
+  const amount = parseInt(document.getElementById('rcoinAmount').value);
+  if (isNaN(amount) || amount < 0) { showToast('请输入有效数量', 'error'); return; }
+
+  const current = user.rcoins || 0;
+  let newAmount;
+  let desc;
+  if (currentRcoinMode === 'add') {
+    newAmount = current + amount;
+    desc = `+${amount}`;
+  } else if (currentRcoinMode === 'subtract') {
+    newAmount = Math.max(0, current - amount);
+    desc = `-${amount}`;
+  } else {
+    newAmount = amount;
+    desc = `=${amount}`;
+  }
+
+  user.rcoins = newAmount;
+  const saved = await ruiAuth.saveUsers(`Admin: Rcoins ${desc} for ${user.username} (now ${newAmount})`);
+  if (saved) {
+    showToast(`R币已更新: ${current} → ${newAmount}`, 'success');
+    addLog('R币操作', `${user.username}: ${desc} (当前: ${newAmount})`);
+    closeModal('rcoinModal');
+    renderUserDetail(user);
+    renderUsersTable();
+  } else {
+    showToast('保存失败', 'error');
+  }
+}
+
+// Send message to user (from detail)
+function sendMsgToUser(uid) {
+  switchPanel('messages');
+  document.getElementById('msgRecipient').value = uid;
+  document.getElementById('msgTitle').focus();
+}
+
+function backToUsers() {
+  document.getElementById('panelUserDetail').classList.add('hidden');
+  document.getElementById('panelUsers').classList.remove('hidden');
+  document.getElementById('panelTitle').textContent = '用户管理';
+  document.getElementById('panelDesc').textContent = '管理所有注册用户';
+}
+
+// ============================================================
+// WEBSITE MANAGEMENT
+// ============================================================
+
+function renderWebsitePanel() {
+  renderHomepageButtons();
+  renderToolboxItems();
+}
+
+function renderHomepageButtons() {
+  const container = document.getElementById('homepageButtonsList');
+  if (!siteSettings || !siteSettings.homepageButtons || !siteSettings.homepageButtons.length) {
+    container.innerHTML = '<div class="text-center py-6 text-gray-400 text-sm">暂无首页入口</div>';
+    return;
+  }
+  container.innerHTML = siteSettings.homepageButtons.map((btn, i) => `
+    <div class="flex items-center gap-3 p-3 bg-gray-50 border border-gray-100 rounded-xl" data-index="${i}">
+      <div class="drag-handle text-gray-400 hover:text-gray-600 cursor-grab">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg>
+      </div>
+      <span class="text-xl flex-shrink-0">${btn.icon}</span>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-medium text-gray-900">${escapeHtml(btn.name)}</span>
+          ${btn.badge ? `<span class="text-[10px] px-1 py-0.5 rounded-full bg-violet-500 text-white font-bold">${escapeHtml(btn.badge)}</span>` : ''}
+        </div>
+        <div class="text-xs text-gray-400 truncate">${escapeHtml(btn.url)}</div>
+      </div>
+      <div class="flex items-center gap-1 flex-shrink-0">
+        <button onclick="moveHomepageButton(${i}, -1)" class="p-1 hover:bg-gray-200 rounded transition-colors" ${i === 0 ? 'disabled' : ''}>
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+        </button>
+        <button onclick="moveHomepageButton(${i}, 1)" class="p-1 hover:bg-gray-200 rounded transition-colors" ${i === siteSettings.homepageButtons.length - 1 ? 'disabled' : ''}>
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <button onclick="editHomepageButton(${i})" class="px-2 py-1 text-xs font-medium text-violet-600 hover:bg-violet-50 rounded-lg transition-colors">编辑</button>
+        <button onclick="removeHomepageButton(${i})" class="px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors">删除</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderToolboxItems() {
+  const container = document.getElementById('toolboxItemsList');
+  if (!siteSettings || !siteSettings.toolboxItems || !siteSettings.toolboxItems.length) {
+    container.innerHTML = '<div class="text-center py-6 text-gray-400 text-sm">暂无百宝箱项目</div>';
+    return;
+  }
+  container.innerHTML = siteSettings.toolboxItems.map((item, i) => `
+    <div class="flex items-center gap-3 p-3 bg-gray-50 border border-gray-100 rounded-xl" data-index="${i}">
+      <div class="drag-handle text-gray-400 hover:text-gray-600 cursor-grab">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg>
+      </div>
+      <span class="text-xl flex-shrink-0">${item.icon}</span>
+      <div class="flex-1 min-w-0">
+        <div class="text-sm font-medium text-gray-900">${escapeHtml(item.name)}</div>
+        <div class="text-xs text-gray-400">${escapeHtml(item.desc || '')} · ${escapeHtml(item.url)}</div>
+      </div>
+      <div class="flex items-center gap-1 flex-shrink-0">
+        <button onclick="moveToolboxItem(${i}, -1)" class="p-1 hover:bg-gray-200 rounded transition-colors" ${i === 0 ? 'disabled' : ''}>
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+        </button>
+        <button onclick="moveToolboxItem(${i}, 1)" class="p-1 hover:bg-gray-200 rounded transition-colors" ${i === siteSettings.toolboxItems.length - 1 ? 'disabled' : ''}>
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <button onclick="editToolboxItem(${i})" class="px-2 py-1 text-xs font-medium text-violet-600 hover:bg-violet-50 rounded-lg transition-colors">编辑</button>
+        <button onclick="removeToolboxItem(${i})" class="px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors">删除</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Homepage button CRUD
+async function addHomepageButton() {
+  const icon = prompt('图标（emoji）:', '📄');
+  if (!icon) return;
+  const name = prompt('名称:');
+  if (!name) return;
+  const url = prompt('链接URL:', '/ruiweihan/');
+  if (!url) return;
+  const badge = prompt('徽章（可选，留空无徽章）:', '');
+
+  if (!siteSettings.homepageButtons) siteSettings.homepageButtons = [];
+  const newBtn = { icon, name, url };
+  if (badge) newBtn.badge = badge;
+  siteSettings.homepageButtons.push(newBtn);
+
+  const saved = await saveSiteSettings(`Add homepage button: ${name}`);
+  if (saved) {
+    showToast('首页入口已添加', 'success');
+    addLog('添加首页入口', name);
+    renderHomepageButtons();
+  } else {
+    showToast('保存失败', 'error');
+  }
+}
+
+async function editHomepageButton(index) {
+  const btn = siteSettings.homepageButtons[index];
+  const icon = prompt('图标（emoji）:', btn.icon);
+  if (icon === null) return;
+  const name = prompt('名称:', btn.name);
+  if (name === null) return;
+  const url = prompt('链接URL:', btn.url);
+  if (url === null) return;
+  const badge = prompt('徽章（可选，留空无徽章）:', btn.badge || '');
+
+  btn.icon = icon || btn.icon;
+  btn.name = name || btn.name;
+  btn.url = url || btn.url;
+  if (badge) btn.badge = badge;
+  else delete btn.badge;
+
+  const saved = await saveSiteSettings(`Edit homepage button: ${name}`);
+  if (saved) {
+    showToast('首页入口已更新', 'success');
+    addLog('编辑首页入口', name);
+    renderHomepageButtons();
+  } else {
+    showToast('保存失败', 'error');
+  }
+}
+
+async function removeHomepageButton(index) {
+  const btn = siteSettings.homepageButtons[index];
+  showConfirm('删除入口', `确定要删除 "${btn.name}" 吗？`, async () => {
+    siteSettings.homepageButtons.splice(index, 1);
+    const saved = await saveSiteSettings(`Remove homepage button: ${btn.name}`);
+    if (saved) {
+      showToast('首页入口已删除', 'success');
+      addLog('删除首页入口', btn.name);
+      renderHomepageButtons();
+    } else {
+      showToast('保存失败', 'error');
     }
+  });
+}
 
-    function startInlineEdit(fieldId, uid) {
-      var field = document.getElementById('field_' + fieldId);
-      if (field) field.classList.add('editing');
-      var input = document.getElementById('edit_' + fieldId);
-      if (input) input.focus();
+function moveHomepageButton(index, direction) {
+  const newIndex = index + direction;
+  if (newIndex < 0 || newIndex >= siteSettings.homepageButtons.length) return;
+  const arr = siteSettings.homepageButtons;
+  [arr[index], arr[newIndex]] = [arr[newIndex], arr[index]];
+  saveSiteSettings('Reorder homepage buttons').then(ok => {
+    if (ok) {
+      renderHomepageButtons();
+      addLog('调整首页入口顺序', '');
     }
+  });
+}
 
-    function cancelInlineEdit(fieldId) {
-      var field = document.getElementById('field_' + fieldId);
-      if (field) field.classList.remove('editing');
+// Toolbox item CRUD
+async function addToolboxItem() {
+  const icon = prompt('图标（emoji）:', '🔧');
+  if (!icon) return;
+  const name = prompt('名称:');
+  if (!name) return;
+  const desc = prompt('描述:', '');
+  const url = prompt('链接URL:', '/ruiweihan/');
+  if (!url) return;
+
+  if (!siteSettings.toolboxItems) siteSettings.toolboxItems = [];
+  siteSettings.toolboxItems.push({ icon, name, desc: desc || '', url });
+
+  const saved = await saveSiteSettings(`Add toolbox item: ${name}`);
+  if (saved) {
+    showToast('百宝箱项目已添加', 'success');
+    addLog('添加百宝箱项目', name);
+    renderToolboxItems();
+  } else {
+    showToast('保存失败', 'error');
+  }
+}
+
+async function editToolboxItem(index) {
+  const item = siteSettings.toolboxItems[index];
+  const icon = prompt('图标（emoji）:', item.icon);
+  if (icon === null) return;
+  const name = prompt('名称:', item.name);
+  if (name === null) return;
+  const desc = prompt('描述:', item.desc || '');
+  const url = prompt('链接URL:', item.url);
+  if (url === null) return;
+
+  item.icon = icon || item.icon;
+  item.name = name || item.name;
+  item.desc = desc;
+  item.url = url || item.url;
+
+  const saved = await saveSiteSettings(`Edit toolbox item: ${name}`);
+  if (saved) {
+    showToast('百宝箱项目已更新', 'success');
+    addLog('编辑百宝箱项目', name);
+    renderToolboxItems();
+  } else {
+    showToast('保存失败', 'error');
+  }
+}
+
+async function removeToolboxItem(index) {
+  const item = siteSettings.toolboxItems[index];
+  showConfirm('删除项目', `确定要删除 "${item.name}" 吗？`, async () => {
+    siteSettings.toolboxItems.splice(index, 1);
+    const saved = await saveSiteSettings(`Remove toolbox item: ${item.name}`);
+    if (saved) {
+      showToast('百宝箱项目已删除', 'success');
+      addLog('删除百宝箱项目', item.name);
+      renderToolboxItems();
+    } else {
+      showToast('保存失败', 'error');
     }
+  });
+}
 
-    function saveInlineEdit(fieldId, uid) {
-      var input = document.getElementById('edit_' + fieldId);
-      if (!input) return;
-      var newValue = input.value.trim();
-
-      var user = findUserByUid(uid);
-      if (!user) return;
-
-      var updateData = {};
-
-      if (fieldId === 'uid') {
-        if (!/^\d{6}$/.test(newValue) && newValue !== 'Administrator') {
-          showToast('UID必须为6位数字或Administrator', 'error'); return;
-        }
-        updateData.uid = newValue;
-        addLog('uid', '修改 ' + user.username + ' 的UID: ' + user.uid + ' -> ' + newValue);
-      } else if (fieldId === 'displayName') {
-        if (!newValue) { showToast('昵称不能为空', 'error'); return; }
-        updateData.displayName = newValue;
-        addLog('displayName', '修改 ' + user.username + ' 的昵称为 ' + newValue);
-      } else if (fieldId === 'level') {
-        var lv = parseInt(newValue);
-        if (isNaN(lv) || lv < 0) { showToast('等级必须为非负整数', 'error'); return; }
-        updateData.level = lv;
-        addLog('level', '修改 ' + user.username + ' 的等级: ' + (user.level || 0) + ' -> ' + lv);
-      } else if (fieldId === 'rcoins') {
-        var rc = parseInt(newValue);
-        if (isNaN(rc) || rc < 0) { showToast('R币必须为非负整数', 'error'); return; }
-        updateData.rcoins = rc;
-        addLog('rcoins', '修改 ' + user.username + ' 的R币: ' + (user.rcoins || 0) + ' -> ' + rc);
-      } else if (fieldId === 'experience') {
-        var exp = parseInt(newValue);
-        if (isNaN(exp) || exp < 0) { showToast('经验值必须为非负整数', 'error'); return; }
-        updateData.experience = exp;
-        addLog('level', '修改 ' + user.username + ' 的经验值: ' + (user.experience || 0) + ' -> ' + exp);
-      }
-
-      if (Object.keys(updateData).length > 0) {
-        var commitMsg = 'Admin: Update ' + fieldId + ' of ' + user.username;
-        updateUserData(uid, updateData, commitMsg, function() {
-          cancelInlineEdit(fieldId);
-        });
-      }
+function moveToolboxItem(index, direction) {
+  const newIndex = index + direction;
+  if (newIndex < 0 || newIndex >= siteSettings.toolboxItems.length) return;
+  const arr = siteSettings.toolboxItems;
+  [arr[index], arr[newIndex]] = [arr[newIndex], arr[index]];
+  saveSiteSettings('Reorder toolbox items').then(ok => {
+    if (ok) {
+      renderToolboxItems();
+      addLog('调整百宝箱项目顺序', '');
     }
+  });
+}
 
-    function quickAddInline(inputId, amount) {
-      var input = document.getElementById(inputId);
-      if (input) {
-        var current = parseInt(input.value) || 0;
-        input.value = current + amount;
-      }
-    }
+// ============================================================
+// SETTINGS PANEL
+// ============================================================
 
-    // ===== Avatar management =====
-    function editAvatarInline(uid) {
-      var user = findUserByUid(uid);
-      if (!user) return;
-      var fileInput = document.getElementById('avatarFileInput');
-      fileInput.onchange = function(e) {
-        var file = e.target.files[0];
-        if (!file) return;
-        var reader = new FileReader();
-        reader.onload = function(ev) {
-          var dataUrl = ev.target.result;
-          try {
-            localStorage.setItem('rui_avatar_' + uid, dataUrl);
-          } catch(err) {
-            showToast('头像数据过大，请使用更小的图片', 'error');
-            return;
-          }
-          adminUpdateUser(uid, function(content, idx) {
-            if (!content.users[idx].profile) content.users[idx].profile = {};
-            content.users[idx].profile.avatar = dataUrl;
-          }, 'Admin: Update avatar for ' + user.username, function() {
-            addLog('avatar', '修改 ' + user.username + ' 的头像');
-            showUserDetail(uid);
-          });
-        };
-        reader.readAsDataURL(file);
-        // Reset input so same file can be selected again
-        fileInput.value = '';
-      };
-      fileInput.click();
-    }
+function renderSettingsPanel() {
+  if (!siteSettings) return;
 
-    function removeAvatar(uid) {
-      var user = findUserByUid(uid);
-      if (!user) return;
-      localStorage.removeItem('rui_avatar_' + uid);
-      adminUpdateUser(uid, function(content, idx) {
-        if (content.users[idx].profile) {
-          content.users[idx].profile.avatar = null;
-        }
-      }, 'Admin: Remove avatar for ' + user.username, function() {
-        addLog('avatar', '移除 ' + user.username + ' 的头像');
-        showUserDetail(uid);
-      });
-    }
+  // Settings toggles
+  const settings = siteSettings.settings || {};
+  document.getElementById('settingRegNotify').checked = settings.regNotify !== false;
+  document.getElementById('settingNewVisitor').checked = settings.newVisitor !== false;
+  document.getElementById('settingLoginAlert').checked = settings.loginAlert !== false;
 
-    // ===== Send private message =====
-    function sendMessage(uid) {
-      var user = findUserByUid(uid);
-      if (!user) return;
-      var msg = prompt('发送私信给 ' + (user.displayName || user.username) + ':');
-      if (!msg) return;
-      var messages = [];
-      try { messages = JSON.parse(localStorage.getItem('rui_private_messages') || '[]'); } catch(e) {}
-      messages.unshift({
-        from: currentUser.username,
-        fromUid: currentUser.uid,
-        to: uid,
-        toUsername: user.username,
-        message: msg,
-        time: new Date().toISOString()
-      });
-      try { localStorage.setItem('rui_private_messages', JSON.stringify(messages)); } catch(e) {}
-      addLog('message', '发送私信给 ' + user.username);
-      showToast('私信已发送');
-    }
+  // Announcement
+  const ann = siteSettings.announcement || {};
+  document.getElementById('settingAnnouncementEnabled').checked = ann.enabled !== false;
+  document.getElementById('announcementText').value = ann.message || '';
 
-    // ===== Reset password =====
-    function resetPassword(uid) {
-      var user = findUserByUid(uid);
-      if (!user) return;
-      var newPassword = prompt('为 ' + (user.displayName || user.username) + ' 设置新密码（至少4位）:');
-      if (!newPassword) return;
-      if (newPassword.length < 4) { showToast('密码至少4个字符', 'error'); return; }
-      var hashedPassword = hashPasswordSync(newPassword);
-      updateUserData(uid, { passwordHash: hashedPassword }, 'Admin: Reset password for ' + user.username, function() {
-        addLog('password', '重置 ' + user.username + ' 的密码');
-      });
-    }
+  // Visitor notification
+  const visitor = siteSettings.firstVisitorNotification || {};
+  document.getElementById('settingVisitorNotification').checked = visitor.enabled !== false;
+  document.getElementById('visitorNotificationText').value = visitor.message || '';
+}
 
-    // ===== Toggle user status =====
-    function toggleStatus(uid) {
-      var user = findUserByUid(uid);
-      if (!user) return;
-      var newStatus = user.status === 'active' ? 'disabled' : 'active';
-      var statusText = newStatus === 'active' ? '启用' : '禁用';
+async function saveSetting(key, value) {
+  if (!siteSettings) return;
+  if (!siteSettings.settings) siteSettings.settings = {};
+  siteSettings.settings[key] = value;
+  const saved = await saveSiteSettings(`Update setting: ${key} = ${value}`);
+  if (saved) {
+    showToast('设置已保存', 'success');
+    addLog('修改设置', `${key}: ${value}`);
+  } else {
+    showToast('保存失败', 'error');
+  }
+}
 
-      showConfirm('确认' + statusText + '用户', '确定要' + statusText + '用户 ' + (user.displayName || user.username) + ' 吗？', function() {
-        updateUserData(uid, { status: newStatus }, 'Admin: ' + statusText + ' user ' + user.username, function() {
-          addLog('status', statusText + '用户 ' + user.username);
-        });
-      });
-    }
+async function saveAnnouncement() {
+  if (!siteSettings) return;
+  const enabled = document.getElementById('settingAnnouncementEnabled').checked;
+  const message = document.getElementById('announcementText').value.trim();
+  siteSettings.announcement = { enabled, message };
+  const saved = await saveSiteSettings('Update announcement');
+  if (saved) {
+    showToast('公告已保存', 'success');
+    addLog('更新系统公告', message.substring(0, 50));
+  } else {
+    showToast('保存失败', 'error');
+  }
+}
 
-    // ===== Set role =====
-    function setRole(uid, newRole) {
-      var user = findUserByUid(uid);
-      if (!user) return;
-      var roleText = roleLabel(newRole);
+async function saveVisitorNotification() {
+  if (!siteSettings) return;
+  const enabled = document.getElementById('settingVisitorNotification').checked;
+  const message = document.getElementById('visitorNotificationText').value.trim();
+  siteSettings.firstVisitorNotification = { enabled, message };
+  const saved = await saveSiteSettings('Update visitor notification');
+  if (saved) {
+    showToast('通知已保存', 'success');
+    addLog('更新首次访问通知', message.substring(0, 50));
+  } else {
+    showToast('保存失败', 'error');
+  }
+}
 
-      showConfirm('确认修改角色', '确定将用户 ' + (user.displayName || user.username) + ' 的角色修改为 ' + roleText + ' 吗？', function() {
-        updateUserData(uid, { role: newRole }, 'Admin: Set role of ' + user.username + ' to ' + newRole, function() {
-          addLog('role', '修改 ' + user.username + ' 的角色为 ' + roleText);
-        });
-      });
-    }
+// ============================================================
+// MESSAGES PANEL
+// ============================================================
 
-    // ===== Generic update functions =====
-    function findUserByUid(uid) {
-      for (var i = 0; i < allUsers.length; i++) {
-        if (allUsers[i].uid === uid) return allUsers[i];
-      }
-      return null;
-    }
+async function sendPrivateMessage() {
+  const recipient = document.getElementById('msgRecipient').value.trim();
+  const title = document.getElementById('msgTitle').value.trim();
+  const content = document.getElementById('msgContent').value.trim();
 
-    // Simple field update
-    function updateUserData(uid, updates, commitMsg, logCallback) {
-      fetchUsersJson().then(function(data) {
-        var content = JSON.parse(fromBase64(data.content));
-        var idx = -1;
-        for (var i = 0; i < content.users.length; i++) {
-          if (content.users[i].uid === uid) { idx = i; break; }
-        }
-        if (idx === -1) { showToast('用户不存在', 'error'); return; }
+  if (!recipient) { showToast('请输入收件人', 'error'); return; }
+  if (!title) { showToast('请输入标题', 'error'); return; }
+  if (!content) { showToast('请输入内容', 'error'); return; }
 
-        var keys = Object.keys(updates);
-        for (var k = 0; k < keys.length; k++) {
-          content.users[idx][keys[k]] = updates[keys[k]];
-        }
+  // Verify recipient exists
+  const auth = await getAuth();
+  const recipientUser = await auth.getUser(recipient);
+  if (!recipientUser) {
+    showToast('收件人不存在', 'error');
+    return;
+  }
 
-        // Rebuild index if uid changed
-        if (updates.uid) {
-          content.index = { byUid: {}, byUsername: {} };
-          content.users.forEach(function(u, j) {
-            content.index.byUid[u.uid] = j;
-            content.index.byUsername[u.username] = j;
-          });
-          currentDetailUid = updates.uid;
-        }
+  if (!messagesData) messagesData = { messages: [] };
 
-        return putUsersJson(content, data.sha, commitMsg).then(function() {
-          showToast('操作成功');
-          if (logCallback) logCallback();
-          loadUsers();
-          if (currentDetailUid) {
-            showUserDetail(currentDetailUid);
-          }
-        });
-      }).catch(function(err) {
-        console.error('操作失败:', err);
-        showToast('操作失败，请重试', 'error');
-      });
-    }
+  const msg = {
+    id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+    from: currentAdmin,
+    fromUid: currentAdminUid,
+    to: recipientUser.username,
+    toUid: recipientUser.uid,
+    title: title,
+    content: content,
+    time: new Date().toISOString(),
+    read: false
+  };
 
-    // Advanced update function (nested fields)
-    function adminUpdateUser(uid, updateFn, commitMsg, logCallback) {
-      fetchUsersJson().then(function(data) {
-        var content = JSON.parse(fromBase64(data.content));
-        var idx = -1;
-        for (var i = 0; i < content.users.length; i++) {
-          if (content.users[i].uid === uid) { idx = i; break; }
-        }
-        if (idx === -1) { showToast('用户不存在', 'error'); return; }
+  messagesData.messages.unshift(msg);
+  const saved = await saveMessages(`Admin message to ${recipientUser.username}: ${title}`);
+  if (saved) {
+    showToast('私信已发送', 'success');
+    addLog('发送私信', `To: ${recipientUser.username}, Title: ${title}`);
+    document.getElementById('msgRecipient').value = '';
+    document.getElementById('msgTitle').value = '';
+    document.getElementById('msgContent').value = '';
+    renderMessages();
+  } else {
+    showToast('发送失败', 'error');
+  }
+}
 
-        updateFn(content, idx);
+function renderMessages() {
+  const container = document.getElementById('messagesContainer');
+  if (!messagesData || !messagesData.messages || !messagesData.messages.length) {
+    container.innerHTML = '<div class="text-center py-10 text-gray-400 text-sm">暂无私信记录</div>';
+    return;
+  }
 
-        // Rebuild index
-        content.index = { byUid: {}, byUsername: {} };
-        content.users.forEach(function(u, j) {
-          content.index.byUid[u.uid] = j;
-          content.index.byUsername[u.username] = j;
-        });
+  container.innerHTML = messagesData.messages.slice(0, 50).map(msg => `
+    <div class="py-3 border-b border-gray-50 last:border-0">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="text-xs px-2 py-0.5 rounded-full ${msg.from === currentAdmin ? 'bg-violet-100 text-violet-700' : 'bg-blue-100 text-blue-700'}">${msg.from === currentAdmin ? '发出' : '收到'}</span>
+        <span class="text-sm font-medium text-gray-900">${escapeHtml(msg.title)}</span>
+        ${!msg.read ? '<span class="w-2 h-2 rounded-full bg-violet-500"></span>' : ''}
+      </div>
+      <div class="text-xs text-gray-400 mb-1">
+        ${msg.from === currentAdmin ? `To: ${escapeHtml(msg.to)}` : `From: ${escapeHtml(msg.from)}`} · ${new Date(msg.time).toLocaleString('zh-CN')}
+      </div>
+      <p class="text-sm text-gray-600">${escapeHtml(msg.content)}</p>
+    </div>
+  `).join('');
+}
 
-        return putUsersJson(content, data.sha, commitMsg).then(function() {
-          showToast('操作成功');
-          if (logCallback) logCallback();
-          loadUsers();
-          if (currentDetailUid) {
-            showUserDetail(currentDetailUid);
-          }
-        });
-      }).catch(function(err) {
-        console.error('操作失败:', err);
-        showToast('操作失败，请重试', 'error');
-      });
-    }
+// ============================================================
+// REFRESH DATA
+// ============================================================
 
-    // ===== Confirm modal =====
-    function showConfirm(title, message, callback) {
-      document.getElementById('confirmTitle').textContent = title;
-      document.getElementById('confirmMessage').textContent = message;
-      var okBtn = document.getElementById('confirmOk');
-      // Remove old events
-      var newBtn = okBtn.cloneNode(true);
-      okBtn.parentNode.replaceChild(newBtn, okBtn);
-      newBtn.id = 'confirmOk';
-      newBtn.addEventListener('click', function() {
-        closeModal('confirmModal');
-        callback();
-      });
-      openModal('confirmModal');
-    }
+async function refreshData() {
+  showToast('正在刷新...', 'info');
+  try {
+    await loadUsers();
+    await fetchSiteSettings();
+    await fetchMessages();
+    renderDashboard();
+    renderWebsitePanel();
+    renderSettingsPanel();
+    renderLogs();
+    renderMessages();
+    showToast('数据已刷新', 'success');
+  } catch (err) {
+    showToast('刷新失败', 'error');
+  }
+}
 
-    // ===== Settings =====
-    function loadSettings() {
-      try {
-        var saved = localStorage.getItem('rui_admin_settings');
-        if (saved) {
-          var settings = JSON.parse(saved);
-          if (settings.regNotify !== undefined) document.getElementById('settingRegNotify').checked = settings.regNotify;
-          if (settings.newVisitor !== undefined) document.getElementById('settingNewVisitor').checked = settings.newVisitor;
-          if (settings.loginAlert !== undefined) document.getElementById('settingLoginAlert').checked = settings.loginAlert;
-        }
-        var announcement = localStorage.getItem('rui_announcement');
-        if (announcement) document.getElementById('announcementText').value = announcement;
-      } catch(e) {}
-    }
+// ============================================================
+// INIT
+// ============================================================
 
-    function saveSetting(key, value) {
-      try {
-        var saved = localStorage.getItem('rui_admin_settings');
-        var settings = saved ? JSON.parse(saved) : {};
-        settings[key] = value;
-        localStorage.setItem('rui_admin_settings', JSON.stringify(settings));
-        addLog('setting', '修改系统设置: ' + key + ' = ' + value);
-        showToast('设置已保存');
-      } catch(e) {}
-    }
-
-    function saveAnnouncement() {
-      var text = document.getElementById('announcementText').value;
-      localStorage.setItem('rui_announcement', text);
-      addLog('setting', '更新系统公告');
-      showToast('公告已保存');
-    }
-
-    // ===== Init =====
-    function init() {
-      loadLogsFromLocal();
-      renderLogs();
-      loadSettings();
-
-      // Load user data first, then check permission
-      var token = getToken();
-      fetch('https://api.github.com/repos/' + USER_REPO + '/contents/users.json?ref=main&_=' + Date.now(), {
-        headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
-      }).then(function(res) {
-        if (res.ok) return res.json();
-        throw new Error('Failed');
-      }).then(function(data) {
-        var content = JSON.parse(fromBase64(data.content));
-        allUsers = content.users || [];
-        updateStats(content);
-        renderUsers(allUsers);
-        checkPermission();
-      }).catch(function(err) {
-        console.error('初始化失败:', err);
-        checkPermission();
-      });
-    }
-
-    // Set initial active nav state
-    document.querySelector('.nav-item[data-panel="dashboard"]').classList.add('bg-violet-50', 'text-violet-700');
-    document.querySelector('.nav-item[data-panel="dashboard"]').classList.remove('text-gray-500');
-
-    init();
+initAdmin().catch(err => {
+  console.error('Init error:', err);
+  showUnauthorized();
+});
   </script>
 </body>
 </html>
