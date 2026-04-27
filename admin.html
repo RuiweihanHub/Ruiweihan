@@ -50,7 +50,9 @@
     .sidebar-avatar {
       width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #a78bfa, #7c3aed);
       display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 14px;
+      overflow: hidden;
     }
+    .sidebar-avatar img { width: 100%; height: 100%; object-fit: cover; }
     .sidebar-user-info { flex: 1; }
     .sidebar-username { font-size: 13px; font-weight: 600; color: #e0e0e0; }
     .sidebar-role { font-size: 11px; color: #a78bfa; }
@@ -313,6 +315,69 @@
       .stats-grid { grid-template-columns: 1fr; }
       .main-body { padding: 16px; }
       .main-header { padding: 12px 16px; }
+      .detail-fields { grid-template-columns: 1fr; }
+    }
+
+    /* === Inline Detail Panel === */
+    .detail-inline-header {
+      display: flex; align-items: center; gap: 20px; margin-bottom: 24px;
+      padding-bottom: 20px; border-bottom: 1px solid #f0f0f0;
+    }
+    .detail-avatar-lg {
+      width: 80px; height: 80px; border-radius: 16px;
+      background: linear-gradient(135deg, #a78bfa, #7c3aed);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 32px; font-weight: 700;
+      overflow: hidden; flex-shrink: 0; position: relative; cursor: pointer;
+    }
+    .detail-avatar-lg img { width: 100%; height: 100%; object-fit: cover; }
+    .detail-avatar-lg:hover::after {
+      content: '更换'; position: absolute; inset: 0;
+      background: rgba(0,0,0,0.5); display: flex; align-items: center;
+      justify-content: center; font-size: 13px; color: #fff;
+    }
+    .detail-inline-info { flex: 1; }
+    .detail-inline-name { font-size: 22px; font-weight: 700; color: #1a1a2e; }
+    .detail-inline-uid { font-size: 14px; color: #888; margin-top: 4px; }
+    .detail-inline-badges { display: flex; gap: 6px; margin-top: 8px; }
+
+    .detail-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+    .detail-field {
+      padding: 12px 16px; background: #f9fafb; border-radius: 10px;
+      border: 1px solid transparent; transition: all 0.2s; position: relative;
+    }
+    .detail-field:hover { border-color: #e5e7eb; }
+    .detail-field-label {
+      font-size: 11px; font-weight: 600; color: #999; text-transform: uppercase;
+      margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .detail-field-value {
+      font-size: 15px; font-weight: 600; color: #1a1a2e; min-height: 24px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .detail-field-edit {
+      display: none; width: 100%; padding: 6px 10px;
+      background: #fff; border: 1px solid #a78bfa; border-radius: 8px;
+      font-size: 14px; outline: none;
+    }
+    .detail-field.editing .detail-field-value { display: none; }
+    .detail-field.editing .detail-field-edit { display: block; }
+    .detail-field-actions {
+      display: none; gap: 4px; margin-top: 4px;
+    }
+    .detail-field.editing .detail-field-actions { display: flex; }
+    .edit-btn {
+      font-size: 11px; color: #a78bfa; cursor: pointer; background: none; border: none; padding: 2px;
+    }
+    .edit-btn:hover { color: #7c3aed; text-decoration: underline; }
+
+    .detail-inline-actions {
+      display: flex; flex-wrap: wrap; gap: 8px; padding-top: 20px;
+      border-top: 1px solid #f0f0f0;
+    }
+    .action-section-label {
+      width: 100%; font-size: 12px; font-weight: 700; color: #999;
+      text-transform: uppercase; margin-top: 8px; margin-bottom: 4px;
     }
   </style>
 </head>
@@ -503,57 +568,36 @@
           </div>
         </div>
 
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== 用户详情弹窗 ===== -->
-  <div id="userDetailModal" class="modal-overlay">
-    <div class="modal modal-md">
-      <div class="modal-header">
-        <h3>用户详情</h3>
-        <button class="modal-close" onclick="closeModal('userDetailModal')">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="detail-header">
-          <div class="detail-avatar" id="detailAvatar">?</div>
-          <div>
-            <div class="detail-name" id="detailName">用户名</div>
-            <div class="detail-uid" id="detailUid">UID: -</div>
+        <!-- ===== 用户详情内联面板 ===== -->
+        <div id="panelUserDetail" class="panel">
+          <div class="panel-card">
+            <div class="panel-card-header">
+              <h3 id="detailPanelTitle">用户详情</h3>
+              <button class="btn btn-xs btn-ghost" onclick="backToUsers()">&#8592; 返回列表</button>
+            </div>
+            <div class="panel-card-body">
+              <!-- 用户头部信息 -->
+              <div class="detail-inline-header">
+                <div class="detail-avatar-lg" id="inlineAvatar" onclick="editAvatarInline(currentDetailUid)">
+                  <img id="inlineAvatarImg" src="" alt="" style="display:none;">
+                  <span id="inlineAvatarLetter">?</span>
+                </div>
+                <div class="detail-inline-info">
+                  <div class="detail-inline-name" id="inlineName">用户名</div>
+                  <div class="detail-inline-uid" id="inlineUid">UID: -</div>
+                  <div class="detail-inline-badges" id="inlineBadges"></div>
+                </div>
+              </div>
+              <!-- 内联编辑字段 -->
+              <div class="detail-fields" id="inlineFields">
+                <!-- 动态生成可编辑字段 -->
+              </div>
+              <!-- 操作按钮 -->
+              <div class="detail-inline-actions" id="inlineActions"></div>
+            </div>
           </div>
         </div>
-        <div class="detail-grid">
-          <div class="detail-item"><div class="detail-item-label">角色</div><div class="detail-item-value" id="detailRole">-</div></div>
-          <div class="detail-item"><div class="detail-item-label">状态</div><div class="detail-item-value" id="detailStatus">-</div></div>
-          <div class="detail-item"><div class="detail-item-label">等级</div><div class="detail-item-value" id="detailLevel">-</div></div>
-          <div class="detail-item"><div class="detail-item-label">R币</div><div class="detail-item-value" id="detailRcoins">-</div></div>
-          <div class="detail-item"><div class="detail-item-label">Pro状态</div><div class="detail-item-value" id="detailPro">-</div></div>
-          <div class="detail-item"><div class="detail-item-label">经验值</div><div class="detail-item-value" id="detailExp">-</div></div>
-          <div class="detail-item"><div class="detail-item-label">注册时间</div><div class="detail-item-value" id="detailCreatedAt">-</div></div>
-          <div class="detail-item"><div class="detail-item-label">最后登录</div><div class="detail-item-value" id="detailLastLogin">-</div></div>
-          <div class="detail-item"><div class="detail-item-label">登录次数</div><div class="detail-item-value" id="detailLoginCount">-</div></div>
-          <div class="detail-item"><div class="detail-item-label">好友数量</div><div class="detail-item-value" id="detailFriends">-</div></div>
-        </div>
-        <div class="detail-actions" id="detailActions">
-          <!-- 动态生成操作按钮 -->
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- ===== 编辑弹窗（通用） ===== -->
-  <div id="editModal" class="modal-overlay">
-    <div class="modal modal-sm">
-      <div class="modal-header">
-        <h3 id="editModalTitle">编辑</h3>
-        <button class="modal-close" onclick="closeModal('editModal')">&times;</button>
-      </div>
-      <div class="modal-body" id="editModalBody">
-        <!-- 动态生成表单 -->
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-ghost" onclick="closeModal('editModal')">取消</button>
-        <button class="btn btn-primary" id="editModalSave" onclick="saveEdit()">保存</button>
       </div>
     </div>
   </div>
@@ -1577,7 +1621,8 @@ window.getLoggedInUser = getLoggedInUser;
       dashboard: ['数据概览', '系统运行状态与关键指标'],
       users: ['用户管理', '查看和管理所有用户'],
       settings: ['系统设置', '配置系统参数和通知'],
-      logs: ['操作日志', '查看管理操作记录']
+      logs: ['操作日志', '查看管理操作记录'],
+      userDetail: ['用户详情', '查看和编辑用户信息']
     };
 
     function switchPanel(panel) {
@@ -1592,7 +1637,7 @@ window.getLoggedInUser = getLoggedInUser;
       });
 
       // 切换面板显示
-      var panels = ['dashboard', 'users', 'settings', 'logs'];
+      var panels = ['dashboard', 'users', 'settings', 'logs', 'userDetail'];
       panels.forEach(function(p) {
         var el = document.getElementById('panel' + p.charAt(0).toUpperCase() + p.slice(1));
         if (p === panel) {
@@ -1655,6 +1700,21 @@ window.getLoggedInUser = getLoggedInUser;
         document.getElementById('adminRole').textContent = 'MA 管理员';
       } else {
         document.getElementById('adminRole').textContent = 'Member';
+      }
+
+      // Show admin avatar in sidebar
+      var adminAvatarSrc = localStorage.getItem('rui_avatar_' + uid);
+      if (!adminAvatarSrc) {
+        // Try to find from allUsers
+        for (var j = 0; j < allUsers.length; j++) {
+          if (allUsers[j].uid === uid && allUsers[j].profile && allUsers[j].profile.avatar) {
+            adminAvatarSrc = allUsers[j].profile.avatar;
+            break;
+          }
+        }
+      }
+      if (adminAvatarSrc) {
+        document.getElementById('sidebarAvatar').innerHTML = '<img src="' + escapeHtml(adminAvatarSrc) + '" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onerror="this.remove()">';
       }
 
       document.getElementById('mainContent').style.display = 'flex';
@@ -1769,8 +1829,9 @@ window.getLoggedInUser = getLoggedInUser;
       tbody.innerHTML = users.map(function(user) {
         var avatarContent = (user.displayName || user.username).charAt(0).toUpperCase();
         var avatarHtml = '';
-        if (user.profile && user.profile.avatar) {
-          avatarHtml = '<div class="user-avatar-sm"><img src="' + escapeHtml(user.profile.avatar) + '" alt="avatar"></div>';
+        var avatarSrc = user.profile && user.profile.avatar ? user.profile.avatar : localStorage.getItem('rui_avatar_' + user.uid);
+        if (avatarSrc) {
+          avatarHtml = '<div class="user-avatar-sm"><img src="' + escapeHtml(avatarSrc) + '" alt="avatar" onerror="this.style.display=\'none\';this.parentNode.textContent=\'' + avatarContent + '\'"></div>';
         } else {
           avatarHtml = '<div class="user-avatar-sm">' + avatarContent + '</div>';
         }
@@ -1817,7 +1878,7 @@ window.getLoggedInUser = getLoggedInUser;
       renderUsers(filtered);
     }
 
-    // ===== 用户详情弹窗 =====
+    // ===== 用户详情内联面板 =====
     function showUserDetail(uid) {
       var user = null;
       for (var i = 0; i < allUsers.length; i++) {
@@ -1827,309 +1888,268 @@ window.getLoggedInUser = getLoggedInUser;
 
       currentDetailUid = uid;
 
-      // 头像
-      var avatarEl = document.getElementById('detailAvatar');
-      if (user.profile && user.profile.avatar) {
-        avatarEl.innerHTML = '<img src="' + escapeHtml(user.profile.avatar) + '" alt="avatar">';
+      // Avatar
+      var avatarImg = document.getElementById('inlineAvatarImg');
+      var avatarLetter = document.getElementById('inlineAvatarLetter');
+      var avatarSrc = (user.profile && user.profile.avatar) ? user.profile.avatar : localStorage.getItem('rui_avatar_' + user.uid);
+      if (avatarSrc) {
+        avatarImg.src = avatarSrc;
+        avatarImg.style.display = 'block';
+        avatarLetter.style.display = 'none';
       } else {
-        avatarEl.textContent = (user.displayName || user.username).charAt(0).toUpperCase();
+        avatarImg.style.display = 'none';
+        avatarLetter.style.display = 'flex';
+        avatarLetter.textContent = (user.displayName || user.username).charAt(0).toUpperCase();
       }
 
-      document.getElementById('detailName').textContent = user.displayName || user.username;
-      document.getElementById('detailUid').textContent = 'UID: ' + user.uid;
-      document.getElementById('detailRole').innerHTML = '<span class="badge ' + roleBadgeClass(user.role) + '">' + roleLabel(user.role) + '</span>';
-      document.getElementById('detailStatus').innerHTML = user.status === 'active'
+      // Name and UID
+      document.getElementById('inlineName').textContent = user.displayName || user.username;
+      document.getElementById('inlineUid').textContent = 'UID: ' + user.uid + '  |  @' + user.username;
+
+      // Badges
+      var badgesHtml = '<span class="badge ' + roleBadgeClass(user.role) + '">' + roleLabel(user.role) + '</span>';
+      badgesHtml += user.status === 'active'
         ? '<span class="badge badge-active">活跃</span>'
         : '<span class="badge badge-disabled">已禁用</span>';
-      document.getElementById('detailLevel').textContent = (user.level !== undefined && user.level !== null) ? user.level : '-';
-      document.getElementById('detailRcoins').textContent = (user.rcoins !== undefined && user.rcoins !== null) ? user.rcoins : '0';
-      document.getElementById('detailPro').innerHTML = user.pro ? '<span class="badge badge-pro">Pro</span>' : '-';
-      document.getElementById('detailExp').textContent = (user.experience !== undefined && user.experience !== null) ? user.experience : '-';
-      document.getElementById('detailCreatedAt').textContent = formatDate(user.createdAt);
-      document.getElementById('detailLastLogin').textContent = formatDate(user.lastLogin);
-      document.getElementById('detailLoginCount').textContent = user.loginCount || 0;
-      document.getElementById('detailFriends').textContent = (user.friends || []).length;
+      if (user.pro) badgesHtml += '<span class="badge badge-pro">Pro</span>';
+      document.getElementById('inlineBadges').innerHTML = badgesHtml;
 
-      // 操作按钮
-      var actionsDiv = document.getElementById('detailActions');
+      // Editable fields
+      var currentLevel = (user.level !== undefined && user.level !== null) ? user.level : 0;
+      var currentRcoins = (user.rcoins !== undefined && user.rcoins !== null) ? user.rcoins : 0;
+      var currentExp = (user.experience !== undefined && user.experience !== null) ? user.experience : 0;
+
+      var fields = [
+        { id: 'uid', label: 'UID', value: user.uid, type: 'text', editable: true, hint: '6位数字' },
+        { id: 'username', label: '用户名', value: user.username, type: 'text', editable: false },
+        { id: 'displayName', label: '昵称', value: user.displayName || '', type: 'text', editable: true },
+        { id: 'level', label: '等级', value: currentLevel, type: 'number', editable: true },
+        { id: 'rcoins', label: 'R币', value: currentRcoins, type: 'number', editable: true, quickBtns: true },
+        { id: 'experience', label: '经验值', value: currentExp, type: 'number', editable: true },
+        { id: 'role', label: '角色', value: roleLabel(user.role), type: 'select', editable: false, displayRole: true },
+        { id: 'status', label: '状态', value: user.status === 'active' ? '活跃' : '已禁用', type: 'text', editable: false },
+        { id: 'createdAt', label: '注册时间', value: formatDate(user.createdAt), type: 'text', editable: false },
+        { id: 'lastLogin', label: '最后登录', value: formatDate(user.lastLogin), type: 'text', editable: false },
+        { id: 'loginCount', label: '登录次数', value: user.loginCount || 0, type: 'number', editable: false },
+        { id: 'friends', label: '好友数量', value: (user.friends || []).length, type: 'number', editable: false }
+      ];
+
+      var fieldsHtml = fields.map(function(f) {
+        var editBtn = f.editable ? ' <button class="edit-btn" onclick="startInlineEdit(\'' + f.id + '\', \'' + uid + '\')">编辑</button>' : '';
+        var valueHtml = '';
+        if (f.id === 'role') {
+          valueHtml = '<span class="badge ' + roleBadgeClass(user.role) + '">' + roleLabel(user.role) + '</span>';
+        } else if (f.id === 'status') {
+          valueHtml = user.status === 'active' ? '<span class="badge badge-active">活跃</span>' : '<span class="badge badge-disabled">已禁用</span>';
+        } else {
+          valueHtml = escapeHtml(String(f.value));
+        }
+
+        var editInput = '';
+        if (f.type === 'number') {
+          editInput = '<input class="detail-field-edit" id="edit_' + f.id + '" type="number" value="' + f.value + '">';
+        } else {
+          editInput = '<input class="detail-field-edit" id="edit_' + f.id + '" type="text" value="' + escapeHtml(String(f.value)) + '"' + (f.hint ? ' placeholder="' + f.hint + '"' : '') + '>';
+        }
+
+        var quickBtnsHtml = '';
+        if (f.quickBtns) {
+          quickBtnsHtml = '<div class="detail-field-actions"><button class="quick-btn" onclick="quickAddInline(\'edit_rcoins\', 1000)">+1K</button><button class="quick-btn" onclick="quickAddInline(\'edit_rcoins\', 10000)">+10K</button><button class="quick-btn" onclick="quickAddInline(\'edit_rcoins\', 100000)">+100K</button><button class="quick-btn" onclick="document.getElementById(\'edit_rcoins\').value=0">归零</button></div>';
+        }
+
+        return '<div class="detail-field" id="field_' + f.id + '">' +
+          '<div class="detail-field-label"><span>' + f.label + '</span>' + editBtn + '</div>' +
+          '<div class="detail-field-value">' + valueHtml + '</div>' +
+          editInput +
+          (quickBtnsHtml ? quickBtnsHtml : '<div class="detail-field-actions"><button class="btn btn-xs btn-primary" onclick="saveInlineEdit(\'' + f.id + '\', \'' + uid + '\')">保存</button><button class="btn btn-xs btn-ghost" onclick="cancelInlineEdit(\'' + f.id + '\')">取消</button></div>') +
+        '</div>';
+      }).join('');
+
+      document.getElementById('inlineFields').innerHTML = fieldsHtml;
+
+      // Action buttons
       var isSU = user.role === 'admin';
       var isMA = user.role === 'ma';
       var isSelf = (currentUser && (user.uid === currentUser.uid || user.username === currentUser.username));
 
-      var html = '';
+      var actionsHtml = '';
+      actionsHtml += '<div class="action-section-label">头像管理</div>';
+      actionsHtml += '<button class="btn btn-sm btn-ghost" onclick="editAvatarInline(\'' + uid + '\')">&#128247; 修改头像</button>';
+      actionsHtml += '<button class="btn btn-sm btn-ghost" onclick="removeAvatar(\'' + uid + '\')">&#128465; 移除头像</button>';
 
-      html += '<div class="action-group-label">基本操作</div>';
-      html += '<button class="btn btn-sm btn-ghost" onclick="editUid(\'' + uid + '\')">&#128273; 修改UID</button>';
-      html += '<button class="btn btn-sm btn-ghost" onclick="editPassword(\'' + uid + '\')">&#128274; 修改密码</button>';
-      html += '<button class="btn btn-sm btn-ghost" onclick="editLevel(\'' + uid + '\')">&#127941; 修改等级</button>';
-      html += '<button class="btn btn-sm btn-ghost" onclick="editRcoins(\'' + uid + '\')">&#127919; 修改R币</button>';
-      html += '<button class="btn btn-sm btn-ghost" onclick="editDisplayName(\'' + uid + '\')">&#9999; 修改昵称</button>';
-      html += '<button class="btn btn-sm btn-ghost" onclick="editAvatar(\'' + uid + '\')">&#128247; 修改头像</button>';
-      html += '<button class="btn btn-sm btn-ghost" onclick="sendMessage(\'' + uid + '\')">&#9993; 发送私信</button>';
+      actionsHtml += '<div class="action-section-label">私信</div>';
+      actionsHtml += '<button class="btn btn-sm btn-ghost" onclick="sendMessage(\'' + uid + '\')">&#9993; 发送私信</button>';
 
-      html += '<div class="action-group-label">权限管理</div>';
-
-      if (isSU) {
-        if (!isSelf) {
-          html += '<button class="btn btn-sm btn-warning" onclick="setRole(\'' + uid + '\', \'ma\')">&#11015; 降为MA管理员</button>';
-          html += '<button class="btn btn-sm btn-danger" onclick="setRole(\'' + uid + '\', \'user\')">&#11015; 取消管理员</button>';
-        } else {
-          html += '<span style="font-size:12px;color:#f59e0b;font-weight:600;">当前用户（不可操作）</span>';
-        }
+      actionsHtml += '<div class="action-section-label">授权管理</div>';
+      if (isSU && !isSelf) {
+        actionsHtml += '<button class="btn btn-sm btn-warning" onclick="setRole(\'' + uid + '\', \'ma\')">&#11015; 降为MA</button>';
+        actionsHtml += '<button class="btn btn-sm btn-danger" onclick="setRole(\'' + uid + '\', \'user\')">&#11015; 取消管理员</button>';
       } else if (isMA) {
-        html += '<button class="btn btn-sm btn-primary" onclick="setRole(\'' + uid + '\', \'admin\')">&#11014; 升为SU超管</button>';
-        html += '<button class="btn btn-sm btn-danger" onclick="setRole(\'' + uid + '\', \'user\')">&#11015; 取消管理员</button>';
+        actionsHtml += '<button class="btn btn-sm btn-primary" onclick="setRole(\'' + uid + '\', \'admin\')">&#11014; 升为SU超管</button>';
+        actionsHtml += '<button class="btn btn-sm btn-danger" onclick="setRole(\'' + uid + '\', \'user\')">&#11015; 取消管理员</button>';
       } else {
-        html += '<button class="btn btn-sm btn-primary" onclick="setRole(\'' + uid + '\', \'admin\')">&#11014; 升为SU超管</button>';
-        html += '<button class="btn btn-sm" style="background:#6366f1;color:#fff;" onclick="setRole(\'' + uid + '\', \'ma\')">&#11014; 升为MA管理员</button>';
+        actionsHtml += '<button class="btn btn-sm btn-primary" onclick="setRole(\'' + uid + '\', \'admin\')">&#11014; 升为SU超管</button>';
+        actionsHtml += '<button class="btn btn-sm" style="background:#6366f1;color:#fff;" onclick="setRole(\'' + uid + '\', \'ma\')">&#11014; 升为MA</button>';
       }
 
-      html += '<div class="action-group-label">状态管理</div>';
+      actionsHtml += '<div class="action-section-label">状态管理</div>';
       if (!isSU || isSelf) {
         if (user.status === 'active') {
-          html += '<button class="btn btn-sm btn-danger" onclick="toggleStatus(\'' + uid + '\')">&#128683; 禁用用户</button>';
+          actionsHtml += '<button class="btn btn-sm btn-danger" onclick="toggleStatus(\'' + uid + '\')">&#128683; 禁用用户</button>';
         } else {
-          html += '<button class="btn btn-sm btn-success" onclick="toggleStatus(\'' + uid + '\')">&#9989; 启用用户</button>';
+          actionsHtml += '<button class="btn btn-sm btn-success" onclick="toggleStatus(\'' + uid + '\')">&#9989; 启用用户</button>';
         }
       }
+      if (isSU && isSelf) {
+        actionsHtml += '<span style="font-size:12px;color:#f59e0b;font-weight:600;">当前用户（不可操作自身权限和状态）</span>';
+      }
 
-      actionsDiv.innerHTML = html;
-      openModal('userDetailModal');
+      document.getElementById('inlineActions').innerHTML = actionsHtml;
+
+      // Switch to detail panel
+      switchPanel('userDetail');
     }
 
-    // ===== 编辑操作 =====
+    // ===== 内联编辑操作 =====
 
-    // 修改UID
-    function editUid(uid) {
+    function backToUsers() {
+      switchPanel('users');
+    }
+
+    function startInlineEdit(fieldId, uid) {
+      var field = document.getElementById('field_' + fieldId);
+      if (field) field.classList.add('editing');
+      var input = document.getElementById('edit_' + fieldId);
+      if (input) input.focus();
+    }
+
+    function cancelInlineEdit(fieldId) {
+      var field = document.getElementById('field_' + fieldId);
+      if (field) field.classList.remove('editing');
+    }
+
+    function saveInlineEdit(fieldId, uid) {
+      var input = document.getElementById('edit_' + fieldId);
+      if (!input) return;
+      var newValue = input.value.trim();
+
       var user = findUserByUid(uid);
       if (!user) return;
-      document.getElementById('editModalTitle').textContent = '修改 UID';
-      document.getElementById('editModalBody').innerHTML =
-        '<div class="form-group">' +
-          '<label class="form-label">当前 UID</label>' +
-          '<input class="form-input" value="' + user.uid + '" disabled>' +
-        '</div>' +
-        '<div class="form-group">' +
-          '<label class="form-label">新 UID</label>' +
-          '<input class="form-input" id="editUidInput" value="' + user.uid + '" placeholder="输入新UID（6位数字）">' +
-          '<div class="form-hint">UID格式为6位数字，如 000003</div>' +
-        '</div>';
-      editCallback = function() {
-        var newUid = document.getElementById('editUidInput').value.trim();
-        if (!newUid || !/^\d{6}$/.test(newUid)) {
-          showToast('UID必须为6位数字', 'error'); return;
+
+      var updateData = {};
+
+      if (fieldId === 'uid') {
+        if (!/^\d{6}$/.test(newValue) && newValue !== 'Administrator') {
+          showToast('UID必须为6位数字或Administrator', 'error'); return;
         }
-        updateUserData(uid, { uid: newUid }, 'Admin: Change UID of ' + user.username + ' to ' + newUid, function() {
-          addLog('uid', '修改 ' + user.username + ' 的UID: ' + user.uid + ' -> ' + newUid);
+        updateData.uid = newValue;
+        addLog('uid', '修改 ' + user.username + ' 的UID: ' + user.uid + ' -> ' + newValue);
+      } else if (fieldId === 'displayName') {
+        if (!newValue) { showToast('昵称不能为空', 'error'); return; }
+        updateData.displayName = newValue;
+        addLog('displayName', '修改 ' + user.username + ' 的昵称为 ' + newValue);
+      } else if (fieldId === 'level') {
+        var lv = parseInt(newValue);
+        if (isNaN(lv) || lv < 0) { showToast('等级必须为非负整数', 'error'); return; }
+        updateData.level = lv;
+        addLog('level', '修改 ' + user.username + ' 的等级: ' + (user.level || 0) + ' -> ' + lv);
+      } else if (fieldId === 'rcoins') {
+        var rc = parseInt(newValue);
+        if (isNaN(rc) || rc < 0) { showToast('R币必须为非负整数', 'error'); return; }
+        updateData.rcoins = rc;
+        addLog('rcoins', '修改 ' + user.username + ' 的R币: ' + (user.rcoins || 0) + ' -> ' + rc);
+      } else if (fieldId === 'experience') {
+        var exp = parseInt(newValue);
+        if (isNaN(exp) || exp < 0) { showToast('经验值必须为非负整数', 'error'); return; }
+        updateData.experience = exp;
+        addLog('level', '修改 ' + user.username + ' 的经验值: ' + (user.experience || 0) + ' -> ' + exp);
+      }
+
+      if (Object.keys(updateData).length > 0) {
+        var commitMsg = 'Admin: Update ' + fieldId + ' of ' + user.username;
+        updateUserData(uid, updateData, commitMsg, function() {
+          cancelInlineEdit(fieldId);
         });
-      };
-      openModal('editModal');
+      }
     }
 
-    // 修改密码
-    function editPassword(uid) {
+    function quickAddInline(inputId, amount) {
+      var input = document.getElementById(inputId);
+      if (input) {
+        var current = parseInt(input.value) || 0;
+        input.value = current + amount;
+      }
+    }
+
+    function editAvatarInline(uid) {
       var user = findUserByUid(uid);
       if (!user) return;
-      document.getElementById('editModalTitle').textContent = '修改密码';
-      document.getElementById('editModalBody').innerHTML =
-        '<div class="form-group">' +
-          '<label class="form-label">用户</label>' +
-          '<input class="form-input" value="' + escapeHtml(user.displayName || user.username) + '" disabled>' +
-        '</div>' +
-        '<div class="form-group">' +
-          '<label class="form-label">新密码</label>' +
-          '<input class="form-input" id="editPasswordInput" type="text" placeholder="输入新密码（至少4位）">' +
-        '</div>';
-      editCallback = function() {
-        var newPwd = document.getElementById('editPasswordInput').value;
-        if (!newPwd || newPwd.length < 4) {
-          showToast('密码至少4个字符', 'error'); return;
+      // Create a hidden file input
+      var fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/*';
+      fileInput.onchange = function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+          var dataUrl = ev.target.result;
+          // Save to localStorage as avatar
+          try {
+            localStorage.setItem('rui_avatar_' + uid, dataUrl);
+          } catch(err) {
+            // localStorage might be full, try compressing
+            showToast('头像数据过大，请使用更小的图片', 'error');
+            return;
+          }
+          // Also update in GitHub
+          adminUpdateUser(uid, function(content, idx) {
+            if (!content.users[idx].profile) content.users[idx].profile = {};
+            content.users[idx].profile.avatar = dataUrl;
+          }, 'Admin: Update avatar for ' + user.username, function() {
+            addLog('avatar', '修改 ' + user.username + ' 的头像');
+            showUserDetail(uid);
+          });
+        };
+        reader.readAsDataURL(file);
+      };
+      fileInput.click();
+    }
+
+    function removeAvatar(uid) {
+      var user = findUserByUid(uid);
+      if (!user) return;
+      localStorage.removeItem('rui_avatar_' + uid);
+      adminUpdateUser(uid, function(content, idx) {
+        if (content.users[idx].profile) {
+          content.users[idx].profile.avatar = null;
         }
-        adminUpdateUser(uid, function(content, idx) {
-          content.users[idx].passwordHash = hashPasswordSync(newPwd);
-        }, 'Admin: Reset password for ' + user.username, function() {
-          addLog('password', '重置 ' + user.username + ' 的密码');
-        });
-      };
-      openModal('editModal');
-    }
-
-    // 修改等级
-    function editLevel(uid) {
-      var user = findUserByUid(uid);
-      if (!user) return;
-      var currentLevel = (user.level !== undefined && user.level !== null) ? user.level : 0;
-      document.getElementById('editModalTitle').textContent = '修改等级';
-      document.getElementById('editModalBody').innerHTML =
-        '<div class="form-group">' +
-          '<label class="form-label">用户</label>' +
-          '<input class="form-input" value="' + escapeHtml(user.displayName || user.username) + '" disabled>' +
-        '</div>' +
-        '<div class="form-group">' +
-          '<label class="form-label">当前等级</label>' +
-          '<input class="form-input" value="' + currentLevel + '" disabled>' +
-        '</div>' +
-        '<div class="form-group">' +
-          '<label class="form-label">新等级</label>' +
-          '<input class="form-input" id="editLevelInput" type="number" min="0" value="' + currentLevel + '">' +
-        '</div>';
-      editCallback = function() {
-        var newLevel = parseInt(document.getElementById('editLevelInput').value);
-        if (isNaN(newLevel) || newLevel < 0) {
-          showToast('等级必须为非负整数', 'error'); return;
-        }
-        updateUserData(uid, { level: newLevel }, 'Admin: Set level of ' + user.username + ' to ' + newLevel, function() {
-          addLog('level', '修改 ' + user.username + ' 的等级: ' + currentLevel + ' -> ' + newLevel);
-        });
-      };
-      openModal('editModal');
-    }
-
-    // 修改R币
-    function editRcoins(uid) {
-      var user = findUserByUid(uid);
-      if (!user) return;
-      var currentRcoins = (user.rcoins !== undefined && user.rcoins !== null) ? user.rcoins : 0;
-      document.getElementById('editModalTitle').textContent = '修改 R币';
-      document.getElementById('editModalBody').innerHTML =
-        '<div class="form-group">' +
-          '<label class="form-label">用户</label>' +
-          '<input class="form-input" value="' + escapeHtml(user.displayName || user.username) + '" disabled>' +
-        '</div>' +
-        '<div class="form-group">' +
-          '<label class="form-label">当前R币</label>' +
-          '<input class="form-input" value="' + currentRcoins + '" disabled>' +
-        '</div>' +
-        '<div class="form-group">' +
-          '<label class="form-label">新R币数量</label>' +
-          '<input class="form-input" id="editRcoinsInput" type="number" value="' + currentRcoins + '">' +
-        '</div>' +
-        '<div class="form-group">' +
-          '<label class="form-label">快捷操作</label>' +
-          '<div class="form-row">' +
-            '<button class="quick-btn" onclick="quickAddRcoins(1000)">+1K</button>' +
-            '<button class="quick-btn" onclick="quickAddRcoins(10000)">+10K</button>' +
-            '<button class="quick-btn" onclick="quickAddRcoins(100000)">+100K</button>' +
-            '<button class="quick-btn" onclick="quickSetRcoins(0)">归零</button>' +
-          '</div>' +
-        '</div>';
-      editCallback = function() {
-        var newRcoins = parseInt(document.getElementById('editRcoinsInput').value);
-        if (isNaN(newRcoins) || newRcoins < 0) {
-          showToast('R币必须为非负整数', 'error'); return;
-        }
-        updateUserData(uid, { rcoins: newRcoins }, 'Admin: Set rcoins of ' + user.username + ' to ' + newRcoins, function() {
-          addLog('rcoins', '修改 ' + user.username + ' 的R币: ' + currentRcoins + ' -> ' + newRcoins);
-        });
-      };
-      openModal('editModal');
-    }
-
-    function quickAddRcoins(amount) {
-      var input = document.getElementById('editRcoinsInput');
-      var current = parseInt(input.value) || 0;
-      input.value = current + amount;
-    }
-
-    function quickSetRcoins(val) {
-      document.getElementById('editRcoinsInput').value = val;
-    }
-
-    // 修改昵称
-    function editDisplayName(uid) {
-      var user = findUserByUid(uid);
-      if (!user) return;
-      document.getElementById('editModalTitle').textContent = '修改昵称';
-      document.getElementById('editModalBody').innerHTML =
-        '<div class="form-group">' +
-          '<label class="form-label">用户</label>' +
-          '<input class="form-input" value="@' + escapeHtml(user.username) + '" disabled>' +
-        '</div>' +
-        '<div class="form-group">' +
-          '<label class="form-label">当前昵称</label>' +
-          '<input class="form-input" value="' + escapeHtml(user.displayName || '') + '" disabled>' +
-        '</div>' +
-        '<div class="form-group">' +
-          '<label class="form-label">新昵称</label>' +
-          '<input class="form-input" id="editDisplayNameInput" value="' + escapeHtml(user.displayName || '') + '">' +
-        '</div>';
-      editCallback = function() {
-        var newName = document.getElementById('editDisplayNameInput').value.trim();
-        if (!newName) {
-          showToast('昵称不能为空', 'error'); return;
-        }
-        updateUserData(uid, { displayName: newName }, 'Admin: Change displayName of ' + user.username + ' to ' + newName, function() {
-          addLog('displayName', '修改 ' + user.username + ' 的昵称: ' + (user.displayName || '') + ' -> ' + newName);
-        });
-      };
-      openModal('editModal');
-    }
-
-    // 修改头像
-    function editAvatar(uid) {
-      var user = findUserByUid(uid);
-      if (!user) return;
-      var currentAvatar = (user.profile && user.profile.avatar) || '';
-      document.getElementById('editModalTitle').textContent = '修改头像';
-      document.getElementById('editModalBody').innerHTML =
-        '<div class="form-group">' +
-          '<label class="form-label">用户</label>' +
-          '<input class="form-input" value="' + escapeHtml(user.displayName || user.username) + '" disabled>' +
-        '</div>' +
-        '<div class="form-group">' +
-          '<label class="form-label">头像 URL</label>' +
-          '<input class="form-input" id="editAvatarInput" value="' + escapeHtml(currentAvatar) + '" placeholder="输入头像图片URL">' +
-          '<div class="form-hint">输入图片链接地址，留空则移除自定义头像</div>' +
-        '</div>' +
-        (currentAvatar ? '<div class="form-group"><label class="form-label">当前头像预览</label><div style="width:64px;height:64px;border-radius:12px;overflow:hidden;background:#f3f4f6;"><img src="' + escapeHtml(currentAvatar) + '" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\'"></div></div>' : '');
-      editCallback = function() {
-        var newAvatar = document.getElementById('editAvatarInput').value.trim();
-        var profileUpdate = { avatar: newAvatar || null };
-        // 需要用 adminUpdateUser 因为 profile 是嵌套对象
-        adminUpdateUser(uid, function(content, idx) {
-          if (!content.users[idx].profile) content.users[idx].profile = {};
-          content.users[idx].profile.avatar = newAvatar || null;
-        }, 'Admin: Change avatar of ' + user.username, function() {
-          addLog('avatar', '修改 ' + user.username + ' 的头像');
-        });
-      };
-      openModal('editModal');
+      }, 'Admin: Remove avatar for ' + user.username, function() {
+        addLog('avatar', '移除 ' + user.username + ' 的头像');
+        showUserDetail(uid);
+      });
     }
 
     // 发送私信
     function sendMessage(uid) {
       var user = findUserByUid(uid);
       if (!user) return;
-      document.getElementById('editModalTitle').textContent = '发送私信';
-      document.getElementById('editModalBody').innerHTML =
-        '<div class="form-group">' +
-          '<label class="form-label">收件人</label>' +
-          '<input class="form-input" value="' + escapeHtml(user.displayName || user.username) + ' (' + user.uid + ')" disabled>' +
-        '</div>' +
-        '<div class="form-group">' +
-          '<label class="form-label">消息内容</label>' +
-          '<textarea class="form-input" id="sendMessageInput" rows="4" placeholder="输入消息内容..." style="min-height:100px;resize:vertical;"></textarea>' +
-        '</div>';
-      editCallback = function() {
-        var msg = document.getElementById('sendMessageInput').value.trim();
-        if (!msg) {
-          showToast('消息不能为空', 'error'); return;
-        }
-        // 保存到用户数据中的messages字段
-        adminUpdateUser(uid, function(content, idx) {
-          if (!content.users[idx].messages) content.users[idx].messages = [];
-          content.users[idx].messages.push({
-            from: currentUser.username,
-            content: msg,
-            time: new Date().toISOString(),
-            read: false
-          });
-        }, 'Admin: Send message to ' + user.username, function() {
-          addLog('message', '发送私信给 ' + user.username);
-          showToast('消息已发送');
-        });
-      };
-      openModal('editModal');
+      var msg = prompt('发送私信给 ' + (user.displayName || user.username) + ':');
+      if (!msg) return;
+      // Store message in localStorage
+      var messages = [];
+      try { messages = JSON.parse(localStorage.getItem('rui_private_messages') || '[]'); } catch(e) {}
+      messages.unshift({
+        from: currentUser.username,
+        fromUid: currentUser.uid,
+        to: uid,
+        toUsername: user.username,
+        message: msg,
+        time: new Date().toISOString()
+      });
+      try { localStorage.setItem('rui_private_messages', JSON.stringify(messages)); } catch(e) {}
+      addLog('message', '发送私信给 ' + user.username);
+      showToast('私信已发送');
     }
 
     // 切换用户状态
@@ -2198,9 +2218,11 @@ window.getLoggedInUser = getLoggedInUser;
         return putUsersJson(content, data.sha, commitMsg).then(function() {
           showToast('操作成功');
           if (logCallback) logCallback();
-          closeModal('editModal');
-          closeModal('userDetailModal');
           loadUsers();
+          // If on userDetail panel, refresh the view
+          if (currentDetailUid) {
+            showUserDetail(currentDetailUid);
+          }
         });
       }).catch(function(err) {
         console.error('操作失败:', err);
@@ -2230,9 +2252,11 @@ window.getLoggedInUser = getLoggedInUser;
         return putUsersJson(content, data.sha, commitMsg).then(function() {
           showToast('操作成功');
           if (logCallback) logCallback();
-          closeModal('editModal');
-          closeModal('userDetailModal');
           loadUsers();
+          // If on userDetail panel, refresh the view
+          if (currentDetailUid) {
+            showUserDetail(currentDetailUid);
+          }
         });
       }).catch(function(err) {
         console.error('操作失败:', err);
@@ -2240,10 +2264,7 @@ window.getLoggedInUser = getLoggedInUser;
       });
     }
 
-    // ===== 保存编辑 =====
-    function saveEdit() {
-      if (editCallback) editCallback();
-    }
+    // ===== 保存编辑 =====（保留兼容，confirm弹窗仍可能使用）
 
     // ===== 确认弹窗 =====
     function showConfirm(title, message, callback) {
