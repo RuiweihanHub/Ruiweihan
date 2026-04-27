@@ -40,7 +40,9 @@
 
     .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
     @media(max-width:640px){.grid{grid-template-columns:1fr}}
-    .card{background:#fff;border:1px solid #f3f4f6;border-radius:16px;padding:16px;cursor:pointer;transition:.15s}.card:hover{border-color:#e5e7eb;box-shadow:0 4px 16px -4px rgba(0,0,0,.06);transform:translateY(-1px)}
+    .card{background:#fff;border:1px solid #f3f4f6;border-radius:16px;padding:16px;cursor:pointer;transition:.15s;position:relative}.card:hover{border-color:#e5e7eb;box-shadow:0 4px 16px -4px rgba(0,0,0,.06);transform:translateY(-1px)}
+    .card .del-btn{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:50%;background:#fef2f2;color:#dc2626;display:none;align-items:center;justify-content:center;font-size:14px;font-weight:700;border:1px solid #fecaca;transition:.15s;z-index:5}.card .del-btn:hover{background:#dc2626;color:#fff}
+    .card:hover .del-btn.can-del{display:flex}
     .ct{display:flex;align-items:flex-start;gap:12px}
     .ci{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
     .ci.doc{background:#eff6ff;color:#2563eb}.ci.vid{background:#fef2f2;color:#dc2626}.ci.lnk{background:#f0fdf4;color:#16a34a}.ci.img{background:#fefce8;color:#ca8a04}
@@ -115,13 +117,16 @@
     .oj-editor{margin-bottom:16px}
     .oj-editor textarea{width:100%;min-height:220px;padding:14px;background:#1f2937;color:#e5e7eb;border:1px solid #374151;border-radius:12px;font-size:13px;font-family:'Courier New',monospace;line-height:1.6;resize:vertical;tab-size:4}
     .oj-editor select{padding:8px 14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;font-size:13px}
-    .oj-result{margin-top:16px;padding:16px;border-radius:14px;display:none}
+    .oj-result{margin-top:16px;padding:20px;border-radius:14px;display:none}
     .oj-result.show{display:block}
-    .oj-result.ac{background:#f0fdf4;border:1px solid #bbf7d0}.oj-result.wa{background:#fef2f2;border:1px solid #fecaca}.oj-result.ce{background:#fefce8;border:1px solid #fde68a}.oj-result.re{background:#f5f3ff;border:1px solid #ddd6fe}
-    .oj-result h4{font-size:14px;font-weight:600;margin-bottom:6px}
-    .oj-result.ac h4{color:#16a34a}.oj-result.wa h4{color:#dc2626}.oj-result.ce h4{color:#ca8a04}.oj-result.re h4{color:#7c3aed}
+    .oj-result.ac{background:#f0fdf4;border:1px solid #bbf7d0}.oj-result.wa{background:#fef2f2;border:1px solid #fecaca}.oj-result.ce{background:#fff7ed;border:1px solid #fed7aa}.oj-result.re{background:#f5f3ff;border:1px solid #ddd6fe}.oj-result.tle{background:#fefce8;border:1px solid #fde68a}
+    .oj-result h4{font-size:15px;font-weight:700;margin-bottom:8px}
+    .oj-result.ac h4{color:#16a34a}.oj-result.wa h4{color:#dc2626}.oj-result.ce h4{color:#ea580c}.oj-result.re h4{color:#7c3aed}.oj-result.tle h4{color:#ca8a04}
     .oj-result pre{background:#fff;padding:10px;border-radius:8px;font-size:12px;overflow-x:auto;white-space:pre-wrap;font-family:'Courier New',monospace}
     .oj-stats{display:flex;gap:16px;font-size:12px;color:#6b7280;margin-top:6px}
+    .oj-verdict{display:inline-block;padding:3px 12px;border-radius:8px;font-size:13px;font-weight:700;margin-right:8px}
+    .oj-verdict.ac{background:#dcfce7;color:#16a34a}.oj-verdict.wa{background:#fee2e2;color:#dc2626}.oj-verdict.tle{background:#fef9c3;color:#ca8a04}.oj-verdict.ce{background:#ffedd5;color:#ea580c}.oj-verdict.re{background:#ede9fe;color:#7c3aed}
+    .oj-score-bar{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;margin:10px 0}.oj-score-bar div{height:100%;border-radius:4px;transition:width .5s}
 
     .tab-nav{display:flex;gap:0;border-bottom:2px solid #f3f4f6;margin-bottom:20px}
     .tab-btn{padding:10px 20px;font-size:14px;font-weight:500;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;transition:.15s;background:none}
@@ -133,6 +138,29 @@
     .exam-stat{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
     .exam-stat .si{background:#f9fafb;border-radius:12px;padding:14px;text-align:center;border:1px solid #e5e7eb}
     .exam-stat .si .n{font-size:24px;font-weight:700;color:#111827}.exam-stat .si .l{font-size:11px;color:#6b7280;margin-top:2px}
+
+    .score-card{margin-top:20px;border-radius:16px;overflow:hidden;border:1px solid #e5e7eb}
+    .score-card .sc-head{padding:24px;text-align:center;color:#fff}
+    .score-card .sc-head.pass{background:linear-gradient(135deg,#16a34a,#22c55e)}.score-card .sc-head.fail{background:linear-gradient(135deg,#dc2626,#ef4444)}
+    .score-card .sc-head .sc-score{font-size:56px;font-weight:800;line-height:1}.score-card .sc-head .sc-label{font-size:14px;opacity:.85;margin-top:6px}
+    .score-card .sc-body{padding:20px;background:#fff}
+    .score-card .sc-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:13px}
+    .score-card .sc-row:last-child{border-bottom:none}
+    .score-card .sc-row .sc-k{color:#6b7280}.score-card .sc-row .sc-v{font-weight:600;color:#111827}
+
+    .exam-card{padding:14px 18px;background:#f9fafb;border-radius:12px;border:1px solid #e5e7eb;margin-bottom:8px;transition:.15s}
+    .exam-card:hover{border-color:#d1d5db;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+    .exam-card .ec-top{display:flex;align-items:center;justify-content:space-between}
+    .exam-card .ec-title{font-weight:500;font-size:14px;cursor:pointer}.exam-card .ec-title:hover{color:#2563eb}
+    .exam-card .ec-meta{font-size:11px;color:#9ca3af;margin-top:4px}
+    .exam-card .ec-id{font-size:10px;color:#9ca3af;font-family:monospace;margin-top:2px}
+    .exam-card .ec-actions{display:flex;align-items:center;gap:8px}
+    .exam-del{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;font-size:12px;transition:.15s;cursor:pointer}.exam-del:hover{background:#dc2626;color:#fff}
+
+    .pv-del{padding:5px 12px;background:#fef2f2;color:#dc2626;font-size:12px;font-weight:500;border-radius:8px;transition:.15s;border:1px solid #fecaca}.pv-del:hover{background:#dc2626;color:#fff}
+
+    .oj-prob-card{padding:14px 18px;background:#f9fafb;border-radius:12px;border:1px solid #e5e7eb;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:space-between}
+    .oj-prob-card:hover{border-color:#d1d5db;box-shadow:0 2px 8px rgba(0,0,0,.04)}
   </style>
 </head>
 <body>
@@ -156,7 +184,7 @@
 
   <div class="main" id="mainContent" style="display:none">
     <div class="hd">
-      <div><h1>学习资源中心<span class="badge">V2.0</span></h1><p class="sub">资源 · 考试 · OJ在线判题 | MA至SU可上传</p></div>
+      <div><h1>学习资源中心<span class="badge">V3.0</span></h1><p class="sub">资源 · 考试 · OJ在线判题 | MA至SU可上传</p></div>
       <div class="hbtns">
         <div id="upW" style="display:none"><button class="bd" onclick="showUploadModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v16m8-8H4"/></svg> 上传</button></div>
       </div>
@@ -184,7 +212,7 @@
   </div>
 
   <div class="fov" id="fov">
-    <div class="fbar"><h2 id="pTitle"></h2><div class="r"><a id="dlB" href="#" target="_blank" download class="bsm">下载</a><button class="xbtn" onclick="closePv()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg></button></div></div>
+    <div class="fbar"><h2 id="pTitle"></h2><div class="r"><a id="dlB" href="#" target="_blank" download class="bsm">下载</a><button id="pvDelBtn" class="pv-del" style="display:none" onclick="delResFromPv()">删除</button><button class="xbtn" onclick="closePv()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg></button></div></div>
     <div class="fbody" id="pBody"></div>
   </div>
 
@@ -226,7 +254,6 @@
   </div></div>
 
   <script>
-    // 全局错误捕获 - 在页面顶部显示错误信息
     window.onerror=function(msg,url,line){
       var d=document.getElementById('jsErr');if(d){d.style.display='block';d.innerHTML+='<div style="padding:8px 12px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;margin-bottom:6px;font-size:12px;color:#dc2626">JS错误: '+msg+' (行:'+line+')</div>'}
       return false;
@@ -234,7 +261,6 @@
   </script>
   <div id="jsErr" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:12px;background:#fff;border-bottom:2px solid #dc2626;max-height:200px;overflow-y:auto"></div>
   <script>
-    // ====== 内联 auth-v2.js（解决Cloudflare缓存JS文件301死循环问题）======
     function hashPasswordSync(p){var h=0,s=p+'ruihub_salt_2024';for(var i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h=h&h}return Math.abs(h).toString(36).padStart(8,'0')}
     function toBase64(s){var b=new TextEncoder().encode(s),r='';for(var i=0;i<b.length;i++)r+=String.fromCharCode(b[i]);return btoa(r)}
     function fromBase64(b){var s=atob(b),r=new Uint8Array(s.length);for(var i=0;i<s.length;i++)r[i]=s.charCodeAt(i);return new TextDecoder().decode(r)}
@@ -276,13 +302,16 @@
         }
       }
     }
-    // ====== 内联 auth 结束 ======
   </script>
   <script>
     var REPO='RuiweihanHub/ruiuser',LF='learn.json',LD='learn-files',EF='exams.json',OJF='oj-problems.json';
     var TK=function(){return['ghp_','aJxbQaU0S56e8pl6N8zrkWoHkfJHi92GOiFQ'].join('')};
     var UP=['Administrator','Ruiweihan','Xvjiarui','Wangpengyi','000001','000002'];
-    var cu=null,res=[],exams=[],ojProbs=[],curCat='',selFile=null,curTab='res',examTimer=null;
+    var ADMINS=['Administrator','Ruiweihan','000001'];
+    var cu=null,res=[],exams=[],ojProbs=[],curCat='',selFile=null,curTab='res',examTimer=null,currentPvRes=null;
+
+    function isAdmin(){return cu&&(ADMINS.indexOf(cu.username)>=0||ADMINS.indexOf(cu.uid)>=0)}
+    function canUpload(){return cu&&(UP.indexOf(cu.username)>=0||UP.indexOf(cu.uid)>=0)}
 
     function b64e(a){var b=new Uint8Array(a),s='';for(var i=0;i<b.length;i++)s+=String.fromCharCode(b[i]);return btoa(s)}
     function b64d(b){var s=atob(b),b2=new Uint8Array(s.length);for(var i=0;i<s.length;i++)b2[i]=s.charCodeAt(i);return new TextDecoder().decode(b2)}
@@ -311,7 +340,7 @@
         document.getElementById('authBtns').style.display='none';
         document.getElementById('userMenu').style.display='flex';
         document.getElementById('uName').textContent=st.username;
-        if(UP.indexOf(cu.username)>=0||UP.indexOf(cu.uid)>=0)document.getElementById('upW').style.display='block';
+        if(canUpload())document.getElementById('upW').style.display='block';
         loadRes();loadExams();loadOJ();
       }else{document.getElementById('loginPage').classList.add('show')}
     })();
@@ -371,6 +400,7 @@
       }
     };
 
+    // ====== Resource CRUD ======
     async function loadRes(){try{var r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+LF+'?ref=main&_='+Date.now(),{headers:{'Authorization':'token '+TK(),'Accept':'application/vnd.github.v3+json'}});if(r.ok){var d=await r.json();res=JSON.parse(b64d(d.content))}else{res=[]}}catch(e){res=[]}renderRes()}
 
     function renderRes(){
@@ -384,15 +414,19 @@
       var cl={文档:'doc',视频:'vid',链接:'lnk',图片:'img'};
       c.innerHTML=list.map(function(r){
         var t=cl[r.resourceType]||'doc',i=ic[r.resourceType]||ic['文档'],fz=r.fileSize?fs(r.fileSize):'';
+        var canDel=cu&&(r.authorUid===cu.uid||r.author===cu.username||isAdmin());
         var thumb='';
         if(r.resourceType==='图片'&&r.fileUrl)thumb='<img src="'+r.fileUrl+'" style="width:100%;height:80px;object-fit:cover;border-radius:8px;margin-top:8px" loading="lazy">';
-        return'<div class="card" onclick="openPv(\''+r.id+'\')"><div class="ct"><div class="ci '+t+'">'+i+'</div><div class="cf"><h3>'+esc(r.title)+'</h3><p>'+esc(r.description)+'</p><div class="cm"><span class="tg '+t+'">'+r.resourceType+'</span><span class="tg cat">'+r.category+'</span>'+(fz?'<span>'+fz+'</span>':'')+'<span>'+r.author+'</span><span>'+ft(r.createdAt)+'</span></div></div></div>'+thumb+'</div>';
+        return'<div class="card" onclick="openPv(\''+r.id+'\')"><button class="del-btn'+(canDel?' can-del':'')+'" onclick="event.stopPropagation();delRes(\''+r.id+'\')" title="删除">&times;</button><div class="ct"><div class="ci '+t+'">'+i+'</div><div class="cf"><h3>'+esc(r.title)+'</h3><p>'+esc(r.description)+'</p><div class="cm"><span class="tg '+t+'">'+r.resourceType+'</span><span class="tg cat">'+r.category+'</span>'+(fz?'<span>'+fz+'</span>':'')+'<span>'+r.author+'</span><span>'+ft(r.createdAt)+'</span></div></div></div>'+thumb+'</div>';
       }).join('');
     }
 
     function openPv(id){
       var r=res.find(function(x){return x.id===id});if(!r)return;
+      currentPvRes=r;
       document.getElementById('pTitle').textContent=r.title;document.getElementById('dlB').href=r.fileUrl||'#';
+      var canDel=cu&&(r.authorUid===cu.uid||r.author===cu.username||isAdmin());
+      document.getElementById('pvDelBtn').style.display=canDel?'inline-block':'none';
       var b=document.getElementById('pBody');b.innerHTML='';
       if(r.resourceType==='视频'&&r.fileUrl){b.innerHTML='<video controls preload="metadata" src="'+r.fileUrl+'">浏览器不支持视频播放</video>'}
       else if(r.resourceType==='链接'&&r.link){
@@ -411,7 +445,28 @@
       }
       document.getElementById('fov').classList.add('show');
     }
-    function closePv(){document.getElementById('fov').classList.remove('show');document.getElementById('pBody').innerHTML=''}
+    function closePv(){document.getElementById('fov').classList.remove('show');document.getElementById('pBody').innerHTML='';currentPvRes=null}
+
+    function delResFromPv(){
+      if(!currentPvRes)return;
+      delRes(currentPvRes.id);
+    }
+
+    async function delRes(id){
+      var r=res.find(function(x){return x.id===id});if(!r)return;
+      if(!cu){alert('请先登录');return}
+      var canDel=(r.authorUid===cu.uid||r.author===cu.username||isAdmin());
+      if(!canDel){alert('无权删除此资源');return}
+      if(!confirm('确定删除资源「'+r.title+'」？此操作不可恢复。'))return;
+      res=res.filter(function(x){return x.id!==id});
+      try{
+        var sha=null;var gr=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+LF+'?ref=main',{headers:{'Authorization':'token '+TK(),'Accept':'application/vnd.github.v3+json'}});
+        if(gr.ok){var gd=await gr.json();sha=gd.sha}
+        var bd={message:'Delete resource: '+r.title,content:b64e(new TextEncoder().encode(JSON.stringify(res,null,2)))};if(sha)bd.sha=sha;
+        var sr=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+LF,{method:'PUT',headers:{'Authorization':'token '+TK(),'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify(bd)});
+        if(sr.ok){closePv();renderRes()}else throw new Error('保存失败');
+      }catch(err){alert('删除失败: '+err.message);res.unshift(r);renderRes()}
+    }
 
     function showUploadModal(){
       selFile=null;document.getElementById('rT').value='';document.getElementById('rD').value='';document.getElementById('rL').value='';
@@ -443,14 +498,30 @@
       }catch(err){alert('上传失败: '+err.message)}finally{btn.disabled=false;btn.textContent='上传'}
     }
 
-    // ====== 专业考试系统 ======
+    // ====== Exam System ======
     async function loadExams(){try{var r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+EF+'?ref=main&_='+Date.now(),{headers:{'Authorization':'token '+TK(),'Accept':'application/vnd.github.v3+json'}});if(r.ok){var d=await r.json();exams=JSON.parse(b64d(d.content))}else{exams=[]}}catch(e){exams=[]}}
 
     function getExamRecords(){try{return JSON.parse(localStorage.getItem('rui_exam_records')||'[]')}catch(e){return[]}}
     function saveExamRecord(r){var rs=getExamRecords();rs.unshift(r);if(rs.length>50)rs=rs.slice(0,50);localStorage.setItem('rui_exam_records',JSON.stringify(rs))}
 
+    async function delExam(eid){
+      var ex=exams.find(function(e){return e.id===eid});if(!ex)return;
+      if(!cu){alert('请先登录');return}
+      var canDel=(ex.author===cu.username||isAdmin());
+      if(!canDel){alert('无权删除此考试');return}
+      if(!confirm('确定删除考试「'+ex.title+'」？此操作不可恢复。'))return;
+      exams=exams.filter(function(e){return e.id!==eid});
+      try{
+        var sha=null;var gr=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+EF+'?ref=main',{headers:{'Authorization':'token '+TK(),'Accept':'application/vnd.github.v3+json'}});
+        if(gr.ok){var gd=await gr.json();sha=gd.sha}
+        var bd={message:'Delete exam: '+ex.title,content:b64e(new TextEncoder().encode(JSON.stringify(exams,null,2)))};if(sha)bd.sha=sha;
+        var sr=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+EF,{method:'PUT',headers:{'Authorization':'token '+TK(),'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify(bd)});
+        if(sr.ok){renderExamHome()}else throw new Error('保存失败');
+      }catch(err){alert('删除失败: '+err.message);exams.unshift(ex);renderExamHome()}
+    }
+
     function renderExamHome(){
-      var c=document.getElementById('examHome'),can=cu&&cu.username&&(UP.indexOf(cu.username)>=0||UP.indexOf(cu.uid)>=0);
+      var c=document.getElementById('examHome'),can=canUpload();
       var myRecs=getExamRecords().filter(function(r){return cu&&r.user===cu.username});
       var h='';
 
@@ -481,7 +552,8 @@
           var dur=ex.duration?' | 限时'+ex.duration+'分钟':'';
           var passed=myRecs.find(function(r){return r.examId===ex.id&&r.score>=(ex.passLine||60)});
           var tried=myRecs.find(function(r){return r.examId===ex.id});
-          h+='<div style="padding:14px;background:#f9fafb;border-radius:12px;border:1px solid #e5e7eb;margin-bottom:8px;cursor:pointer;transition:.15s" onclick="startExam(\''+ex.id+'\')"><div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font-weight:500;font-size:14px">'+esc(ex.title)+'</div><div style="font-size:11px;color:#9ca3af;margin-top:4px">'+ex.category+' | '+ex.questions.length+'题'+dur+' | 及格线:'+(ex.passLine||60)+'分 | '+ex.author+'</div></div><div style="display:flex;align-items:center;gap:8px">'+(passed?'<span style="font-size:11px;padding:2px 8px;border-radius:20px;background:#f0fdf4;color:#16a34a;font-weight:600">已通过</span>':(tried?'<span style="font-size:11px;padding:2px 8px;border-radius:20px;background:#fef2f2;color:#dc2626;font-weight:600">未通过</span>':''))+'<button class="bd" style="font-size:11px;padding:6px 12px">开始</button></div></div></div>';
+          var canDelExam=cu&&(ex.author===cu.username||isAdmin());
+          h+='<div class="exam-card"><div class="ec-top"><div><div class="ec-title" onclick="startExam(\''+ex.id+'\')">'+esc(ex.title)+'</div><div class="ec-meta">'+ex.category+' | '+ex.questions.length+'题'+dur+' | 及格线:'+(ex.passLine||60)+'分 | '+ex.author+'</div><div class="ec-id">ID: '+ex.id+'</div></div><div class="ec-actions">'+(passed?'<span style="font-size:11px;padding:2px 8px;border-radius:20px;background:#f0fdf4;color:#16a34a;font-weight:600">已通过</span>':(tried?'<span style="font-size:11px;padding:2px 8px;border-radius:20px;background:#fef2f2;color:#dc2626;font-weight:600">未通过</span>':''))+(canDelExam?'<button class="exam-del" onclick="event.stopPropagation();delExam(\''+ex.id+'\')" title="删除考试">&times;</button>':'')+'<button class="bd" style="font-size:11px;padding:6px 12px" onclick="startExam(\''+ex.id+'\')">开始</button></div></div></div>';
         });
       }
 
@@ -546,6 +618,8 @@
 
       if(ex.note){h+='<div style="padding:12px 16px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;font-size:13px;color:#1e40af;margin-bottom:16px"><strong>考试须知：</strong>'+esc(ex.note)+'</div>'}
 
+      h+='<div style="padding:12px 16px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;margin-bottom:16px;font-size:12px;color:#6b7280;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><span>考试ID: <code style="background:#f3f4f6;padding:2px 6px;border-radius:4px;font-size:11px">'+ex.id+'</code></span><span>出题人: '+esc(ex.author)+'</span><span>创建时间: '+new Date(ex.createdAt).toLocaleDateString('zh-CN')+'</span></div>';
+
       h+='<div class="qnav" id="qNav">';
       ex.questions.forEach(function(q,i){h+='<button class="qnav-b'+(i===0?' cur':'')+'" onclick="scrollToQ('+i+')" id="qnav'+i+'">'+(i+1)+'</button>'});
       h+='</div>';
@@ -593,11 +667,13 @@
       window._es=true;if(examTimer){clearTimeout(examTimer);examTimer=null}
       document.getElementById('eTimer').style.display='none';
       var okScore=0,totalScore=ex.totalScore||100,okCount=0,total=ex.questions.length;
+      var qBreakdown=[];
       ex.questions.forEach(function(q,i){
         var ua=(window._ea[i]||'').toString().trim(),ca=q.answer.toString().trim();
         var correct=ua.toLowerCase()===ca.toLowerCase();
         var sc=q.score||Math.round(totalScore/total);
         if(correct){okScore+=sc;okCount++}
+        qBreakdown.push({index:i,type:q.type,correct:correct,score:sc,userAnswer:ua,correctAnswer:ca});
         if(q.type==='choice'){
           ['A','B','C','D'].forEach(function(l){var e=document.getElementById('q'+i+'_'+l);if(!e)return;if(l===q.answer)e.classList.add('ok');if(ua===l&&l!==q.answer)e.classList.add('no')});
         }else if(q.type==='judge'){
@@ -614,13 +690,37 @@
       });
       var sc=totalScore>0?Math.round(okScore/totalScore*100):0;
       var passLine=ex.passLine||60;
+      var passed=sc>=passLine;
       saveExamRecord({examId:ex.id,examTitle:ex.title,user:cu.username,score:sc,correctCount:okCount,totalCount:total,okScore:okScore,totalScore:totalScore,time:new Date().toISOString()});
-      var rh='<div style="margin-top:20px;padding:18px;border-radius:14px;border:1px solid '+(sc>=passLine?'#bbf7d0':'#fecaca')+';background:'+(sc>=passLine?'#f0fdf4':'#fef2f2')+';text-align:center"><p style="font-size:36px;font-weight:700;color:'+(sc>=passLine?'#16a34a':'#dc2626')+'">'+sc+'</p><p style="font-size:13px;color:#6b7280;margin-top:4px">得分 '+okScore+'/'+totalScore+' | 正确 '+okCount+'/'+total+' 题</p><p style="font-size:13px;color:'+(sc>=passLine?'#16a34a':'#dc2626')+';margin-top:8px">'+(sc>=passLine?'恭喜通过！':'未达及格线('+passLine+'分)，继续加油！')+'</p></div><button class="bg" onclick="closeEx()" style="width:100%;margin-top:10px;padding:10px">返回</button>';
+
+      // Professional score card
+      var choiceQs=qBreakdown.filter(function(q){return q.type==='choice'});
+      var judgeQs=qBreakdown.filter(function(q){return q.type==='judge'});
+      var fillQs=qBreakdown.filter(function(q){return q.type==='fill'});
+      var choiceOk=choiceQs.filter(function(q){return q.correct}).length;
+      var judgeOk=judgeQs.filter(function(q){return q.correct}).length;
+      var fillOk=fillQs.filter(function(q){return q.correct}).length;
+
+      var rh='<div class="score-card">';
+      rh+='<div class="sc-head '+(passed?'pass':'fail')+'">';
+      rh+='<div class="sc-score">'+sc+'</div>';
+      rh+='<div class="sc-label">'+(passed?'恭喜通过！':'未达及格线('+passLine+'分)')+'</div>';
+      rh+='</div>';
+      rh+='<div class="sc-body">';
+      rh+='<div class="sc-row"><span class="sc-k">得分</span><span class="sc-v">'+okScore+' / '+totalScore+'</span></div>';
+      rh+='<div class="sc-row"><span class="sc-k">正确题数</span><span class="sc-v">'+okCount+' / '+total+'</span></div>';
+      if(choiceQs.length)rh+='<div class="sc-row"><span class="sc-k">选择题</span><span class="sc-v">'+choiceOk+' / '+choiceQs.length+'</span></div>';
+      if(judgeQs.length)rh+='<div class="sc-row"><span class="sc-k">判断题</span><span class="sc-v">'+judgeOk+' / '+judgeQs.length+'</span></div>';
+      if(fillQs.length)rh+='<div class="sc-row"><span class="sc-k">填空题</span><span class="sc-v">'+fillOk+' / '+fillQs.length+'</span></div>';
+      rh+='<div class="sc-row"><span class="sc-k">及格线</span><span class="sc-v">'+passLine+'分</span></div>';
+      rh+='<div class="sc-row"><span class="sc-k">状态</span><span class="sc-v" style="color:'+(passed?'#16a34a':'#dc2626')+'">'+(passed?'PASS':'FAIL')+'</span></div>';
+      rh+='</div></div>';
+      rh+='<button class="bg" onclick="closeEx()" style="width:100%;margin-top:10px;padding:10px">返回</button>';
       document.getElementById('eBody').insertAdjacentHTML('beforeend',rh);
     }
     function closeEx(){document.getElementById('eov').classList.remove('show');if(examTimer){clearTimeout(examTimer);examTimer=null}renderExamHome()}
 
-    // ====== OJ在线判题 ======
+    // ====== OJ System ======
     async function loadOJ(){try{var r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+OJF+'?ref=main&_='+Date.now(),{headers:{'Authorization':'token '+TK(),'Accept':'application/vnd.github.v3+json'}});if(r.ok){var d=await r.json();ojProbs=JSON.parse(b64d(d.content))}else{ojProbs=[]}}catch(e){ojProbs=[]}}
 
     var OJ_RECORDS_KEY='rui_oj_records';
@@ -628,7 +728,7 @@
     function saveOJRecord(r){var rs=getOJRecords();rs.unshift(r);if(rs.length>100)rs=rs.slice(0,100);localStorage.setItem(OJ_RECORDS_KEY,JSON.stringify(rs))}
 
     function renderOJ(){
-      var c=document.getElementById('ojWrap'),can=cu&&cu.username&&(UP.indexOf(cu.username)>=0||UP.indexOf(cu.uid)>=0);
+      var c=document.getElementById('ojWrap'),can=canUpload();
       var h='<div class="oj-header"><h3>OJ 在线判题</h3><div>';
       if(can)h+='<button class="bd" onclick="showAddOJ()">+ 出题</button>';
       h+='</div></div>';
@@ -639,7 +739,10 @@
         var dc={easy:'#16a34a',medium:'#ca8a04',hard:'#dc2626'}[p.difficulty]||'#16a34a';
         var recs=getOJRecords().filter(function(r){return cu&&r.user===cu.username&&r.probId===p.id});
         var ac=recs.find(function(r){return r.status==='ac'});
-        h+='<div style="padding:14px 18px;background:#f9fafb;border-radius:12px;border:1px solid #e5e7eb;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:space-between" onclick="openOJProb('+i+')"><div style="display:flex;align-items:center;gap:10px"><span style="font-weight:500;font-size:14px">'+esc(p.title)+'</span><span style="font-size:11px;padding:2px 8px;border-radius:20px;color:'+dc+';background:'+dc+'15;font-weight:600">'+diff+'</span>'+(ac?'<span style="font-size:10px;padding:1px 6px;border-radius:20px;background:#f0fdf4;color:#16a34a;font-weight:600">AC</span>':'')+'</div><div style="font-size:12px;color:#9ca3af">时间: '+(p.timeLimit||1)+'s | 内存: '+(p.memoryLimit||128)+'MB</div></div>';
+        var sampleCount=(p.samples||[]).length;
+        var testDataCount=(p.testData||[]).length;
+        var totalPoints=sampleCount+testDataCount;
+        h+='<div class="oj-prob-card" onclick="openOJProb('+i+')"><div style="display:flex;align-items:center;gap:10px"><span style="font-weight:500;font-size:14px">'+esc(p.title)+'</span><span style="font-size:11px;padding:2px 8px;border-radius:20px;color:'+dc+';background:'+dc+'15;font-weight:600">'+diff+'</span>'+(ac?'<span style="font-size:10px;padding:1px 6px;border-radius:20px;background:#f0fdf4;color:#16a34a;font-weight:600">AC</span>':'')+'</div><div style="font-size:12px;color:#9ca3af">时间: '+(p.timeLimit||1)+'s | 内存: '+(p.memoryLimit||128)+'MB | 测试点: '+totalPoints+'</div></div>';
       });
       h+='</div>';
       c.innerHTML=h;
@@ -650,19 +753,23 @@
       var c=document.getElementById('ojWrap');
       var diff={easy:'简单',medium:'中等',hard:'困难'}[p.difficulty]||'简单';
       var dc={easy:'#16a34a',medium:'#ca8a04',hard:'#dc2626'}[p.difficulty]||'#16a34a';
+      var sampleCount=(p.samples||[]).length;
+      var testDataCount=(p.testData||[]).length;
+      var totalPoints=sampleCount+testDataCount;
       var h='<div style="margin-bottom:16px"><button class="bg" onclick="renderOJ()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M19 12H5m7-7l-7 7 7 7"/></svg> 返回题目列表</button></div>';
       h+='<div class="oj-problem"><h4>'+esc(p.title)+' <span style="font-size:11px;padding:2px 8px;border-radius:20px;color:'+dc+';background:'+dc+'15;font-weight:600">'+diff+'</span></h4>';
       h+='<p>'+esc(p.description)+'</p>';
       if(p.inputDesc)h+='<p style="margin-top:8px"><strong>输入格式：</strong>'+esc(p.inputDesc)+'</p>';
       if(p.outputDesc)h+='<p><strong>输出格式：</strong>'+esc(p.outputDesc)+'</p>';
       if(p.samples&&p.samples.length){
+        var displaySamples=p.samples.slice(0,2);
         h+='<div class="sample">';
-        p.samples.forEach(function(s,si){
+        displaySamples.forEach(function(s,si){
           h+='<div class="sample-box"><label>样例输入 '+(si+1)+'</label><pre>'+esc(s.input)+'</pre></div><div class="sample-box"><label>样例输出 '+(si+1)+'</label><pre>'+esc(s.output)+'</pre></div>';
         });
         h+='</div>';
       }
-      h+='<div class="oj-stats"><span>时间限制: '+(p.timeLimit||1)+'s</span><span>内存限制: '+(p.memoryLimit||128)+'MB</span></div></div>';
+      h+='<div class="oj-stats"><span>时间限制: '+(p.timeLimit||1)+'s</span><span>内存限制: '+(p.memoryLimit||128)+'MB</span><span>测试点: '+totalPoints+'</span></div></div>';
       h+='<div class="oj-editor"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><label style="font-size:13px;font-weight:500">语言:</label><select id="ojLang" onchange="changeLang()"><option value="cpp">C++</option><option value="c">C</option><option value="python">Python</option><option value="java">Java</option><option value="javascript">JavaScript</option></select></div>';
       h+='<textarea id="ojCode" spellcheck="false">#include <iostream>\nusing namespace std;\n\nint main() {\n    \n    return 0;\n}</textarea></div>';
       h+='<div style="display:flex;gap:10px"><button class="bd" onclick="submitOJ('+idx+')" style="padding:10px 24px">提交代码</button><button class="bg" onclick="testOJ('+idx+')" style="padding:10px 24px">运行样例</button></div>';
@@ -688,6 +795,19 @@
       return await r.json();
     }
 
+    function showOJResult(verdict,score,total,extra){
+      var resEl=document.getElementById('ojRes');
+      var label={ac:'Accepted',wa:'Wrong Answer',tle:'Time Limit Exceeded',ce:'Compilation Error',re:'Runtime Error'}[verdict]||verdict;
+      resEl.className='oj-result show '+verdict;
+      var pct=total>0?Math.round(score/total*100):0;
+      var barColor=verdict==='ac'?'#16a34a':verdict==='wa'?'#dc2626':verdict==='tle'?'#ca8a04':verdict==='ce'?'#ea580c':'#7c3aed';
+      var h='<div style="display:flex;align-items:center;margin-bottom:12px"><span class="oj-verdict '+verdict+'">'+verdict.toUpperCase()+'</span><span style="font-size:14px;font-weight:600">'+label+'</span></div>';
+      h+='<div style="font-size:16px;font-weight:700;margin-bottom:4px">'+verdict.toUpperCase()+' '+score+'/'+total+'</div>';
+      h+='<div class="oj-score-bar"><div style="width:'+pct+'%;background:'+barColor+'"></div></div>';
+      if(extra)h+='<pre style="margin-top:10px">'+extra+'</pre>';
+      resEl.innerHTML=h;
+    }
+
     async function submitOJ(idx){
       var p=ojProbs[idx];if(!p)return;
       var code=document.getElementById('ojCode').value;
@@ -695,45 +815,56 @@
       var langId=LANG_IDS[lang]||54;
       var resEl=document.getElementById('ojRes');resEl.className='oj-result show ce';resEl.innerHTML='<h4>判题中...</h4><pre>正在运行，请稍候...</pre>';
 
-      var allSamples=p.samples||[];
-      if(!allSamples.length){resEl.className='oj-result show ce';resEl.innerHTML='<h4>无测试样例</h4><pre>该题目没有设置测试样例</pre>';return}
-      var acCount=0,totalTests=allSamples.length,results=[];
+      var allTests=[];
+      if(p.samples&&p.samples.length){p.samples.forEach(function(s){allTests.push({input:s.input,output:s.output})})}
+      if(p.testData&&p.testData.length){p.testData.forEach(function(s){allTests.push({input:s.input,output:s.output})})}
+
+      if(!allTests.length){resEl.className='oj-result show ce';resEl.innerHTML='<h4>无测试数据</h4><pre>该题目没有设置测试数据</pre>';return}
+      var totalTests=allTests.length;
+      var acCount=0,tleCount=0;
 
       try{
         for(var si=0;si<totalTests;si++){
-          var s=allSamples[si];
+          var s=allTests[si];
           try{
             var d=await runJudge0(langId,code,s.input,p.timeLimit||2,p.memoryLimit||128);
             if(d.status&&d.status.id===3){
               var output=(d.stdout||'').trim();
               var expected=(s.output||'').trim();
-              var passed=output===expected;
-              if(passed)acCount++;
-              results.push({idx:si+1,passed:passed,output:output,expected:expected,stderr:'',time:d.time||'?',memory:d.memory?Math.round(d.memory/1024)+'MB':'?'});
-            }else if(d.status&&d.status.id===6){
-              results.push({idx:si+1,passed:false,output:'',expected:(s.output||'').trim(),stderr:'编译错误: '+(d.compile_output||'').substring(0,200),time:'?',memory:'?'});
+              if(output===expected){acCount++}
+            }else if(d.status&&(d.status.id===5||d.status.id===6)){
+              var errMsg=(d.compile_output||'').substring(0,300);
+              showOJResult('ce',acCount,totalTests,'编译错误\n\n'+errMsg);
+              saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'ce',score:acCount,total:totalTests,time:new Date().toISOString()});
+              return;
+            }else if(d.status&&(d.status.id===7||d.status.id===8||d.status.id===9||d.status.id===10||d.status.id===11||d.status.id===12)){
+              var errMsg=(d.stderr||d.status.description||'运行时错误').substring(0,300);
+              showOJResult('re',acCount,totalTests,'Runtime Error\n\n'+errMsg);
+              saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'re',score:acCount,total:totalTests,time:new Date().toISOString()});
+              return;
             }else{
-              var errMsg=d.stderr||d.compile_output||(d.status&&d.status.description)||'未知错误';
-              results.push({idx:si+1,passed:false,output:'',expected:(s.output||'').trim(),stderr:errMsg.substring(0,200),time:d.time||'?',memory:'?'});
+              var desc=(d.status&&d.status.description)||'';
+              if(desc.indexOf('Time Limit')>=0){tleCount++}
             }
           }catch(e){
-            results.push({idx:si+1,passed:false,output:'',expected:(s.output||'').trim(),stderr:e.message,time:'?',memory:'?'});
+            showOJResult('re',acCount,totalTests,'运行时错误\n\n'+e.message);
+            saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'re',score:acCount,total:totalTests,time:new Date().toISOString()});
+            return;
           }
         }
 
         if(acCount===totalTests){
-          resEl.className='oj-result show ac';
-          var detail=results.map(function(r){return '测试#'+r.idx+': AC ('+r.time+'s, '+r.memory+')'}).join('\n');
-          resEl.innerHTML='<h4>Accepted - 全部通过!</h4><pre>'+detail+'\n\n通过: '+acCount+'/'+totalTests+'</pre>';
-          saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'ac',time:new Date().toISOString()});
+          showOJResult('ac',acCount,totalTests,'');
+          saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'ac',score:acCount,total:totalTests,time:new Date().toISOString()});
+        }else if(tleCount>0){
+          showOJResult('tle',acCount,totalTests,'');
+          saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'tle',score:acCount,total:totalTests,time:new Date().toISOString()});
         }else{
-          resEl.className='oj-result show wa';
-          var detail=results.map(function(r){return '测试#'+r.idx+': '+(r.passed?'AC':'WA')+(r.passed?' ('+r.time+'s)':'\n  期望: '+r.expected+'\n  输出: '+r.output+(r.stderr?'\n  错误: '+r.stderr:''))}).join('\n\n');
-          resEl.innerHTML='<h4>Wrong Answer - '+(totalTests>1?acCount+'/'+totalTests+'通过':'答案错误')+'</h4><pre>'+detail+'</pre>';
-          saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'wa',time:new Date().toISOString()});
+          showOJResult('wa',acCount,totalTests,'');
+          saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'wa',score:acCount,total:totalTests,time:new Date().toISOString()});
         }
       }catch(err){
-        resEl.className='oj-result show ce';resEl.innerHTML='<h4>判题服务暂不可用</h4><pre>请稍后重试\n\n错误: '+esc(err.message)+'</pre>';
+        showOJResult('ce',0,totalTests,'判题服务暂不可用\n\n'+esc(err.message));
       }
     }
 
@@ -744,11 +875,18 @@
       var langId=LANG_IDS[lang]||54;
       var resEl=document.getElementById('ojRes');resEl.className='oj-result show ce';resEl.innerHTML='<h4>运行中...</h4><pre>正在执行样例测试...</pre>';
       var stdin=p.samples&&p.samples[0]?p.samples[0].input:'';
+      var expected=p.samples&&p.samples[0]?(p.samples[0].output||'').trim():'';
       runJudge0(langId,code,stdin,p.timeLimit||2,p.memoryLimit||128).then(function(d){
         if(d.status&&d.status.id===3){
-          var output=d.stdout||'',err=d.stderr||'';
-          resEl.className='oj-result show ac';
-          resEl.innerHTML='<h4>运行完成</h4><pre>'+(output?'输出:\n'+esc(output):'')+(err?'\n\n错误:\n'+esc(err):'')+'\n\n运行时间: '+(d.time||'?')+'s\n内存: '+(d.memory?Math.round(d.memory/1024)+'MB':'?')+'</pre>';
+          var output=(d.stdout||'').trim();
+          var matched=output===expected;
+          var h='<div style="display:flex;align-items:center;margin-bottom:12px"><span class="oj-verdict '+(matched?'ac':'wa')+'">'+(matched?'MATCH':'MISMATCH')+'</span><span style="font-size:14px;font-weight:600">样例运行结果</span></div>';
+          h+='<pre>'+(output?'你的输出:\n'+esc(output):'(无输出)')+(expected?'\n\n期望输出:\n'+esc(expected):'');
+          var err=d.stderr||'';
+          if(err)h+='\n\n标准错误:\n'+esc(err);
+          h+='\n\n运行时间: '+(d.time||'?')+'s\n内存: '+(d.memory?Math.round(d.memory/1024)+'MB':'?')+'</pre>';
+          resEl.className='oj-result show '+(matched?'ac':'wa');
+          resEl.innerHTML=h;
         }else{
           resEl.className='oj-result show ce';
           var errMsg=d.compile_output||d.stderr||(d.status&&d.status.description)||'运行错误';
@@ -770,7 +908,9 @@
       h+='<div class="fd"><label>输入格式</label><input id="ojIn" placeholder="描述输入格式"></div>';
       h+='<div class="fd"><label>输出格式</label><input id="ojOut" placeholder="描述输出格式"></div>';
       h+='<div id="ojSamples"><div class="fd"><label>样例1 输入</label><textarea class="oj-si" rows="2" placeholder="3 5"></textarea><label>样例1 输出</label><textarea class="oj-so" rows="2" placeholder="8"></textarea></div></div>';
-      h+='<button class="bg" onclick="addOJSample()" style="margin-bottom:12px">+ 添加样例</button>';
+      h+='<div style="display:flex;gap:8px;margin-bottom:12px"><button class="bg" onclick="addOJSample()">+ 添加样例</button><span style="font-size:11px;color:#9ca3af;line-height:32px">最多2个样例（显示给用户）</span></div>';
+      h+='<div id="ojTestData"><div class="fd" style="padding:12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px"><label style="color:#ea580c">隐藏测试数据1 输入</label><textarea class="oj-tdi" rows="2" placeholder="隐藏测试输入（不显示给用户）"></textarea><label style="color:#ea580c">隐藏测试数据1 输出</label><textarea class="oj-tdo" rows="2" placeholder="隐藏测试输出"></textarea></div></div>';
+      h+='<div style="display:flex;gap:8px;margin-bottom:12px"><button class="bg" onclick="addOJTestData()" style="background:#fff7ed;color:#ea580c;border-color:#fed7aa">+ 添加隐藏测试数据</button><span style="font-size:11px;color:#9ca3af;line-height:32px">用户不可见，用于判题</span></div>';
       h+='<button class="bd" onclick="createOJ()" style="width:100%;padding:10px">发布题目</button></div>';
       c.innerHTML=h;
     }
@@ -778,8 +918,18 @@
     function addOJSample(){
       var c=document.getElementById('ojSamples');
       var n=c.querySelectorAll('.oj-si').length+1;
+      if(n>2){alert('样例最多2个');return}
       var d=document.createElement('div');d.className='fd';
       d.innerHTML='<label>样例'+n+' 输入</label><textarea class="oj-si" rows="2" placeholder="输入"></textarea><label>样例'+n+' 输出</label><textarea class="oj-so" rows="2" placeholder="输出"></textarea>';
+      c.appendChild(d);
+    }
+
+    function addOJTestData(){
+      var c=document.getElementById('ojTestData');
+      var n=c.querySelectorAll('.oj-tdi').length+1;
+      var d=document.createElement('div');d.className='fd';
+      d.style.cssText='padding:12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;margin-top:8px';
+      d.innerHTML='<label style="color:#ea580c">隐藏测试数据'+n+' 输入</label><textarea class="oj-tdi" rows="2" placeholder="隐藏测试输入"></textarea><label style="color:#ea580c">隐藏测试数据'+n+' 输出</label><textarea class="oj-tdo" rows="2" placeholder="隐藏测试输出"></textarea>';
       c.appendChild(d);
     }
 
@@ -790,8 +940,11 @@
       if(!t||!desc){alert('请填写题目名称和描述');return}
       var sis=document.querySelectorAll('.oj-si'),sos=document.querySelectorAll('.oj-so');
       var samples=[];
-      for(var i=0;i<sis.length;i++){var si=sis[i].value.trim(),soEl=sos[i],so=soEl&&soEl.value?soEl.value.trim():'';if(si||so)samples.push({input:si,output:so})}
-      var np={id:'oj_'+Date.now(),title:t,difficulty:d,description:desc,inputDesc:ind,outputDesc:outd,samples:samples,timeLimit:tl,memoryLimit:ml,author:cu.username,createdAt:new Date().toISOString()};
+      for(var i=0;i<Math.min(sis.length,2);i++){var si=sis[i].value.trim(),soEl=sos[i],so=soEl&&soEl.value?soEl.value.trim():'';if(si||so)samples.push({input:si,output:so})}
+      var tdis=document.querySelectorAll('.oj-tdi'),tdos=document.querySelectorAll('.oj-tdo');
+      var testData=[];
+      for(var i=0;i<tdis.length;i++){var tdi=tdis[i].value.trim(),tdoEl=tdos[i],tdo=tdoEl&&tdoEl.value?tdoEl.value.trim():'';if(tdi||tdo)testData.push({input:tdi,output:tdo})}
+      var np={id:'oj_'+Date.now(),title:t,difficulty:d,description:desc,inputDesc:ind,outputDesc:outd,samples:samples,testData:testData,timeLimit:tl,memoryLimit:ml,author:cu.username,createdAt:new Date().toISOString()};
       ojProbs.unshift(np);
       try{var sha=null;var gr=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+OJF+'?ref=main',{headers:{'Authorization':'token '+TK(),'Accept':'application/vnd.github.v3+json'}});if(gr.ok){var gd=await gr.json();sha=gd.sha}
       var bd={message:'Add OJ: '+t,content:b64e(new TextEncoder().encode(JSON.stringify(ojProbs,null,2)))};if(sha)bd.sha=sha;
