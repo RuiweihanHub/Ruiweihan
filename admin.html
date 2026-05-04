@@ -213,6 +213,7 @@
                         <th class="text-left text-xs font-semibold text-gray-500 py-3 px-3">角色</th>
                         <th class="text-left text-xs font-semibold text-gray-500 py-3 px-3">等级</th>
                         <th class="text-left text-xs font-semibold text-gray-500 py-3 px-3">R币</th>
+                        <th class="text-left text-xs font-semibold text-gray-500 py-3 px-3">快捷密码</th>
                         <th class="text-left text-xs font-semibold text-gray-500 py-3 px-3">Pro</th>
                         <th class="text-left text-xs font-semibold text-gray-500 py-3 px-3">状态</th>
                         <th class="text-left text-xs font-semibold text-gray-500 py-3 px-3">注册时间</th>
@@ -220,7 +221,7 @@
                       </tr>
                     </thead>
                     <tbody id="usersTableBody">
-                      <tr><td colspan="9" class="text-center py-10 text-gray-400 text-sm">加载中...</td></tr>
+                      <tr><td colspan="10" class="text-center py-10 text-gray-400 text-sm">加载中...</td></tr>
                     </tbody>
                   </table>
                 </div>
@@ -663,7 +664,7 @@ function fromBase64(base64) {
       }).catch(function(err) {
         console.error('加载用户失败:', err);
         var tbody = document.getElementById('usersTableBody');
-        if (tbody) tbody.innerHTML = '<tr><td colspan="9" class="text-center py-10 text-red-500 text-sm">加载失败，请刷新重试</td></tr>';
+        if (tbody) tbody.innerHTML = '<tr><td colspan="10" class="text-center py-10 text-red-500 text-sm">加载失败，请刷新重试</td></tr>';
       });
     }
 
@@ -703,7 +704,7 @@ function fromBase64(base64) {
     function renderUsers(users) {
       var tbody = document.getElementById('usersTableBody');
       if (!tbody) return;
-      if (users.length === 0) { tbody.innerHTML = '<tr><td colspan="9" class="text-center py-10 text-gray-400 text-sm">暂无用户</td></tr>'; return; }
+      if (users.length === 0) { tbody.innerHTML = '<tr><td colspan="10" class="text-center py-10 text-gray-400 text-sm">暂无用户</td></tr>'; return; }
       tbody.innerHTML = users.map(function(user) {
         var avatarSrc = getUserAvatar(user.uid);
         var avatarHtml = renderAvatar(avatarSrc, 36);
@@ -720,6 +721,7 @@ function fromBase64(base64) {
           '<td class="py-3 px-3"><span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold ' + roleClass + '">' + roleText + '</span></td>' +
           '<td class="py-3 px-3 text-sm text-gray-700">' + level + '</td>' +
           '<td class="py-3 px-3 text-sm text-gray-700">' + rcoins + '</td>' +
+          '<td class="py-3 px-3"><span class="text-xs text-gray-400 font-mono">' + (user.quickPass || '000000000').substring(0,3) + '******' + '</span></td>' +
           '<td class="py-3 px-3 text-sm">' + proHtml + '</td>' +
           '<td class="py-3 px-3"><span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold ' + statusClass + '">' + statusText + '</span></td>' +
           '<td class="py-3 px-3 text-xs text-gray-400">' + formatDate(user.createdAt) + '</td>' +
@@ -762,6 +764,7 @@ function fromBase64(base64) {
       var fields = [
         { id: 'uid', label: 'UID', value: user.uid, type: 'text', editable: true, hint: '6位数字' },
         { id: 'displayName', label: '昵称', value: user.displayName || '', type: 'text', editable: true },
+        { id: 'quickPass', label: '快捷密码', value: user.quickPass || '000000000', type: 'text', editable: true, hint: '9位数字' },
         { id: 'level', label: '等级', value: currentLevel, type: 'number', editable: true },
         { id: 'rcoins', label: 'R币', value: currentRcoins, type: 'number', editable: true, quickBtns: true },
         { id: 'experience', label: '经验值', value: currentExp, type: 'number', editable: true },
@@ -824,6 +827,8 @@ function fromBase64(base64) {
 
       actionsHtml += '<div class="w-full text-[11px] font-bold text-gray-400 uppercase mt-4 mb-1">密码管理</div>';
       actionsHtml += '<button class="px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors cursor-pointer" onclick="resetPassword(\'' + uid + '\')">&#128272; 重置密码</button>';
+      actionsHtml += '<div class="w-full text-[11px] font-bold text-gray-400 uppercase mt-4 mb-1">快捷密码</div>';
+      actionsHtml += '<button class="px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors cursor-pointer" onclick="resetQuickPass(\'' + uid + '\')">&#128272; 重置为默认(9个0)</button>';
 
       actionsHtml += '<div class="w-full text-[11px] font-bold text-gray-400 uppercase mt-4 mb-1">授权管理</div>';
       if (isSU && !isSelf) {
@@ -880,7 +885,7 @@ function fromBase64(base64) {
         updates[fieldId] = newValue;
       }
       updateUserData(uid, updates, 'Admin: Update ' + fieldId + ' for ' + uid, function() {
-        addLog(fieldId, '修改 ' + uid + ' 的' + {uid:'UID', displayName:'昵称', level:'等级', rcoins:'R币', experience:'经验值'}[fieldId] + ' 为 ' + newValue);
+        addLog(fieldId, '修改 ' + uid + ' 的' + {uid:'UID', displayName:'昵称', quickPass:'快捷密码', level:'等级', rcoins:'R币', experience:'经验值'}[fieldId] + ' 为 ' + newValue);
       });
     }
 
@@ -968,6 +973,14 @@ function fromBase64(base64) {
       var hashedPassword = hashPasswordSync(newPassword);
       updateUserData(uid, { passwordHash: hashedPassword }, 'Admin: Reset password for ' + user.username, function() {
         addLog('password', '重置 ' + user.username + ' 的密码');
+      });
+    }
+
+    function resetQuickPass(uid) {
+      showConfirm('重置快捷密码', '确定将该用户的快捷密码重置为000000000吗？', function() {
+        updateUserData(uid, { quickPass: '000000000' }, 'Admin: Reset quickPass for ' + uid, function() {
+          addLog('update', '重置 ' + uid + ' 的快捷密码');
+        });
       });
     }
 
