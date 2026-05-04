@@ -187,6 +187,16 @@
             </div>
             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
           </button>
+          <button onclick="showQuickPassModal()" class="w-full flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+            <div class="flex items-center gap-3">
+              <span class="text-xl">🔑</span>
+              <div class="text-left">
+                <p class="text-sm font-medium text-gray-700">修改快捷密码</p>
+                <p class="text-xs text-gray-500">9位数字，用于快速登录，默认为000000000</p>
+              </div>
+            </div>
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+          </button>
           <button onclick="clearLocalData()" class="w-full flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
             <div class="flex items-center gap-3">
               <span class="text-xl">🗑️</span>
@@ -320,6 +330,32 @@
         <div id="passwordError" class="hidden p-3 bg-red-50 border border-red-100 rounded-xl text-sm text-red-600"></div>
         <div id="passwordSuccess" class="hidden p-3 bg-green-50 border border-green-100 rounded-xl text-sm text-green-600"></div>
         <button onclick="changePassword()" class="w-full py-2.5 bg-violet-600 text-white font-medium rounded-xl hover:bg-violet-700 transition-colors">确认修改</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 快捷密码弹窗 -->
+  <div id="quickPassModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden">
+      <div class="p-6 border-b border-gray-100">
+        <h3 class="font-semibold text-gray-800">修改快捷密码</h3>
+      </div>
+      <div class="p-6 space-y-4">
+        <div id="quickPassError" class="hidden p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-600"></div>
+        <div id="quickPassSuccess" class="hidden p-3 bg-green-50 border border-green-100 rounded-lg text-sm text-green-600"></div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">新快捷密码</label>
+          <input id="newQuickPass" type="text" maxlength="9" placeholder="输入9位数字" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-center tracking-widest focus:outline-none focus:border-gray-300 focus:bg-white transition-colors" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">确认快捷密码</label>
+          <input id="confirmQuickPass" type="text" maxlength="9" placeholder="再次输入9位数字" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-center tracking-widest focus:outline-none focus:border-gray-300 focus:bg-white transition-colors" />
+        </div>
+        <p class="text-xs text-gray-400">快捷密码为9位数字，可用于快速登录。请勿使用过于简单的密码。</p>
+      </div>
+      <div class="p-6 pt-0 flex gap-3">
+        <button onclick="closeQuickPassModal()" class="flex-1 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors">取消</button>
+        <button onclick="saveQuickPass()" class="flex-1 py-2.5 bg-violet-600 text-white font-medium rounded-xl hover:bg-violet-700 transition-colors">确认修改</button>
       </div>
     </div>
   </div>
@@ -1599,6 +1635,88 @@ window.getLoggedInUser = getLoggedInUser;
       }
     }
     
+    // 快捷密码
+    function showQuickPassModal() {
+      document.getElementById('quickPassModal').classList.remove('hidden');
+      document.getElementById('quickPassModal').classList.add('flex');
+      document.getElementById('newQuickPass').value = '';
+      document.getElementById('confirmQuickPass').value = '';
+      document.getElementById('quickPassError').classList.add('hidden');
+      document.getElementById('quickPassSuccess').classList.add('hidden');
+    }
+
+    function closeQuickPassModal() {
+      document.getElementById('quickPassModal').classList.add('hidden');
+      document.getElementById('quickPassModal').classList.remove('flex');
+    }
+
+    async function saveQuickPass() {
+      const newPass = document.getElementById('newQuickPass').value.trim();
+      const confirmPass = document.getElementById('confirmQuickPass').value.trim();
+      const errEl = document.getElementById('quickPassError');
+      const sucEl = document.getElementById('quickPassSuccess');
+
+      if (!newPass || newPass.length !== 9) {
+        errEl.textContent = '快捷密码必须为9位';
+        errEl.classList.remove('hidden');
+        sucEl.classList.add('hidden');
+        return;
+      }
+      if (!/^\d{9}$/.test(newPass)) {
+        errEl.textContent = '快捷密码必须为9位数字';
+        errEl.classList.remove('hidden');
+        sucEl.classList.add('hidden');
+        return;
+      }
+      if (newPass !== confirmPass) {
+        errEl.textContent = '两次输入不一致';
+        errEl.classList.remove('hidden');
+        sucEl.classList.add('hidden');
+        return;
+      }
+
+      try {
+        // Update users.json on GitHub
+        const token = ['ghp_', 'aJxbQaU0S56e8pl6N8zrkWoHkfJHi92GOiFQ'].join('');
+        const res = await fetch('https://api.github.com/repos/RuiweihanHub/ruiuser/contents/users.json?ref=main&_=' + Date.now(), {
+          headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
+        });
+        if (!res.ok) throw new Error('获取数据失败');
+        const data = await res.json();
+        const content = JSON.parse(atob(data.content.replace(/\s/g, '')));
+        const binaryStr = atob(data.content.replace(/\s/g, ''));
+        const bytes = new Uint8Array(binaryStr.length);
+        for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
+        const fullContent = JSON.parse(new TextDecoder().decode(bytes));
+        const idx = fullContent.users.findIndex(u => u.uid === currentUser.uid || u.username === currentUser.username);
+        if (idx === -1) throw new Error('用户不存在');
+        fullContent.users[idx].quickPass = newPass;
+
+        // Upload
+        const updatedStr = JSON.stringify(fullContent, null, 2);
+        const encodedBytes = new TextEncoder().encode(updatedStr);
+        let binary = '';
+        for (let i = 0; i < encodedBytes.length; i++) binary += String.fromCharCode(encodedBytes[i]);
+        const encoded = btoa(binary);
+
+        const putRes = await fetch('https://api.github.com/repos/RuiweihanHub/ruiuser/contents/users.json', {
+          method: 'PUT',
+          headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: 'Update quickPass for ' + currentUser.username, content: encoded, sha: data.sha })
+        });
+        if (!putRes.ok) throw new Error('保存失败');
+
+        sucEl.textContent = '快捷密码修改成功！';
+        sucEl.classList.remove('hidden');
+        errEl.classList.add('hidden');
+        setTimeout(() => closeQuickPassModal(), 1500);
+      } catch (err) {
+        errEl.textContent = '修改失败: ' + err.message;
+        errEl.classList.remove('hidden');
+        sucEl.classList.add('hidden');
+      }
+    }
+
     // 清除本地数据
     function clearLocalData() {
       if (confirm('确定要清除所有本地缓存吗？这不会影响您的账户数据。')) {
