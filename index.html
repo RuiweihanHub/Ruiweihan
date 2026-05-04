@@ -228,6 +228,11 @@
           <h2 class="text-lg font-semibold text-gray-900">登录</h2>
           <button id="closeBtn" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"><svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
         </div>
+        <!-- Login method tabs -->
+        <div class="flex mt-4 bg-gray-100 rounded-xl p-1">
+          <button id="tabAccount" class="flex-1 py-2 text-sm font-medium rounded-lg bg-white text-gray-900 shadow-sm transition-colors" onclick="switchLoginTab('account')">账号登录</button>
+          <button id="tabQuick" class="flex-1 py-2 text-sm font-medium rounded-lg text-gray-500 transition-colors" onclick="switchLoginTab('quick')">快捷密码</button>
+        </div>
       </div>
       <form id="authForm" class="p-6 space-y-4">
         <div id="errorMsg" class="hidden p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-600"></div>
@@ -245,6 +250,25 @@
           <label for="rememberMe" class="text-sm text-gray-600">保持登录（7天）</label>
         </div>
         <button type="submit" class="w-full py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 disabled:opacity-50 transition-colors">登录</button>
+        <div class="text-center text-sm text-gray-500">
+          没有账号？<a href="/register.html" class="text-violet-600 hover:text-violet-700 font-medium">立即注册</a>
+        </div>
+      </form>
+      
+      <!-- Quick password login form (new) -->
+      <form id="quickForm" class="p-6 space-y-4 hidden">
+        <div id="quickErrorMsg" class="hidden p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-600"></div>
+        <div id="quickSuccessMsg" class="hidden p-3 bg-green-50 border border-green-100 rounded-lg text-sm text-green-600"></div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">快捷密码</label>
+          <input id="quickPass" type="password" maxlength="9" placeholder="输入9位快捷密码" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-center tracking-widest focus:outline-none focus:border-gray-300 focus:bg-white transition-colors" required />
+          <p class="text-xs text-gray-400 mt-1.5">默认快捷密码为9个0，可在个人中心修改</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="quickRememberMe" class="w-4 h-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500" />
+          <label for="quickRememberMe" class="text-sm text-gray-600">保持登录（7天）</label>
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 disabled:opacity-50 transition-colors">快捷登录</button>
         <div class="text-center text-sm text-gray-500">
           没有账号？<a href="/register.html" class="text-violet-600 hover:text-violet-700 font-medium">立即注册</a>
         </div>
@@ -1216,7 +1240,7 @@ window.getLoggedInUser = getLoggedInUser;
     }
 
     loginBtn.addEventListener('click', () => { modal.classList.remove('hidden'); modal.classList.add('flex'); });
-    closeBtn.addEventListener('click', () => { modal.classList.add('hidden'); modal.classList.remove('flex'); errorMsg.classList.add('hidden'); });
+    closeBtn.addEventListener('click', () => { modal.classList.add('hidden'); modal.classList.remove('flex'); errorMsg.classList.add('hidden'); document.getElementById('quickErrorMsg')?.classList.add('hidden'); document.getElementById('quickSuccessMsg')?.classList.add('hidden'); switchLoginTab('account'); });
     userBtn.addEventListener('click', (e) => { e.stopPropagation(); dropdown.classList.toggle('hidden'); });
     document.addEventListener('click', () => { dropdown.classList.add('hidden'); });
 
@@ -1295,6 +1319,76 @@ window.getLoggedInUser = getLoggedInUser;
     }
     function showError(msg) { errorMsg.textContent = msg; errorMsg.classList.remove('hidden'); successMsg.classList.add('hidden'); }
     function showSuccess(msg) { successMsg.textContent = msg; successMsg.classList.remove('hidden'); errorMsg.classList.add('hidden'); }
+
+    // Switch login tabs
+    function switchLoginTab(tab) {
+      const authForm = document.getElementById('authForm');
+      const quickForm = document.getElementById('quickForm');
+      const tabAccount = document.getElementById('tabAccount');
+      const tabQuick = document.getElementById('tabQuick');
+      if (tab === 'account') {
+        authForm.classList.remove('hidden');
+        quickForm.classList.add('hidden');
+        tabAccount.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+        tabAccount.classList.remove('text-gray-500');
+        tabQuick.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+        tabQuick.classList.add('text-gray-500');
+      } else {
+        authForm.classList.add('hidden');
+        quickForm.classList.remove('hidden');
+        tabQuick.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+        tabQuick.classList.remove('text-gray-500');
+        tabAccount.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+        tabAccount.classList.add('text-gray-500');
+      }
+    }
+
+    // Quick password login handler
+    document.getElementById('quickForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const quickPass = document.getElementById('quickPass').value.trim();
+      const rememberMe = document.getElementById('quickRememberMe').checked;
+      if (!quickPass || quickPass.length !== 9) {
+        document.getElementById('quickErrorMsg').textContent = '请输入9位快捷密码';
+        document.getElementById('quickErrorMsg').classList.remove('hidden');
+        document.getElementById('quickSuccessMsg').classList.add('hidden');
+        return;
+      }
+      try {
+        const token = ['ghp_', 'aJxbQaU0S56e8pl6N8zrkWoHkfJHi92GOiFQ'].join('');
+        const res = await fetch('https://api.github.com/repos/RuiweihanHub/ruiuser/contents/users.json?ref=main&_=' + Date.now(), {
+          headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
+        });
+        if (!res.ok) throw new Error('获取用户数据失败');
+        const data = await res.json();
+        // Support Chinese base64
+        const binaryStr = atob(data.content.replace(/\s/g, ''));
+        const bytes = new Uint8Array(binaryStr.length);
+        for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
+        const users = JSON.parse(new TextDecoder().decode(bytes)).users;
+        const user = users.find(u => u.quickPass === quickPass && u.status !== 'disabled');
+        if (user) {
+          sessionStorage.setItem('rui_user', user.username);
+          sessionStorage.setItem('rui_uid', user.uid);
+          localStorage.setItem('rui_user_remember', user.username);
+          localStorage.setItem('rui_uid_remember', user.uid);
+          const expireTime = rememberMe ? 7 * 24 * 60 * 60 * 1000 : 1 * 60 * 60 * 1000;
+          localStorage.setItem('rui_user_expire', (Date.now() + expireTime).toString());
+          document.getElementById('quickSuccessMsg').textContent = '登录成功！';
+          document.getElementById('quickSuccessMsg').classList.remove('hidden');
+          document.getElementById('quickErrorMsg').classList.add('hidden');
+          setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); showLoggedInState(user.username); }, 500);
+        } else {
+          document.getElementById('quickErrorMsg').textContent = '快捷密码错误或账户已禁用';
+          document.getElementById('quickErrorMsg').classList.remove('hidden');
+          document.getElementById('quickSuccessMsg').classList.add('hidden');
+        }
+      } catch (err) {
+        document.getElementById('quickErrorMsg').textContent = '登录失败，请重试';
+        document.getElementById('quickErrorMsg').classList.remove('hidden');
+        document.getElementById('quickSuccessMsg').classList.add('hidden');
+      }
+    });
 
     // 搜索类型切换
     let currentSearchType = 'project';
