@@ -81,6 +81,7 @@ const DEFAULT_USERS = {
       username: 'Administrator',
       displayName: '系统管理员',
       passwordHash: '1u98e9',
+      quickPass: '123456789',
       role: 'admin',
       status: 'active',
       createdAt: '2024-01-01T00:00:00Z',
@@ -98,6 +99,7 @@ const DEFAULT_USERS = {
       username: 'Ruiweihan',
       displayName: 'Ruiweihan',
       passwordHash: '6052ni',
+      quickPass: '987654321',
       role: 'admin',
       status: 'active',
       createdAt: '2024-01-01T00:00:00Z',
@@ -115,6 +117,7 @@ const DEFAULT_USERS = {
       username: 'Xvjiarui',
       displayName: 'Xvjiarui',
       passwordHash: 'o7dyuk',
+      quickPass: '555666777',
       role: 'user',
       status: 'active',
       createdAt: '2024-01-01T00:00:00Z',
@@ -447,6 +450,7 @@ class RuiAuth {
       username: username,
       displayName: displayName || username,
       passwordHash: hashPasswordSync(password),
+      quickPass: generateQuickPassword(),  // 注册时随机分配快捷密码
       role: 'user',
       status: 'active',
       createdAt: now,
@@ -853,6 +857,62 @@ function getLoggedInUser() {
   return syncLoginState();
 }
 
+
+// 生成9位随机快捷密码
+function generateQuickPassword() {
+  var chars = '0123456789';
+  var pass = '';
+  for (var i = 0; i < 9; i++) {
+    pass += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return pass;
+}
+
+// 检查快捷密码是否已被过多用户使用
+function checkQuickPasswordCollision(users, quickPass) {
+  var count = 0;
+  if (!users || !users.users) return false;
+  for (var i = 0; i < users.users.length; i++) {
+    if (users.users[i].quickPass === quickPass) count++;
+  }
+  return count >= 2; // 超过2个用户使用同一快捷密码
+}
+
+// 快捷密码登录验证
+async function validateQuickLogin(quickPass, auth) {
+  if (!auth || !auth.users) return { success: false, error: '系统不可用' };
+  
+  var matchedUsers = [];
+  for (var i = 0; i < auth.users.users.length; i++) {
+    if (auth.users.users[i].quickPass === quickPass && auth.users.users[i].status !== 'disabled') {
+      matchedUsers.push(auth.users.users[i]);
+    }
+  }
+  
+  if (matchedUsers.length === 0) {
+    return { success: false, error: '快捷密码无效' };
+  }
+  
+  if (matchedUsers.length === 1) {
+    var user = matchedUsers[0];
+    user.lastLogin = new Date().toISOString();
+    user.loginCount = (user.loginCount || 0) + 1;
+    return { 
+      success: true, 
+      user: { uid: user.uid, username: user.username, displayName: user.displayName, role: user.role, profile: user.profile },
+      needPassword: false
+    };
+  }
+  
+  // 超过2个用户共享同一快捷密码，需要额外验证
+  return { 
+    success: false, 
+    error: '该快捷密码被多个用户使用，请使用账号密码登录',
+    needPassword: true,
+    matchedUsers: matchedUsers.map(function(u) { return { uid: u.uid, username: u.username }; })
+  };
+}
+
 // 导出全局函数
 window.RuiAuth = RuiAuth;
 window.getAuth = getAuth;
@@ -866,3 +926,6 @@ window.AUTH_LOCAL_USERS = AUTH_LOCAL_USERS;
 window.syncLoginState = syncLoginState;
 window.isLoggedIn = isLoggedIn;
 window.getLoggedInUser = getLoggedInUser;
+window.generateQuickPassword = generateQuickPassword;
+window.checkQuickPasswordCollision = checkQuickPasswordCollision;
+window.validateQuickLogin = validateQuickLogin;
