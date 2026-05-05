@@ -733,6 +733,7 @@ class RuiAuth {
       username: username,
       displayName: displayName || username,
       passwordHash: hashPasswordSync(password),
+      quickPass: generateQuickPassword(),
       role: 'user',
       status: 'active',
       createdAt: now,
@@ -1433,8 +1434,9 @@ window.getLoggedInUser = getLoggedInUser;
         const result = await auth.register(formData.username, formData.password, formData.username, formData.email || null);
         
         if (result.success) {
+        var qpMsg = result.quickPass ? '\n\n你的快捷密码: ' + result.quickPass + '\n(请妥善保管)' : '';
           document.getElementById('summaryUid').textContent = result.user.uid;
-          successEl.textContent = `注册成功！您的UID: ${result.user.uid}，即将跳转...`;
+          successEl.textContent = `注册成功！！您的UID: ${result.user.uid}，即将跳转...`;
           successEl.classList.remove('hidden');
           
           setTimeout(() => {
