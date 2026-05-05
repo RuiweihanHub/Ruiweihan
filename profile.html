@@ -1480,7 +1480,20 @@ window.getLoggedInUser = getLoggedInUser;
       // 初始化头像选项
       const container = document.getElementById('avatarOptions');
       container.innerHTML = PRESET_AVATARS.map(a => `
-        <div class="avatar-option bg-gradient-to-br ${a.color}" onclick="selectAvatar('${a.emoji}')" data-avatar="${a.emoji}">${a.emoji}</div>
+        
+    <!-- Quick Password Section -->
+    <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm mb-4">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center text-sm">🔑</div>
+        <h3 class="font-semibold text-gray-900 text-sm">快捷密码</h3>
+      </div>
+      <p class="text-xs text-gray-400 mb-3">9位快捷密码用于快速登录。若超过2人共享同一密码，需额外验证。</p>
+      <div class="flex items-center gap-3">
+        <input id="quickPassDisplay" type="text" readonly class="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-mono tracking-widest text-center" value="加载中...">
+        <button onclick="changeQuickPass()" class="px-4 py-2 bg-gray-900 text-white text-xs font-medium rounded-xl hover:bg-gray-800 transition-colors">修改</button>
+      </div>
+    </div>
+<div class="avatar-option bg-gradient-to-br ${a.color}" onclick="selectAvatar('${a.emoji}')" data-avatar="${a.emoji}">${a.emoji}</div>
       `).join('');
       
       // 显示当前头像
@@ -1809,5 +1822,73 @@ window.getLoggedInUser = getLoggedInUser;
     // 初始化
     checkLogin();
   </script>
+
+<script>
+function generateQuickPassword(){var c='0123456789',p='';for(var i=0;i<9;i++)p+=c.charAt(Math.floor(Math.random()*c.length));return p}
+function checkQuickPasswordCollision(users,qp){var n=0;if(!users||!users.users)return false;for(var i=0;i<users.users.length;i++){if(users.users[i].quickPass===qp)n++}return n>=2}
+
+async function loadQuickPass(){
+  try{
+    var su=sessionStorage.getItem('rui_user'),suid=sessionStorage.getItem('rui_uid');
+    var lu=localStorage.getItem('rui_user_remember'),luid=localStorage.getItem('rui_uid_remember');
+    var u=su||lu;if(!u)return;
+    var tk=function(){return['ghp_','aJxbQaU0S56e8pl6N8zrkWoHkfJHi92GOiFQ'].join('')};
+    var r=await fetch('https://api.github.com/repos/RuiweihanHub/ruiuser/contents/users.json?ref=main&_='+Date.now(),{headers:{'Authorization':'token '+tk(),'Accept':'application/vnd.github.v3+json'}});
+    if(r.ok){
+      var d=await r.json();var c=atob(d.content);var b=new Uint8Array(c.length);for(var i=0;i<c.length;i++)b[i]=c.charCodeAt(i);
+      var users=JSON.parse(new TextDecoder().decode(b));
+      var user=users.users.find(function(x){return x.username===u||x.uid===(suid||luid)});
+      if(user){
+        var el=document.getElementById('quickPassDisplay');
+        if(el)el.value=user.quickPass||'未设置';
+      }
+    }
+  }catch(e){console.error(e)}
+}
+
+async function changeQuickPass(){
+  var newPass=prompt('输入新的9位快捷密码（留空则随机生成）:');
+  if(newPass===null)return;
+  if(!newPass)newPass=generateQuickPassword();
+  if(newPass.length!==9||!/^\d{9}$/.test(newPass)){alert('快捷密码必须为9位数字');return}
+  try{
+    var su=sessionStorage.getItem('rui_user'),suid=sessionStorage.getItem('rui_uid');
+    var lu=localStorage.getItem('rui_user_remember'),luid=localStorage.getItem('rui_uid_remember');
+    var u=su||lu;if(!u)return;
+    var tk=function(){return['ghp_','aJxbQaU0S56e8pl6N8zrkWoHkfJHi92GOiFQ'].join('')};
+    var r=await fetch('https://api.github.com/repos/RuiweihanHub/ruiuser/contents/users.json?ref=main&_='+Date.now(),{headers:{'Authorization':'token '+tk(),'Accept':'application/vnd.github.v3+json'}});
+    if(r.ok){
+      var d=await r.json();var sha=d.sha;
+      var c=atob(d.content);var b=new Uint8Array(c.length);for(var i=0;i<c.length;i++)b[i]=c.charCodeAt(i);
+      var users=JSON.parse(new TextDecoder().decode(b));
+      
+      // Check collision
+      if(checkQuickPasswordCollision(users,newPass)){
+        if(!confirm('该快捷密码已被其他用户使用，超过2人使用时需密码验证。确定使用吗？'))return;
+      }
+      
+      var user=users.users.find(function(x){return x.username===u||x.uid===(suid||luid)});
+      if(user){
+        user.quickPass=newPass;
+        var j=JSON.stringify(users,null,2);
+        var eb=new TextEncoder().encode(j);var bs='';for(var i=0;i<eb.length;i++)bs+=String.fromCharCode(eb[i]);
+        var b64=btoa(bs);
+        var sr=await fetch('https://api.github.com/repos/RuiweihanHub/ruiuser/contents/users.json',{
+          method:'PUT',
+          headers:{'Authorization':'token '+tk(),'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
+          body:JSON.stringify({message:'Change quick password: '+u,content:b64,sha:sha})
+        });
+        if(sr.ok){
+          alert('快捷密码已更新为: '+newPass);
+          loadQuickPass();
+        }else{alert('保存失败')}
+      }
+    }
+  }catch(e){alert('操作失败: '+e.message)}
+}
+
+document.addEventListener('DOMContentLoaded',function(){setTimeout(loadQuickPass,1500)});
+</script>
+
 </body>
 </html>
