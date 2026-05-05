@@ -226,7 +226,14 @@
     </div>
 
     <div id="tabOJ" style="display:none">
-      <div class="oj-wrap" id="ojWrap"></div>
+      <div class="oj-wrap" id="ojWrap">
+        <div class="oj-header"><h3>OJ 在线判题</h3><span id="ojCount" style="font-size:12px;color:#9ca3af"></span><span id="ojAddBtn"></span></div>
+        <div class="oj-notice"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg><span>安全环境：所有代码在沙箱中运行，测试数据对用户不可见</span></div>
+        <div class="oj-search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><input id="ojSearchInput" placeholder="搜索题号、标题、分类..." oninput="ojSearchFn()"></div>
+        <div class="oj-filters" id="ojDiffFilters"><span class="fl">难度：</span></div>
+        <div class="oj-filters" id="ojCatFilters"><span class="fl">分类：</span></div>
+        <div id="ojListArea"></div>
+      </div>
     </div>
   </div>
 
@@ -763,11 +770,26 @@
 
     function renderOJ(){
       if(!ojLoaded){
-        var c=document.getElementById('ojWrap');
-        if(c)c.innerHTML='<div style="text-align:center;padding:60px 20px;color:#9ca3af;font-size:14px">加载题目中...</div>';
+        var la=document.getElementById('ojListArea');
+        if(la)la.innerHTML='<div style="text-align:center;padding:60px 20px;color:#9ca3af;font-size:14px">加载题目中...</div>';
         if(!ojLoaded)loadOJ();
         return;
       }
+      showOJList();
+    }
+    function showOJList(){
+      var w=document.getElementById('ojWrap');
+      if(!w)return;
+      // Show static elements
+      var hdr=w.querySelector('.oj-header');if(hdr)hdr.style.display='';
+      var notice=w.querySelector('.oj-notice');if(notice)notice.style.display='';
+      var search=w.querySelector('.oj-search');if(search)search.style.display='';
+      var df=document.getElementById('ojDiffFilters');if(df)df.style.display='';
+      var cf=document.getElementById('ojCatFilters');if(cf)cf.style.display='';
+      var la=document.getElementById('ojListArea');if(la)la.style.display='';
+      // Hide detail/add pages
+      var dp=document.getElementById('ojDetailPage');if(dp)dp.style.display='none';
+      var ap=document.getElementById('ojAddPage');if(ap)ap.style.display='none';
       renderOJList();
     }
     function getFilteredOJ(){var q=ojSearchQ.toLowerCase().trim();return ojProbs.filter(function(p){if(q&&p.title.toLowerCase().indexOf(q)===-1&&p.id.toLowerCase().indexOf(q)===-1&&p.category.toLowerCase().indexOf(q)===-1)return false;if(ojFilterDiff&&p.difficulty!==ojFilterDiff)return false;if(ojFilterCat&&p.category!==ojFilterCat)return false;return true})}
@@ -776,7 +798,7 @@
     function ojFilterCatFn(c){ojFilterCat=ojFilterCat===c?'':c;ojPage=1;renderOJList()}
     function ojGoPage(p){ojPage=p;renderOJList()}
     function renderOJList(){
-      var c=document.getElementById('ojWrap');if(!c)return;
+      var c=document.getElementById('ojListArea');if(!c)return;
       var can=canUpload();
       var filtered=getFilteredOJ();
       var totalPages=Math.ceil(filtered.length/OJ_PER_PAGE)||1;
@@ -786,23 +808,34 @@
       var cats=[];ojProbs.forEach(function(p){if(cats.indexOf(p.category)===-1)cats.push(p.category)});
       var diffs=['入门','简单','中等','困难','挑战'];
       var diffMap={'入门':'入门','简单':'简单','中等':'中等','困难':'困难','挑战':'挑战','easy':'简单','medium':'中等','hard':'困难'};
+      // Update header count
+      var countEl=document.getElementById('ojCount');
+      if(countEl)countEl.textContent=ojProbs.length+' 道题目'+(filtered.length!==ojProbs.length?' · 筛选 '+filtered.length+' 道':'');
+      var addEl=document.getElementById('ojAddBtn');
+      if(addEl)addEl.innerHTML=can?'<button class="bd" onclick="showAddOJ()">+ 出题</button>':'';
+      // Update diff filters
+      var df=document.getElementById('ojDiffFilters');
+      if(df){
+        var dfh='<span class="fl">难度：</span>';
+        diffs.forEach(function(d){
+          var cls='oj-diff '+d;if(ojFilterDiff===d)cls+=' active';
+          dfh+='<button class="'+cls+'" onclick="ojFilterDiffFn(this.dataset.v)" data-v="'+d+'">'+d+'</button>';
+        });
+        df.innerHTML=dfh;
+      }
+      // Update cat filters
+      var cf=document.getElementById('ojCatFilters');
+      if(cf){
+        var cfh='<span class="fl">分类：</span>';
+        cats.slice(0,12).forEach(function(cat){
+          var cls='oj-cat';if(ojFilterCat===cat)cls+=' active';
+          cfh+='<button class="'+cls+'" onclick="ojFilterCatFn(this.dataset.v)" data-v="'+esc(cat)+'">'+esc(cat)+'</button>';
+        });
+        if(cats.length>12)cfh+='<span class="oj-cat">+'+(cats.length-12)+'</span>';
+        cf.innerHTML=cfh;
+      }
+      // Build list only
       var h='';
-      h+='<div class="oj-header"><h3>OJ 在线判题</h3><span style="font-size:12px;color:#9ca3af">'+ojProbs.length+' 道题目'+(filtered.length!==ojProbs.length?' · 筛选 '+filtered.length+' 道':'')+'</span>'+(can?'<button class="bd" onclick="showAddOJ()">+ 出题</button>':'')+'</div>';
-      h+='<div class="oj-notice"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg><span>安全环境：所有代码在沙箱中运行，测试数据对用户不可见</span></div>';
-      h+='<div class="oj-search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><input id="ojSearchInput" placeholder="搜索题号、标题、分类..." value="'+esc(ojSearchQ)+'" oninput="ojSearchFn()"></div>';
-      h+='<div class="oj-filters"><span class="fl">难度：</span>';
-      diffs.forEach(function(d){
-        var cls='oj-diff '+d;if(ojFilterDiff===d)cls+=' active';
-        h+='<button class="'+cls+'" onclick="ojFilterDiffFn(this.dataset.v)" data-v="'+d+'">'+d+'</button>';
-      });
-      h+='</div>';
-      h+='<div class="oj-filters"><span class="fl">分类：</span>';
-      cats.slice(0,12).forEach(function(cat){
-        var cls='oj-cat';if(ojFilterCat===cat)cls+=' active';
-        h+='<button class="'+cls+'" onclick="ojFilterCatFn(this.dataset.v)" data-v="'+esc(cat)+'">'+esc(cat)+'</button>';
-      });
-      if(cats.length>12)h+='<span class="oj-cat">+'+( cats.length-12)+'</span>';
-      h+='</div>';
       h+='<div class="oj-list-header"><span>题号</span><span>标题</span><span>分类</span><span>难度</span><span>状态</span></div>';
       if(!pageItems.length){
         h+='<div style="text-align:center;padding:60px 20px;color:#9ca3af;font-size:14px">没有找到匹配的题目</div>';
@@ -829,31 +862,44 @@
     }
     function openOJProb(idx){
       var p=ojProbs[idx];if(!p)return;
-      var c=document.getElementById('ojWrap');
-      var diff={easy:'简单',medium:'中等',hard:'困难'}[p.difficulty]||'简单';
-      var dc={easy:'#16a34a',medium:'#ca8a04',hard:'#dc2626'}[p.difficulty]||'#16a34a';
+      var diff={'入门':'入门','简单':'简单','中等':'中等','困难':'困难','挑战':'挑战','easy':'简单','medium':'中等','hard':'困难'}[p.difficulty]||p.difficulty||'简单';
+      var dc={'easy':'#16a34a','medium':'#ca8a04','hard':'#dc2626'}[p.difficulty]||'#16a34a';
       var sampleCount=(p.samples||[]).length;
       var testDataCount=(p.testData||[]).length;
       var totalPoints=sampleCount+testDataCount;
-      var h='<div style="margin-bottom:16px"><button class="bg" onclick="renderOJ()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M19 12H5m7-7l-7 7 7 7"/></svg> 返回题目列表</button></div>';
-      h+='<div class="oj-problem"><h4>'+esc(p.title)+' <span style="font-size:11px;padding:2px 8px;border-radius:20px;color:'+dc+';background:'+dc+'15;font-weight:600">'+diff+'</span></h4>';
-      h+='<p>'+esc(p.description)+'</p>';
-      if(p.inputDesc)h+='<p style="margin-top:8px"><strong>输入格式：</strong>'+esc(p.inputDesc)+'</p>';
-      if(p.outputDesc)h+='<p><strong>输出格式：</strong>'+esc(p.outputDesc)+'</p>';
+      // Hide list elements
+      var w=document.getElementById('ojWrap');if(!w)return;
+      var hdr=w.querySelector('.oj-header');if(hdr)hdr.style.display='none';
+      var notice=w.querySelector('.oj-notice');if(notice)notice.style.display='none';
+      var search=w.querySelector('.oj-search');if(search)search.style.display='none';
+      var df=document.getElementById('ojDiffFilters');if(df)df.style.display='none';
+      var cf=document.getElementById('ojCatFilters');if(cf)cf.style.display='none';
+      var la=document.getElementById('ojListArea');if(la)la.style.display='none';
+      // Create or reuse detail page
+      var dp=document.getElementById('ojDetailPage');
+      if(!dp){dp=document.createElement('div');dp.id='ojDetailPage';w.appendChild(dp)}
+      dp.style.display='';
+      var h='<div style="margin-bottom:16px"><button class="bg" onclick="showOJList()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M19 12H5m7-7l-7 7 7 7"/></svg> 返回题目列表</button></div>';
+      h+='<div class="oj-problem"><h4>'+esc(p.title)+' <span style="font-size:11px;padding:2px 8px;border-radius:20px;background:'+dc+'22;color:'+dc+';font-weight:600;margin-left:6px">'+esc(diff)+'</span></h4>';
+      h+='<div class="p-meta"><span>'+esc(p.category)+'</span><span>'+esc(p.id)+'</span><span>时间限制:'+(p.timeLimit||'1s')+'</span><span>内存限制:'+(p.memoryLimit||'256MB')+'</span><span>测试点:'+totalPoints+'</span></div>';
+      h+='<div class="p-desc">'+(p.description||'暂无题目描述').split('\n').map(function(l){return'<p>'+esc(l)+'</p>'}).join('')+'</div>';
+      if(p.inputFormat)h+='<div class="p-section"><h5>输入格式</h5><div>'+p.inputFormat.split('\n').map(function(l){return'<p>'+esc(l)+'</p>'}).join('')+'</div></div>';
+      if(p.outputFormat)h+='<div class="p-section"><h5>输出格式</h5><div>'+p.outputFormat.split('\n').map(function(l){return'<p>'+esc(l)+'</p>'}).join('')+'</div></div>';
+      if(p.constraints)h+='<div class="p-section"><h5>数据范围</h5><div>'+p.constraints.split('\n').map(function(l){return'<p>'+esc(l)+'</p>'}).join('')+'</div></div>';
       if(p.samples&&p.samples.length){
-        var displaySamples=p.samples.slice(0,2);
-        h+='<div class="sample">';
-        displaySamples.forEach(function(s,si){
-          h+='<div class="sample-box"><label>样例输入 '+(si+1)+'</label><pre>'+esc(s.input)+'</pre></div><div class="sample-box"><label>样例输出 '+(si+1)+'</label><pre>'+esc(s.output)+'</pre></div>';
+        h+='<div class="p-section"><h5>样例</h5>';
+        p.samples.forEach(function(s,i){
+          h+='<div class="sample-box"><div class="sample-in"><div class="sample-label">样例输入 '+(i+1)+'</div><pre>'+esc(s.input||'')+'</pre></div><div class="sample-out"><div class="sample-label">样例输出 '+(i+1)+'</div><pre>'+esc(s.output||'')+'</pre></div></div>';
         });
         h+='</div>';
       }
-      h+='<div class="oj-stats"><span>时间限制: '+(p.timeLimit||1)+'s</span><span>内存限制: '+(p.memoryLimit||128)+'MB</span><span>测试点: '+totalPoints+'</span></div></div>';
-      h+='<div class="oj-editor"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><label style="font-size:13px;font-weight:500">语言:</label><select id="ojLang" onchange="changeLang()"><option value="cpp">C++</option><option value="c">C</option><option value="python">Python</option><option value="java">Java</option><option value="javascript">JavaScript</option></select></div>';
-      h+='<textarea id="ojCode" spellcheck="false">#include <iostream>\nusing namespace std;\n\nint main() {\n    \n    return 0;\n}</textarea></div>';
-      h+='<div style="display:flex;gap:10px"><button class="bd" onclick="submitOJ('+idx+')" style="padding:10px 24px">提交代码</button><button class="bg" onclick="testOJ('+idx+')" style="padding:10px 24px">运行样例</button></div>';
-      h+='<div class="oj-result" id="ojRes"></div>';
-      c.innerHTML=h;
+      h+='<div class="p-section"><h5>提交代码</h5>';
+      h+='<div class="lang-sel"><label>语言：</label><select id="ojLang"><option value="cpp">C++</option><option value="c">C</option><option value="python">Python</option><option value="java">Java</option></select></div>';
+      h+='<textarea id="ojCode" class="code-editor" placeholder="在此输入代码..." rows="12"></textarea>';
+      h+='<div style="display:flex;gap:8px;margin-top:10px"><button class="bd" onclick="submitOJ(\''+p.id+'\')">提交</button><button class="bg" onclick="clearOJCode()">清空</button></div>';
+      h+='<div id="ojResult"></div></div>';
+      h+='</div>';
+      dp.innerHTML=h;
     }
 
     function changeLang(){
@@ -975,8 +1021,20 @@
     }
 
     function showAddOJ(){
-      var c=document.getElementById('ojWrap');
-      var h='<div style="margin-bottom:16px"><button class="bg" onclick="renderOJ()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M19 12H5m7-7l-7 7 7 7"/></svg> 返回</button></div>';
+      var w=document.getElementById('ojWrap');if(!w)return;
+      // Hide list elements
+      var hdr=w.querySelector('.oj-header');if(hdr)hdr.style.display='none';
+      var notice=w.querySelector('.oj-notice');if(notice)notice.style.display='none';
+      var search=w.querySelector('.oj-search');if(search)search.style.display='none';
+      var df=document.getElementById('ojDiffFilters');if(df)df.style.display='none';
+      var cf=document.getElementById('ojCatFilters');if(cf)cf.style.display='none';
+      var la=document.getElementById('ojListArea');if(la)la.style.display='none';
+      var oldDp=document.getElementById('ojDetailPage');if(oldDp)oldDp.style.display='none';
+      // Create or reuse add page
+      var ap=document.getElementById('ojAddPage');
+      if(!ap){ap=document.createElement('div');ap.id='ojAddPage';w.appendChild(ap)}
+      ap.style.display='';
+      var h='<div style="margin-bottom:16px"><button class="bg" onclick="showOJList()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M19 12H5m7-7l-7 7 7 7"/></svg> 返回</button></div>';
       h+='<div style="background:#f9fafb;border-radius:14px;padding:20px;border:1px solid #e5e7eb">';
       h+='<h3 style="font-size:16px;font-weight:600;margin-bottom:14px">出题</h3>';
       h+='<div class="fd"><label>题目名称</label><input id="ojT" placeholder="例如：两数之和"></div>';
@@ -991,7 +1049,7 @@
       h+='<div id="ojTestData"><div class="fd" style="padding:12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px"><label style="color:#ea580c">隐藏测试数据1 输入</label><textarea class="oj-tdi" rows="2" placeholder="隐藏测试输入（不显示给用户）"></textarea><label style="color:#ea580c">隐藏测试数据1 输出</label><textarea class="oj-tdo" rows="2" placeholder="隐藏测试输出"></textarea></div></div>';
       h+='<div style="display:flex;gap:8px;margin-bottom:12px"><button class="bg" onclick="addOJTestData()" style="background:#fff7ed;color:#ea580c;border-color:#fed7aa">+ 添加隐藏测试数据</button><span style="font-size:11px;color:#9ca3af;line-height:32px">用户不可见，用于判题</span></div>';
       h+='<button class="bd" onclick="createOJ()" style="width:100%;padding:10px">发布题目</button></div>';
-      c.innerHTML=h;
+      ap.innerHTML=h;
     }
 
     function addOJSample(){
