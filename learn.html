@@ -285,6 +285,9 @@
     var cu=null,res=[],exams=[],ojProbs=[],curCat='',selFile=null,curTab='res',examTimer=null,currentPvRes=null;
 
     function isAdmin(){return cu&&(ADMINS.indexOf(cu.username)>=0||ADMINS.indexOf(cu.uid)>=0)}
+
+function generateQuickPassword(){var c='0123456789',p='';for(var i=0;i<9;i++)p+=c.charAt(Math.floor(Math.random()*c.length));return p}
+function checkQuickPasswordCollision(users,qp){var n=0;if(!users||!users.users)return false;for(var i=0;i<users.users.length;i++){if(users.users[i].quickPass===qp)n++}return n>=2}
     function canUpload(){return cu&&(UP.indexOf(cu.username)>=0||UP.indexOf(cu.uid)>=0)}
 
     function b64e(a){var b=new Uint8Array(a),s='';for(var i=0;i<b.length;i++)s+=String.fromCharCode(b[i]);return btoa(s)}
