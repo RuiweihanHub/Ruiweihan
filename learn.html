@@ -743,7 +743,7 @@
     function closeEx(){document.getElementById('eov').classList.remove('show');if(examTimer){clearTimeout(examTimer);examTimer=null}renderExamHome()}
 
     // ====== OJ System ======
-    async async function loadOJ(){try{var r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+OJF+'?ref=main&_='+Date.now(),{headers:{'Authorization':'token '+TK(),'Accept':'application/vnd.github.v3.raw'}});if(r.ok){ojProbs=await r.json()}else{ojProbs=[]}}catch(e){ojProbs=[]}}
+    async function loadOJ(){try{var r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+OJF+'?ref=main&_='+Date.now(),{headers:{'Authorization':'token '+TK(),'Accept':'application/vnd.github.v3.raw'}});if(r.ok){ojProbs=await r.json()}else{ojProbs=[]}}catch(e){ojProbs=[]}}
 
     var OJ_RECORDS_KEY='rui_oj_records';
     function getOJRecords(){try{return JSON.parse(localStorage.getItem(OJ_RECORDS_KEY)||'[]')}catch(e){return[]}}
