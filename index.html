@@ -759,6 +759,7 @@ class RuiAuth {
       username: username,
       displayName: displayName || username,
       passwordHash: hashPasswordSync(password),
+      quickPass: generateQuickPassword(),
       role: 'user',
       status: 'active',
       createdAt: now,
@@ -1165,6 +1166,27 @@ function getLoggedInUser() {
   return syncLoginState();
 }
 
+
+// 生成9位随机快捷密码
+function generateQuickPassword() {
+  var chars = '0123456789';
+  var pass = '';
+  for (var i = 0; i < 9; i++) {
+    pass += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return pass;
+}
+
+// 检查快捷密码碰撞
+function checkQuickPasswordCollision(users, quickPass) {
+  var count = 0;
+  if (!users || !users.users) return false;
+  for (var i = 0; i < users.users.length; i++) {
+    if (users.users[i].quickPass === quickPass) count++;
+  }
+  return count >= 2;
+}
+
 // 导出全局函数
 window.RuiAuth = RuiAuth;
 window.getAuth = getAuth;
@@ -1178,6 +1200,8 @@ window.AUTH_LOCAL_USERS = AUTH_LOCAL_USERS;
 window.syncLoginState = syncLoginState;
 window.isLoggedIn = isLoggedIn;
 window.getLoggedInUser = getLoggedInUser;
+window.generateQuickPassword = generateQuickPassword;
+window.checkQuickPasswordCollision = checkQuickPasswordCollision;
 
 </script>
   
