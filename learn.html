@@ -187,7 +187,7 @@
   <nav class="nav"><div class="nav-in">
     <div style="display:flex;align-items:center;gap:28px">
       <a href="/index.html" style="font-size:18px;font-weight:600">Rui</a>
-      <div class="nav-lk"><a href="/download.html">下载</a><a href="/ruiflow.html">论坛</a><a href="/chat.html">聊天</a><a href="/cloud.html">云盘</a><a href="/learn.html" style="color:#111827;font-weight:500">📚 学习</a></div>
+      <div class="nav-lk"><a href="/download.html">下载</a><a href="/ruiflow.html">论坛</a><a href="/chat.html">💬 聊天</a><a href="/cloud.html">云盘</a><a href="/learn.html" style="color:#111827;font-weight:500">📚 学习</a></div>
     </div>
     <div class="nav-r">
       <div id="authBtns"><a href="/register.html" class="btn-r">注册</a><button class="btn-b" onclick="showLoginModal()">登录</button></div>
@@ -743,7 +743,16 @@
     function closeEx(){document.getElementById('eov').classList.remove('show');if(examTimer){clearTimeout(examTimer);examTimer=null}renderExamHome()}
 
     // ====== OJ System ======
-    async function loadOJ(){try{var r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+OJF+'?ref=main&_='+Date.now(),{headers:{'Authorization':'token '+TK(),'Accept':'application/vnd.github.v3.raw'}});if(r.ok){ojProbs=await r.json()}else{ojProbs=[]}}catch(e){ojProbs=[]}}
+    async function loadOJ(){
+      try{
+        var r1=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+OJF+'?ref=main&_='+Date.now(),{headers:{'Authorization':'token '+TK(),'Accept':'application/vnd.github.v3+json'}});
+        if(r1.ok){var d=await r1.json();
+          if(d.content&&d.content.length>0){ojProbs=JSON.parse(b64d(d.content))}
+          else if(d.download_url){var r2=await fetch(d.download_url,{headers:{'Authorization':'token '+TK()}});if(r2.ok){ojProbs=await r2.json()}else{ojProbs=[]}}
+          else{ojProbs=[]}
+        }else{ojProbs=[]}
+      }catch(e){console.error('loadOJ error:',e);ojProbs=[]}
+    }
 
     var OJ_RECORDS_KEY='rui_oj_records';
     function getOJRecords(){try{return JSON.parse(localStorage.getItem(OJ_RECORDS_KEY)||'[]')}catch(e){return[]}}
@@ -761,32 +770,42 @@
       var filtered=getFilteredOJ();
       var totalPages=Math.ceil(filtered.length/OJ_PER_PAGE)||1;
       if(ojPage>totalPages)ojPage=totalPages;
-      var start=(ojPage-1)*OJ_PER_PAGE;
-      var pageItems=filtered.slice(start,start+OJ_PER_PAGE);
+      var startIdx=(ojPage-1)*OJ_PER_PAGE;
+      var pageItems=filtered.slice(startIdx,startIdx+OJ_PER_PAGE);
       var cats=[];ojProbs.forEach(function(p){if(cats.indexOf(p.category)===-1)cats.push(p.category)});
       var diffs=['入门','简单','中等','困难','挑战'];
       var diffMap={'入门':'入门','简单':'简单','中等':'中等','困难':'困难','挑战':'挑战','easy':'简单','medium':'中等','hard':'困难'};
       var h='';
       h+='<div class="oj-header"><h3>OJ 在线判题</h3><span style="font-size:12px;color:#9ca3af">'+ojProbs.length+' 道题目'+(filtered.length!==ojProbs.length?' · 筛选 '+filtered.length+' 道':'')+'</span>'+(can?'<button class="bd" onclick="showAddOJ()">+ 出题</button>':'')+'</div>';
       h+='<div class="oj-notice"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg><span>安全环境：所有代码在沙箱中运行，测试数据对用户不可见</span></div>';
-      h+='<div class="oj-search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><input id="ojSearchInput" placeholder="搜索题号、标题、分类..." value="'+esc(ojSearchQ)+'" oninput="ojSearchFn()"></div>';
+      h+='<div class="oj-search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><input id="ojSearchInput" placeholder="搜索题号、标题、分类..." oninput="ojSearchFn()"></div>';
       h+='<div class="oj-filters"><span class="fl">难度：</span>';
-      diffs.forEach(function(d){h+='<button class="oj-diff '+d+(ojFilterDiff===d?' active':'')+'" onclick="ojFilterDiffFn(this.dataset.d)" data-d="'+d+'">'+d+'</button>'});
+      diffs.forEach(function(d){
+        var cls='oj-diff '+d;if(ojFilterDiff===d)cls+=' active';
+        h+='<button class="'+cls+'" onclick="ojFilterDiffFn(this.dataset.v)" data-v="'+d+'">'+d+'</button>';
+      });
       h+='</div>';
       h+='<div class="oj-filters"><span class="fl">分类：</span>';
-      cats.slice(0,12).forEach(function(cat){h+='<button class="oj-cat'+(ojFilterCat===cat?' active':'')+'" onclick="ojFilterCatFn(this.dataset.c)" data-c="'+esc(cat)+'">'+esc(cat)+'</button>'});
-      if(cats.length>12)h+='<span class="oj-cat">+'+(cats.length-12)+'</span>';
+      cats.slice(0,12).forEach(function(cat){
+        var cls='oj-cat';if(ojFilterCat===cat)cls+=' active';
+        h+='<button class="'+cls+'" onclick="ojFilterCatFn(this.dataset.v)" data-v="'+esc(cat)+'">'+esc(cat)+'</button>';
+      });
+      if(cats.length>12)h+='<span class="oj-cat">+'+( cats.length-12)+'</span>';
       h+='</div>';
       h+='<div class="oj-list-header"><span>题号</span><span>标题</span><span>分类</span><span>难度</span><span>状态</span></div>';
-      if(!pageItems.length){h+='<div class="empty"><p>没有找到匹配的题目</p></div>'}
-      else{pageItems.forEach(function(p){
-        var recs=getOJRecords().filter(function(r){return cu&&r.user===cu.username&&r.probId===p.id});
-        var bestStatus=recs.length?(recs.some(function(r){return r.status==='ac'})?'ac':'tried'):'none';
-        var statusIcon=bestStatus==='ac'?'<span style="color:#16a34a;font-weight:700">✓</span>':bestStatus==='tried'?'<span style="color:#ca8a04">○</span>':'<span style="color:#d1d5db">-</span>';
-        var pidx=ojProbs.indexOf(p);
-        var diff=diffMap[p.difficulty]||p.difficulty||'简单';
-        h+='<div class="oj-list-row" onclick="openOJProb('+pidx+')"><span class="pid">'+esc(p.id)+'</span><span class="ptitle">'+esc(p.title)+'</span><span class="pcat"><span class="oj-cat">'+esc(p.category)+'</span></span><span class="pdiff"><span class="oj-diff '+esc(diff)+'">'+esc(diff)+'</span></span><span class="pstatus">'+statusIcon+'</span></div>';
-      })}
+      if(!pageItems.length){
+        h+='<div style="text-align:center;padding:60px 20px;color:#9ca3af;font-size:14px">没有找到匹配的题目</div>';
+      }else{
+        pageItems.forEach(function(p){
+          var recs=getOJRecords().filter(function(r){return cu&&r.user===cu.username&&r.probId===p.id});
+          var bestStatus=recs.length?(recs.some(function(r){return r.status==='ac'})?'ac':'tried'):'none';
+          var statusIcon=bestStatus==='ac'?'<span style="color:#16a34a;font-weight:700">✓</span>':bestStatus==='tried'?'<span style="color:#ca8a04">○</span>':'<span style="color:#d1d5db">-</span>';
+          var pidx=ojProbs.indexOf(p);
+          var diff=diffMap[p.difficulty]||p.difficulty||'简单';
+          var diffCls='oj-diff '+esc(diff);
+          h+='<div class="oj-list-row" onclick="openOJProb('+pidx+')"><span class="pid">'+esc(p.id)+'</span><span class="ptitle">'+esc(p.title)+'</span><span class="pcat"><span class="oj-cat">'+esc(p.category)+'</span></span><span class="pdiff"><span class="'+diffCls+'">'+esc(diff)+'</span></span><span class="pstatus">'+statusIcon+'</span></div>';
+        });
+      }
       if(totalPages>1){
         h+='<div class="oj-pagi">';
         if(ojPage>1)h+='<button onclick="ojGoPage('+(ojPage-1)+')">上一页</button>';
@@ -797,7 +816,6 @@
       }
       c.innerHTML=h;
     }
-    
     function openOJProb(idx){
       var p=ojProbs[idx];if(!p)return;
       var c=document.getElementById('ojWrap');
