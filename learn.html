@@ -754,6 +754,7 @@
           else{console.error('OJ load failed:',r.status,r2.status);ojProbs=[]}
         }
       }catch(e){console.error('loadOJ error:',e);ojProbs=[]}
+      if(curTab==='oj')renderOJList();
     }
 
     var OJ_RECORDS_KEY='rui_oj_records';
@@ -761,7 +762,12 @@
     function saveOJRecord(r){var rs=getOJRecords();rs.unshift(r);if(rs.length>100)rs=rs.slice(0,100);localStorage.setItem(OJ_RECORDS_KEY,JSON.stringify(rs))}
 
     function renderOJ(){
-      if(!ojProbs.length){loadOJ();return}
+      if(!ojProbs.length){
+        var c=document.getElementById('ojWrap');
+        if(c)c.innerHTML='<div style="text-align:center;padding:60px 20px;color:#9ca3af;font-size:14px">加载题目中...</div>';
+        loadOJ();
+        return;
+      }
       renderOJList();
     }
     function getFilteredOJ(){var q=ojSearchQ.toLowerCase().trim();return ojProbs.filter(function(p){if(q&&p.title.toLowerCase().indexOf(q)===-1&&p.id.toLowerCase().indexOf(q)===-1&&p.category.toLowerCase().indexOf(q)===-1)return false;if(ojFilterDiff&&p.difficulty!==ojFilterDiff)return false;if(ojFilterCat&&p.category!==ojFilterCat)return false;return true})}
