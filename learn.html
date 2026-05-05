@@ -743,7 +743,7 @@
     function closeEx(){document.getElementById('eov').classList.remove('show');if(examTimer){clearTimeout(examTimer);examTimer=null}renderExamHome()}
 
     // ====== OJ System ======
-    async function loadOJ(){try{var r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+OJF+'?ref=main&_='+Date.now(),{headers:{'Authorization':'token '+TK(),'Accept':'application/vnd.github.v3+json'}});if(r.ok){var d=await r.json();ojProbs=JSON.parse(b64d(d.content))}else{ojProbs=[]}}catch(e){ojProbs=[]}}
+    async async function loadOJ(){try{var r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+OJF+'?ref=main&_='+Date.now(),{headers:{'Authorization':'token '+TK(),'Accept':'application/vnd.github.v3.raw'}});if(r.ok){ojProbs=await r.json()}else{ojProbs=[]}}catch(e){ojProbs=[]}}
 
     var OJ_RECORDS_KEY='rui_oj_records';
     function getOJRecords(){try{return JSON.parse(localStorage.getItem(OJ_RECORDS_KEY)||'[]')}catch(e){return[]}}
@@ -771,10 +771,10 @@
       h+='<div class="oj-notice"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg><span>安全环境：所有代码在沙箱中运行，测试数据对用户不可见</span></div>';
       h+='<div class="oj-search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><input id="ojSearchInput" placeholder="搜索题号、标题、分类..." value="'+esc(ojSearchQ)+'" oninput="ojSearchFn()"></div>';
       h+='<div class="oj-filters"><span class="fl">难度：</span>';
-      diffs.forEach(function(d){h+='<button class="oj-diff '+d+(ojFilterDiff===d?' active':'')+'" onclick="ojFilterDiffFn(\''+d+'\')">'+d+'</button>'});
+      diffs.forEach(function(d){h+='<button class="oj-diff '+d+(ojFilterDiff===d?' active':'')+'" onclick="ojFilterDiffFn(this.dataset.d)" data-d="'+d+'">'+d+'</button>'});
       h+='</div>';
       h+='<div class="oj-filters"><span class="fl">分类：</span>';
-      cats.slice(0,12).forEach(function(cat){h+='<button class="oj-cat'+(ojFilterCat===cat?' active':'')+'" onclick="ojFilterCatFn(\''+cat+'\')">'+esc(cat)+'</button>'});
+      cats.slice(0,12).forEach(function(cat){h+='<button class="oj-cat'+(ojFilterCat===cat?' active':'')+'" onclick="ojFilterCatFn(this.dataset.c)" data-c="'+esc(cat)+'">'+esc(cat)+'</button>'});
       if(cats.length>12)h+='<span class="oj-cat">+'+(cats.length-12)+'</span>';
       h+='</div>';
       h+='<div class="oj-list-header"><span>题号</span><span>标题</span><span>分类</span><span>难度</span><span>状态</span></div>';
