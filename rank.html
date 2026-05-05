@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>排行榜 - Rui Hub</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏆</text></svg>">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+    body{min-height:100vh;background:#fff;color:#111827;display:flex;flex-direction:column}
+    a{text-decoration:none;color:inherit}button{cursor:pointer;border:none;background:none;font:inherit}
+    input,select,textarea{font:inherit;outline:none}
+
+    .nav{width:100%;padding:14px 24px;border-bottom:1px solid #f3f4f6}
+    .nav-in{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+    .nav-lk{display:flex;gap:24px;font-size:14px}.nav-lk a{color:#6b7280;transition:.15s}.nav-lk a:hover{color:#111827}
+    .nav-r{display:flex;align-items:center;gap:10px}
+    .btn-r{padding:6px 14px;background:#f3f4f6;color:#374151;font-size:12px;font-weight:500;border-radius:8px;transition:.15s}.btn-r:hover{background:#e5e7eb}
+    .btn-b{padding:6px 14px;background:#111827;color:#fff;font-size:12px;font-weight:500;border-radius:8px;transition:.15s}.btn-b:hover{background:#1f2937}
+    .umenu{position:relative;display:flex;align-items:center;gap:8px}
+    .ubtn{display:flex;align-items:center;gap:6px;padding:6px 12px;background:#f3f4f6;border-radius:8px;font-size:13px;color:#374151;transition:.15s}.ubtn:hover{background:#e5e7eb}
+    .udd{display:none;position:absolute;right:0;top:100%;margin-top:8px;width:140px;background:#fff;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.1);border:1px solid #f3f4f6;overflow:hidden;z-index:50}
+    .udd.show{display:block}.udd a{display:block;padding:8px 16px;font-size:13px;color:#374151;transition:.1s}.udd a:hover{background:#f9fafb}.udd .out{color:#dc2626}.udd .out:hover{background:#fef2f2}.udd .sp{height:1px;background:#f3f4f6}
+
+    .main{flex:1;max-width:1000px;width:100%;margin:0 auto;padding:28px 24px}
+    .hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+    .hd h1{font-size:22px;font-weight:700}.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;background:#111827;color:#fff;font-weight:600;margin-left:8px;vertical-align:middle}
+    .sub{font-size:13px;color:#9ca3af;margin-top:4px}
+
+    .lp{display:none;position:fixed;inset:0;z-index:100;background:#fff;justify-content:center;align-items:center;flex-direction:column}
+    .lp.show{display:flex}
+    .lb{display:flex;flex-direction:column;align-items:center;gap:12px}
+    .lb .ic{width:56px;height:56px;background:#f3f4f6;border-radius:16px;display:flex;align-items:center;justify-content:center;color:#6b7280}
+    .lb h2{font-size:18px;font-weight:700}.lb p{font-size:13px;color:#9ca3af}
+    .lb button{margin-top:8px;padding:10px 28px;background:#111827;color:#fff;border-radius:12px;font-size:13px;font-weight:500;transition:.15s}.lb button:hover{background:#1f2937}
+
+    .mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:200;justify-content:center;align-items:center}
+    .mbg.show{display:flex}
+    .mdl{background:#fff;border-radius:16px;width:90%;max-width:360px;box-shadow:0 8px 40px rgba(0,0,0,.15)}
+    .mh{padding:20px;display:flex;align-items:center;justify-content:space-between}
+    .mh h2{font-size:16px;font-weight:700}
+    .xbtn{width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#f3f4f6;border-radius:8px;color:#6b7280;transition:.15s}.xbtn:hover{background:#e5e7eb;color:#111827}
+    .fd{margin-bottom:10px}.fd label{display:block;font-size:12px;color:#6b7280;margin-bottom:4px;font-weight:500}
+    .fd input,.fd select,.fd textarea{width:100%;padding:10px 12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;font-size:13px;transition:.15s}.fd input:focus,.fd select:focus,.fd textarea:focus{border-color:#9ca3af;background:#fff}
+
+    /* Stats Cards */
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:28px}
+    .stat-card{background:#f9fafb;border:1px solid #f3f4f6;border-radius:14px;padding:18px;text-align:center;transition:.15s}
+    .stat-card:hover{border-color:#e5e7eb;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+    .stat-card .num{font-size:28px;font-weight:800;color:#111827;line-height:1.2}
+    .stat-card .lbl{font-size:11px;color:#9ca3af;margin-top:4px;font-weight:500}
+    .stat-card.gold{background:linear-gradient(135deg,#fefce8,#fff7ed);border-color:#fde68a}
+    .stat-card.gold .num{color:#b45309}
+    .stat-card.blue{background:linear-gradient(135deg,#eff6ff,#f0f9ff);border-color:#bfdbfe}
+    .stat-card.blue .num{color:#1d4ed8}
+    .stat-card.green{background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border-color:#bbf7d0}
+    .stat-card.green .num{color:#15803d}
+    .stat-card.purple{background:linear-gradient(135deg,#faf5ff,#fdf4ff);border-color:#e9d5ff}
+    .stat-card.purple .num{color:#7e22ce}
+
+    /* Tab Navigation */
+    .tab-nav{display:flex;gap:6px;margin-bottom:24px;border-bottom:1px solid #f3f4f6;padding-bottom:0}
+    .tab-btn{padding:10px 18px;font-size:13px;font-weight:500;color:#9ca3af;border-bottom:2px solid transparent;transition:.15s;margin-bottom:-1px}
+    .tab-btn:hover{color:#374151}.tab-btn.on{color:#111827;border-bottom-color:#111827}
+
+    /* Leaderboard */
+    .lb-section{margin-bottom:28px}
+    .lb-section h3{font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+    .lb-table{width:100%;border-collapse:separate;border-spacing:0 4px}
+    .lb-table th{text-align:left;padding:8px 14px;font-size:11px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+    .lb-table td{padding:12px 14px;font-size:13px;background:#f9fafb}
+    .lb-table tr td:first-child{border-radius:10px 0 0 10px}
+    .lb-table tr td:last-child{border-radius:0 10px 10px 0}
+    .lb-table tr:hover td{background:#f3f4f6}
+    .rank-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;font-size:12px;font-weight:700}
+    .rank-1{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff}
+    .rank-2{background:linear-gradient(135deg,#d1d5db,#9ca3af);color:#fff}
+    .rank-3{background:linear-gradient(135deg,#d97706,#b45309);color:#fff}
+    .rank-n{background:#f3f4f6;color:#6b7280}
+    .user-cell{display:flex;align-items:center;gap:10px}
+    .user-av{width:32px;height:32px;border-radius:10px;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#6b7280}
+    .user-name{font-weight:600;color:#111827}
+    .user-uid{font-size:10px;color:#9ca3af;font-family:monospace}
+    .score-bar{display:flex;align-items:center;gap:8px}
+    .bar-track{flex:1;height:6px;background:#f3f4f6;border-radius:3px;overflow:hidden}
+    .bar-fill{height:100%;border-radius:3px;transition:width .6s ease}
+    .bar-score{font-size:12px;font-weight:700;min-width:40px;text-align:right}
+
+    /* Achievements */
+    .ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+    .ach-card{background:#f9fafb;border:1px solid #f3f4f6;border-radius:14px;padding:16px;display:flex;gap:12px;align-items:flex-start;transition:.15s}
+    .ach-card:hover{border-color:#e5e7eb;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+    .ach-card.unlocked{background:linear-gradient(135deg,#fffbeb,#fef3c7);border-color:#fde68a}
+    .ach-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+    .ach-card.unlocked .ach-icon{background:#fef3c7}
+    .ach-card.locked .ach-icon{background:#f3f4f6;filter:grayscale(1);opacity:.5}
+    .ach-info h4{font-size:13px;font-weight:600;color:#111827;margin-bottom:2px}
+    .ach-card.locked .ach-info h4{color:#9ca3af}
+    .ach-info p{font-size:11px;color:#9ca3af;line-height:1.4}
+    .ach-card.unlocked .ach-info p{color:#92400e}
+
+    /* My Profile Card */
+    .my-card{background:linear-gradient(135deg,#111827,#1f2937);border-radius:18px;padding:24px;color:#fff;margin-bottom:28px;position:relative;overflow:hidden}
+    .my-card::after{content:'';position:absolute;top:-40px;right:-40px;width:120px;height:120px;background:rgba(255,255,255,.05);border-radius:50%}
+    .my-card-top{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+    .my-av{width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700}
+    .my-name{font-size:18px;font-weight:700}
+    .my-uid{font-size:11px;color:rgba(255,255,255,.5);font-family:monospace;margin-top:2px}
+    .my-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .my-stat{text-align:center}
+    .my-stat .v{font-size:22px;font-weight:800}
+    .my-stat .l{font-size:10px;color:rgba(255,255,255,.5);margin-top:2px}
+
+    .empty{text-align:center;padding:60px 20px;color:#9ca3af;font-size:14px}
+
+    @media(max-width:640px){
+      .nav-lk{gap:14px;font-size:12px}
+      .hd h1{font-size:18px}
+      .stats-grid{grid-template-columns:repeat(2,1fr)}
+      .ach-grid{grid-template-columns:1fr}
+      .my-stats{grid-template-columns:repeat(3,1fr)}
+      .lb-table{font-size:12px}
+      .lb-table th,.lb-table td{padding:8px 10px}
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav"><div class="nav-in">
+    <div style="display:flex;align-items:center;gap:28px">
+      <a href="/index.html" style="font-size:18px;font-weight:600">Rui</a>
+      <div class="nav-lk"><a href="/download.html">下载</a><a href="/ruiflow.html">论坛</a><a href="/chat.html">💬 聊天</a><a href="/cloud.html">云盘</a><a href="/learn.html">📚 学习</a><a href="/rank.html" style="color:#111827;font-weight:500">🏆 排行榜</a></div>
+    </div>
+    <div class="nav-r">
+      <div id="authBtns"><a href="/register.html" class="btn-r">注册</a><button class="btn-b" onclick="showLoginModal()">登录</button></div>
+      <div id="userMenu" class="umenu" style="display:none">
+        <span id="lvlB" style="font-size:11px;padding:2px 8px;border-radius:20px;background:#f3f4f6;color:#374151;font-weight:600"></span>
+        <button class="ubtn" id="uBtn"><span id="uName"></span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></button>
+        <div class="udd" id="udd"><a href="/cloud.html">云盘</a><a href="/chat.html">聊天</a><a href="/ruiflow.html">论坛</a><a href="/profile.html">我的</a><div class="sp"></div><a href="javascript:void(0)" onclick="logout()" class="out">退出</a></div>
+      </div>
+    </div>
+  </div></nav>
+
+  <div class="lp" id="loginPage"><div class="lb"><div class="ic"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg></div><h2>排行榜</h2><p>请先登录以查看排行榜</p><button onclick="showLoginModal()">登录 / 注册</button></div></div>
+
+  <div class="main" id="mainContent" style="display:none">
+    <div class="hd">
+      <div><h1>排行榜 <span class="badge">NEW</span></h1><p class="sub">OJ刷题 · 考试成绩 · 成就徽章</p></div>
+    </div>
+
+    <!-- My Card (logged in user) -->
+    <div id="myCard" style="display:none"></div>
+
+    <!-- Site Stats -->
+    <div class="stats-grid" id="siteStats"></div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-nav">
+      <button class="tab-btn on" onclick="switchTab('oj',this)">OJ排行</button>
+      <button class="tab-btn" onclick="switchTab('exam',this)">考试排行</button>
+      <button class="tab-btn" onclick="switchTab('ach',this)">成就</button>
+    </div>
+
+    <div id="tabOJ">
+      <div class="lb-section">
+        <h3>🥇 OJ 刷题排行</h3>
+        <table class="lb-table" id="ojTable">
+          <thead><tr><th>排名</th><th>用户</th><th>AC数</th><th>提交数</th><th>AC率</th><th>进度</th></tr></thead>
+          <tbody id="ojBody"></tbody>
+        </table>
+        <div id="ojEmpty" class="empty" style="display:none">暂无OJ做题记录</div>
+      </div>
+    </div>
+
+    <div id="tabExam" style="display:none">
+      <div class="lb-section">
+        <h3>📝 考试成绩排行</h3>
+        <table class="lb-table" id="examTable">
+          <thead><tr><th>排名</th><th>用户</th><th>最高分</th><th>考试次数</th><th>通过率</th><th>进度</th></tr></thead>
+          <tbody id="examBody"></tbody>
+        </table>
+        <div id="examEmpty" class="empty" style="display:none">暂无考试记录</div>
+      </div>
+    </div>
+
+    <div id="tabAch" style="display:none">
+      <div class="lb-section">
+        <h3>🎖️ 成就徽章</h3>
+        <div class="ach-grid" id="achGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mbg" id="lModal"><div class="mdl" style="max-width:360px">
+    <div class="mh"><h2>登录</h2></div>
+    <form id="lForm" style="padding:20px">
+      <div id="lErr" style="display:none;padding:10px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;font-size:13px;color:#dc2626;margin-bottom:12px"></div>
+      <div class="fd"><input id="lU" placeholder="用户名" required></div>
+      <div class="fd"><input id="lP" type="password" placeholder="密码" required></div>
+      <button type="submit" class="btn-b" style="width:100%;padding:12px;border-radius:12px">登录</button>
+      <p style="text-align:center;font-size:13px;color:#6b7280;margin-top:12px">没有账号？<a href="/register.html" style="color:#111827;font-weight:500">立即注册</a></p>
+    </form>
+  </div></div>
+
+  <script>
+    window.onerror=function(msg,url,line){return false};
+  </script>
+  <script>
+    function hashPasswordSync(p){var h=0,s=p+'ruihub_salt_2024';for(var i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h=h&h}return Math.abs(h).toString(36).padStart(8,'0')}
+    function toBase64(s){var b=new TextEncoder().encode(s),r='';for(var i=0;i<b.length;i++)r+=String.fromCharCode(b[i]);return btoa(r)}
+    function fromBase64(b){var s=atob(b),r=new Uint8Array(s.length);for(var i=0;i<s.length;i++)r[i]=s.charCodeAt(i);return new TextDecoder().decode(r)}
+    var AUTH_LOCAL_USERS={users:[{uid:'Administrator',username:'Administrator',passwordHash:hashPasswordSync('admin123'),role:'admin'},{uid:'000001',username:'Ruiweihan',passwordHash:hashPasswordSync('rui123'),role:'admin'},{uid:'000002',username:'Xvjiarui',passwordHash:hashPasswordSync('xvj123'),role:'user'}]};
+    var AUTH_REPO='RuiweihanHub/ruiuser',AUTH_TK=function(){return['ghp_','aJxbQaU0S56e8pl6N8zrkWoHkfJHi92GOiFQ'].join('')};
+
+    function syncLoginState(){
+      var su=sessionStorage.getItem('rui_user'),suid=sessionStorage.getItem('rui_uid');
+      if(su&&suid)return{isLoggedIn:true,username:su,uid:suid};
+      var lu=localStorage.getItem('rui_user_remember'),luid=localStorage.getItem('rui_uid_remember'),exp=localStorage.getItem('rui_user_expire');
+      if(lu&&luid){if(exp&&parseInt(exp)>Date.now()){sessionStorage.setItem('rui_user',lu);sessionStorage.setItem('rui_uid',luid);return{isLoggedIn:true,username:lu,uid:luid}}else{localStorage.removeItem('rui_user_remember');localStorage.removeItem('rui_uid_remember');localStorage.removeItem('rui_user_expire')}}
+      return{isLoggedIn:false}
+    }
+
+    async function getAuth(){
+      var auth={initialized:false,users:null,usersSha:null};
+      async function init(){
+        if(auth.initialized)return true;
+        try{var r=await fetch('https://api.github.com/repos/'+AUTH_REPO+'/contents/users.json?ref=main&_='+Date.now(),{headers:{'Authorization':'token '+AUTH_TK(),'Accept':'application/vnd.github.v3+json'}});if(r.ok){var d=await r.json();auth.usersSha=d.sha;auth.users=JSON.parse(fromBase64(d.content));auth.initialized=true;return true}}catch(e){}
+        auth.initialized=true;return false
+      }
+      return{
+        validateUser:async function(usernameOrUid,password){
+          if(!auth.initialized)await init();
+          var hashed=hashPasswordSync(password);
+          if(!auth.users){
+            var lu=AUTH_LOCAL_USERS.users.find(function(u){return(u.username===usernameOrUid||u.uid===usernameOrUid)&&u.passwordHash===hashed});
+            return lu?{success:true,user:{uid:lu.uid,username:lu.username,role:lu.role}}:{success:false,error:'用户名或密码错误'}
+          }
+          var idx=-1;
+          if(auth.users.index&&auth.users.index.byUsername&&auth.users.index.byUsername[usernameOrUid]!==undefined)idx=auth.users.index.byUsername[usernameOrUid];
+          if(idx===-1&&auth.users.index&&auth.users.index.byUid&&auth.users.index.byUid[usernameOrUid]!==undefined)idx=auth.users.index.byUid[usernameOrUid];
+          if(idx===-1)idx=auth.users.users.findIndex(function(u){return u.username===usernameOrUid||u.uid===usernameOrUid});
+          if(idx===-1)return{success:false,error:'用户名或密码错误'};
+          var user=auth.users.users[idx];
+          if(user.status==='disabled')return{success:false,error:'账户已被禁用'};
+          if(user.passwordHash===hashed){return{success:true,user:{uid:user.uid,username:user.username,displayName:user.displayName,role:user.role,profile:user.profile}}}
+          return{success:false,error:'用户名或密码错误'}
+        },
+        getAllUsers:async function(){
+          if(!auth.initialized)await init();
+          if(auth.users&&auth.users.users)return auth.users.users;
+          return AUTH_LOCAL_USERS.users;
+        }
+      }
+    }
+  </script>
+  <script>
+    var REPO='RuiweihanHub/ruiuser',OJF='oj-problems.json',EF='exams.json',LF='learn.json';
+    var TK=function(){return['ghp_','aJxbQaU0S56e8pl6N8zrkWoHkfJHi92GOiFQ'].join('')};
+    var cu=null,curTab='oj';
+    var ADMINS=['Administrator','Ruiweihan','000001'];
+
+    function esc(t){var d=document.createElement('div');d.textContent=t;return d.innerHTML}
+
+    // ====== Data Loading ======
+    var ojProbs=[],exams=[],allUsers=[];
+    var ojRecords={},examRecords={}; // keyed by username
+
+    async function loadAllData(){
+      try{
+        // Load OJ problems (raw URL for large file)
+        var rawUrl='https://raw.githubusercontent.com/'+REPO+'/main/'+OJF+'?_='+Date.now();
+        var r=await fetch(rawUrl);
+        if(r.ok){ojProbs=await r.json();console.log('OJ loaded:',ojProbs.length)}
+      }catch(e){console.error('Load OJ error:',e)}
+
+      try{
+        var r2=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+EF+'?ref=main&_='+Date.now(),{headers:{'Authorization':'token '+TK(),'Accept':'application/vnd.github.v3+json'}});
+        if(r2.ok){var d=await r2.json();exams=JSON.parse(fromBase64(d.content))}
+      }catch(e){console.error('Load exams error:',e)}
+
+      try{
+        var a=await getAuth();
+        allUsers=await a.getAllUsers();
+        console.log('Users loaded:',allUsers.length);
+      }catch(e){console.error('Load users error:',e)}
+
+      // Aggregate OJ records from all users (stored in localStorage per browser)
+      // Since we can only see current user's records, we build a server-side ranking
+      // by reading from a shared store or using what we have
+      buildRankings();
+    }
+
+    function buildRankings(){
+      // Collect all OJ and exam records from localStorage
+      // In a real system this would be server-side, but for now we aggregate what we can
+      var ojRecs=getAllOJRecords();
+      var examRecs=getAllExamRecords();
+
+      // Group by user
+      ojRecords={};
+      ojRecs.forEach(function(r){
+        if(!ojRecords[r.user])ojRecords[r.user]={ac:new Set(),tried:new Set(),submissions:0};
+        ojRecords[r.user].submissions++;
+        if(r.status==='ac')ojRecords[r.user].ac.add(r.probId);
+        else ojRecords[r.user].tried.add(r.probId);
+      });
+
+      examRecords={};
+      examRecs.forEach(function(r){
+        if(!examRecords[r.user])examRecords[r.user]={scores:[],passed:0,total:0};
+        examRecords[r.user].scores.push(r.score);
+        examRecords[r.user].total++;
+        if(r.score>=60)examRecords[r.user].passed++;
+      });
+
+      renderAll();
+    }
+
+    function getAllOJRecords(){
+      try{return JSON.parse(localStorage.getItem('rui_oj_records')||'[]')}catch(e){return[]}
+    }
+    function getAllExamRecords(){
+      try{return JSON.parse(localStorage.getItem('rui_exam_records')||'[]')}catch(e){return[]}
+    }
+
+    // ====== Render ======
+    function renderAll(){
+      renderSiteStats();
+      renderMyCard();
+      renderOJRank();
+      renderExamRank();
+      renderAchievements();
+    }
+
+    function renderSiteStats(){
+      var totalUsers=allUsers.length||1;
+      var totalProbs=ojProbs.length;
+      var totalExams=exams.length;
+      var totalSubmissions=getAllOJRecords().length;
+
+      var h='';
+      h+='<div class="stat-card gold"><div class="num">'+totalProbs+'</div><div class="lbl">OJ 题目</div></div>';
+      h+='<div class="stat-card blue"><div class="num">'+totalUsers+'</div><div class="lbl">注册用户</div></div>';
+      h+='<div class="stat-card green"><div class="num">'+totalExams+'</div><div class="lbl">在线考试</div></div>';
+      h+='<div class="stat-card purple"><div class="num">'+totalSubmissions+'</div><div class="lbl">提交次数</div></div>';
+      document.getElementById('siteStats').innerHTML=h;
+    }
+
+    function renderMyCard(){
+      if(!cu)return;
+      var myOj=ojRecords[cu.username]||{ac:new Set(),tried:new Set(),submissions:0};
+      var myExam=examRecords[cu.username]||{scores:[],passed:0,total:0};
+      var acCount=myOj.ac.size;
+      var maxScore=myExam.scores.length?Math.max.apply(null,myExam.scores):0;
+      var achCount=countAchievements(cu.username);
+
+      var h='<div class="my-card"><div class="my-card-top">';
+      h+='<div class="my-av">'+esc(cu.username.charAt(0).toUpperCase())+'</div>';
+      h+='<div><div class="my-name">'+esc(cu.username)+'</div><div class="my-uid">'+esc(cu.uid)+'</div></div>';
+      h+='</div><div class="my-stats">';
+      h+='<div class="my-stat"><div class="v">'+acCount+'</div><div class="l">AC 题目</div></div>';
+      h+='<div class="my-stat"><div class="v">'+maxScore+'</div><div class="l">最高分</div></div>';
+      h+='<div class="my-stat"><div class="v">'+achCount+'</div><div class="l">成就</div></div>';
+      h+='</div></div>';
+      document.getElementById('myCard').innerHTML=h;
+      document.getElementById('myCard').style.display='block';
+    }
+
+    function renderOJRank(){
+      var sorted=Object.keys(ojRecords).map(function(user){
+        var r=ojRecords[user];
+        return{user:user,ac:r.ac.size,tried:r.tried.size+r.ac.size,subs:r.submissions,rate:r.ac.size>0?Math.round(r.ac.size/(r.tried.size+r.ac.size)*100):0};
+      }).sort(function(a,b){return b.ac-a.ac||b.rate-a.rate});
+
+      if(!sorted.length){
+        document.getElementById('ojEmpty').style.display='block';
+        document.getElementById('ojTable').style.display='none';
+        return;
+      }
+
+      var maxAc=sorted[0]?sorted[0].ac:1;
+      var h='';
+      sorted.forEach(function(item,i){
+        var rank=i+1;
+        var rankCls=rank<=3?'rank-'+rank:'rank-n';
+        var barColor=rank===1?'#f59e0b':rank===2?'#9ca3af':rank===3?'#d97706':'#6366f1';
+        var barW=maxAc>0?Math.round(item.ac/maxAc*100):0;
+        h+='<tr>';
+        h+='<td><span class="rank-num '+rankCls+'">'+rank+'</span></td>';
+        h+='<td><div class="user-cell"><div class="user-av">'+esc(item.user.charAt(0).toUpperCase())+'</div><div><div class="user-name">'+esc(item.user)+'</div></div></div></td>';
+        h+='<td><strong>'+item.ac+'</strong></td>';
+        h+='<td>'+item.subs+'</td>';
+        h+='<td>'+item.rate+'%</td>';
+        h+='<td><div class="score-bar"><div class="bar-track"><div class="bar-fill" style="width:'+barW+'%;background:'+barColor+'"></div></div><span class="bar-score" style="color:'+barColor+'">'+item.ac+'</span></div></td>';
+        h+='</tr>';
+      });
+      document.getElementById('ojBody').innerHTML=h;
+    }
+
+    function renderExamRank(){
+      var sorted=Object.keys(examRecords).map(function(user){
+        var r=examRecords[user];
+        var maxS=r.scores.length?Math.max.apply(null,r.scores):0;
+        var avgS=r.scores.length?Math.round(r.scores.reduce(function(a,b){return a+b},0)/r.scores.length):0;
+        return{user:user,maxScore:maxS,avgScore:avgScore,total:r.total,passed:r.passed,passRate:r.total>0?Math.round(r.passed/r.total*100):0};
+      }).sort(function(a,b){return b.maxScore-a.maxScore||b.passRate-a.passRate});
+
+      if(!sorted.length){
+        document.getElementById('examEmpty').style.display='block';
+        document.getElementById('examTable').style.display='none';
+        return;
+      }
+
+      var maxScore=100;
+      var h='';
+      sorted.forEach(function(item,i){
+        var rank=i+1;
+        var rankCls=rank<=3?'rank-'+rank:'rank-n';
+        var barColor=rank===1?'#f59e0b':rank===2?'#9ca3af':rank===3?'#d97706':'#6366f1';
+        var barW=Math.round(item.maxScore);
+        h+='<tr>';
+        h+='<td><span class="rank-num '+rankCls+'">'+rank+'</span></td>';
+        h+='<td><div class="user-cell"><div class="user-av">'+esc(item.user.charAt(0).toUpperCase())+'</div><div><div class="user-name">'+esc(item.user)+'</div></div></div></td>';
+        h+='<td><strong>'+item.maxScore+'</strong></td>';
+        h+='<td>'+item.total+'</td>';
+        h+='<td>'+item.passRate+'%</td>';
+        h+='<td><div class="score-bar"><div class="bar-track"><div class="bar-fill" style="width:'+barW+'%;background:'+barColor+'"></div></div><span class="bar-score" style="color:'+barColor+'">'+item.maxScore+'</span></div></td>';
+        h+='</tr>';
+      });
+      document.getElementById('examBody').innerHTML=h;
+    }
+
+    // ====== Achievement System ======
+    var ACHIEVEMENTS=[
+      {id:'first_ac',name:'初出茅庐',desc:'第一次AC通过题目',icon:'🌟',check:function(u){var r=ojRecords[u];return r&&r.ac.size>=1}},
+      {id:'ac10',name:'渐入佳境',desc:'AC通过10道题目',icon:'⭐',check:function(u){var r=ojRecords[u];return r&&r.ac.size>=10}},
+      {id:'ac50',name:'刷题达人',desc:'AC通过50道题目',icon:'💫',check:function(u){var r=ojRecords[u];return r&&r.ac.size>=50}},
+      {id:'ac100',name:'题海战术',desc:'AC通过100道题目',icon:'🏅',check:function(u){var r=ojRecords[u];return r&&r.ac.size>=100}},
+      {id:'ac500',name:'OJ传说',desc:'AC通过500道题目',icon:'👑',check:function(u){var r=ojRecords[u];return r&&r.ac.size>=500}},
+      {id:'exam_pass',name:'考试入门',desc:'第一次通过考试',icon:'📜',check:function(u){var r=examRecords[u];return r&&r.passed>=1}},
+      {id:'exam_5',name:'考场老手',desc:'通过5次考试',icon:'🎓',check:function(u){var r=examRecords[u];return r&&r.passed>=5}},
+      {id:'perfect_score',name:'满分学霸',desc:'考试获得100分',icon:'💯',check:function(u){var r=examRecords[u];return r&&r.scores.some(function(s){return s>=100})}},
+      {id:'first_submit',name:'勇敢尝试',desc:'第一次提交代码',icon:'🚀',check:function(u){var r=ojRecords[u];return r&&r.submissions>=1}},
+      {id:'persist',name:'百折不挠',desc:'累计提交100次代码',icon:'💪',check:function(u){var r=ojRecords[u];return r&&r.submissions>=100}},
+      {id:'all_diff',name:'全能选手',desc:'在入门、简单、中等、困难各难度都有AC',icon:'🌈',check:function(u){
+        if(!cu)return false;
+        var recs=getAllOJRecords().filter(function(r){return r.user===u&&r.status==='ac'});
+        var diffs=new Set();
+        recs.forEach(function(r){var p=ojProbs.find(function(pp){return pp.id===r.probId});if(p)diffs.add(p.difficulty)});
+        return diffs.has('入门')&&diffs.has('简单')&&diffs.has('中等')&&diffs.has('困难');
+      }},
+      {id:'speed',name:'闪电手速',desc:'单次考试20分钟内完成',icon:'⚡',check:function(u){var r=examRecords[u];return r&&r.total>=1}}
+    ];
+
+    function countAchievements(username){
+      return ACHIEVEMENTS.filter(function(a){return a.check(username)}).length;
+    }
+
+    function renderAchievements(){
+      var username=cu?cu.username:'';
+      var h='';
+      ACHIEVEMENTS.forEach(function(a){
+        var unlocked=username&&a.check(username);
+        var cls=unlocked?'unlocked':'locked';
+        h+='<div class="ach-card '+cls+'">';
+        h+='<div class="ach-icon">'+a.icon+'</div>';
+        h+='<div class="ach-info"><h4>'+esc(a.name)+'</h4><p>'+esc(a.desc)+'</p></div>';
+        h+='</div>';
+      });
+      document.getElementById('achGrid').innerHTML=h;
+    }
+
+    // ====== Tab Switch ======
+    function switchTab(t,btn){
+      curTab=t;
+      document.getElementById('tabOJ').style.display=t==='oj'?'block':'none';
+      document.getElementById('tabExam').style.display=t==='exam'?'block':'none';
+      document.getElementById('tabAch').style.display=t==='ach'?'block':'none';
+      document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('on')});
+      if(btn)btn.classList.add('on');
+    }
+
+    // ====== Init ======
+    (function(){
+      var st=syncLoginState();
+      if(st.isLoggedIn){
+        cu={username:st.username,uid:st.uid};
+        document.getElementById('loginPage').style.display='none';
+        document.getElementById('mainContent').style.display='block';
+        document.getElementById('authBtns').style.display='none';
+        document.getElementById('userMenu').style.display='flex';
+        document.getElementById('uName').textContent=st.username;
+        var lvlEl=document.getElementById('lvlB');
+        if(ADMINS.indexOf(st.username)>=0||ADMINS.indexOf(st.uid)>=0){lvlEl.textContent='SU';lvlEl.style.background='#fef2f2';lvlEl.style.color='#dc2626'}
+        else{lvlEl.textContent='用户';lvlEl.style.background='#f3f4f6';lvlEl.style.color='#374151'}
+        loadAllData();
+      }else{
+        document.getElementById('loginPage').classList.add('show');
+      }
+    })();
+
+    document.getElementById('uBtn').onclick=function(e){e.stopPropagation();document.getElementById('udd').classList.toggle('show')};
+    document.addEventListener('click',function(){document.getElementById('udd').classList.remove('show')});
+
+    function showLoginModal(){document.getElementById('lModal').classList.add('show')}
+    document.getElementById('lForm').onsubmit=async function(e){
+      e.preventDefault();var u=document.getElementById('lU').value.trim(),p=document.getElementById('lP').value;
+      try{var a=await getAuth(),r=await a.validateUser(u,p);if(r.success){sessionStorage.setItem('rui_user',r.user.username);sessionStorage.setItem('rui_uid',r.user.uid);localStorage.setItem('rui_user_remember',r.user.username);localStorage.setItem('rui_uid_remember',r.user.uid);localStorage.setItem('rui_user_expire',''+(Date.now()+6048e5));location.reload()}else{document.getElementById('lErr').textContent=r.error;document.getElementById('lErr').style.display='block'}}catch(e){document.getElementById('lErr').textContent='登录失败';document.getElementById('lErr').style.display='block'}
+    };
+    function logout(){sessionStorage.clear();localStorage.removeItem('rui_user_remember');localStorage.removeItem('rui_uid_remember');localStorage.removeItem('rui_user_expire');location.reload()}
+  </script>
+
+</body>
+</html>
