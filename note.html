@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Note - Rui Hub</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+body{min-height:100vh;background:#fafafa;color:#111827;display:flex;flex-direction:column}
+a{text-decoration:none;color:inherit}button{cursor:pointer;border:none;background:none;font:inherit}
+input,textarea{font:inherit;outline:none}
+.nav{width:100%;padding:12px 20px;border-bottom:1px solid #e5e7eb;background:#fff}
+.nav-in{max-width:800px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.nav a.logo{font-size:17px;font-weight:700;color:#111827}
+.nav-lk{display:flex;gap:18px;font-size:13px}
+.nav-lk a{color:#6b7280;transition:.15s}.nav-lk a:hover{color:#111827}
+.wrap{flex:1;max-width:800px;width:100%;margin:0 auto;padding:24px 20px}
+.note-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.note-head h1{font-size:20px;font-weight:700;display:flex;align-items:center;gap:8px}
+.note-id{font-size:11px;padding:3px 10px;border-radius:20px;background:#111827;color:#fff;font-weight:600}
+.note-meta{font-size:12px;color:#9ca3af;display:flex;gap:12px;align-items:center}
+.editor{width:100%;min-height:400px;padding:20px;background:#fff;border:1px solid #e5e7eb;border-radius:14px;font-size:14px;line-height:1.8;resize:vertical;transition:.15s}
+.editor:focus{border-color:#9ca3af;box-shadow:0 0 0 3px rgba(0,0,0,.05)}
+.toolbar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.tbtn{padding:6px 14px;background:#f3f4f6;color:#374151;font-size:12px;font-weight:500;border-radius:8px;transition:.15s}
+.tbtn:hover{background:#e5e7eb}.tbtn.primary{background:#111827;color:#fff}.tbtn.primary:hover{background:#1f2937}
+.tbtn.danger{background:#fef2f2;color:#dc2626}.tbtn.danger:hover{background:#fee2e2}
+.saved-tag{font-size:11px;padding:3px 8px;border-radius:6px;font-weight:600}
+.saved-tag.ok{background:#f0fdf4;color:#16a34a}.saved-tag.no{background:#fef2f2;color:#dc2626}
+.notes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.note-card{padding:12px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;cursor:pointer;transition:.15s;min-height:80px;display:flex;flex-direction:column;justify-content:space-between}
+.note-card:hover{border-color:#d1d5db;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.note-card.active{border-color:#111827;box-shadow:0 0 0 2px #111827}
+.note-card .nc-id{font-size:10px;color:#9ca3af;font-weight:600}
+.note-card .nc-preview{font-size:12px;color:#374151;margin-top:6px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.note-card .nc-empty{font-size:11px;color:#d1d5db;font-style:italic;margin-top:6px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:10px 24px;background:#111827;color:#fff;font-size:13px;font-weight:500;border-radius:12px;opacity:0;transition:.3s;z-index:100;pointer-events:none}
+.toast.show{opacity:1}
+.empty-state{text-align:center;padding:60px 20px;color:#9ca3af;font-size:14px}
+@media(max-width:640px){
+  .nav-lk{gap:12px;font-size:12px}
+  .note-head h1{font-size:17px}
+  .editor{min-height:300px;padding:14px;font-size:13px}
+  .notes-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px}
+  .note-card{padding:10px;min-height:60px}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav"><div class="nav-in">
+  <a href="/" class="logo">Rui</a>
+  <div class="nav-lk">
+    <a href="/learn.html">📚 学习</a>
+    <a href="/note.html">📝 Note</a>
+  </div>
+</div></nav>
+
+<div class="wrap">
+  <div class="note-head">
+    <h1>📝 Note <span class="note-id" id="noteId">#1</span></h1>
+    <div class="note-meta">
+      <span class="saved-tag ok" id="saveStatus">已保存</span>
+      <span id="charCount">0 字</span>
+    </div>
+  </div>
+
+  <div class="notes-grid" id="notesGrid"></div>
+
+  <div class="toolbar">
+    <button class="tbtn primary" onclick="saveNote()">💾 保存</button>
+    <button class="tbtn" onclick="newNote()">➕ 新建</button>
+    <button class="tbtn" onclick="exportNote()">📋 复制</button>
+    <button class="tbtn danger" onclick="clearNote()">🗑️ 清空</button>
+  </div>
+
+  <textarea class="editor" id="editor" placeholder="开始写点什么...&#10;&#10;支持离线使用，数据保存在本地浏览器。&#10;按 Ctrl+S 快速保存。" oninput="onInput()"></textarea>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var currentId=1;
+var STORAGE_PREFIX='rui_note_';
+
+// Parse note ID from URL: /note/1 or /note.html?id=1 or default 1
+function getNoteIdFromURL(){
+  var p=window.location.pathname;
+  var m=p.match(/\/note\/(\d+)/);
+  if(m)return parseInt(m[1]);
+  var s=window.location.search;
+  var m2=s.match(/[?&]id=(\d+)/);
+  if(m2)return parseInt(m2[1]);
+  return 1;
+}
+
+function clampId(id){return Math.max(1,Math.min(100,id))}
+
+function loadNote(id){
+  id=clampId(id);
+  currentId=id;
+  document.getElementById('noteId').textContent='#'+id;
+  var data=localStorage.getItem(STORAGE_PREFIX+id);
+  document.getElementById('editor').value=data||'';
+  updateStatus();
+  updateGrid();
+  updateURL();
+}
+
+function saveNote(){
+  var content=document.getElementById('editor').value;
+  if(content.trim()){
+    localStorage.setItem(STORAGE_PREFIX+currentId,content);
+  }else{
+    localStorage.removeItem(STORAGE_PREFIX+currentId);
+  }
+  updateStatus(true);
+  updateGrid();
+  showToast('已保存');
+}
+
+function onInput(){
+  updateStatus();
+  var len=document.getElementById('editor').value.length;
+  document.getElementById('charCount').textContent=len+' 字';
+  // Auto-save after 1s of no typing
+  clearTimeout(window._autoSave);
+  window._autoSave=setTimeout(function(){saveNote()},1000);
+}
+
+function updateStatus(justSaved){
+  var data=localStorage.getItem(STORAGE_PREFIX+currentId);
+  var el=document.getElementById('saveStatus');
+  if(data||document.getElementById('editor').value.trim()){
+    el.textContent=justSaved?'已保存':'未保存';
+    el.className='saved-tag '+(justSaved?'ok':'no');
+  }else{
+    el.textContent='空白';
+    el.className='saved-tag ok';
+  }
+}
+
+function newNote(){
+  // Find next empty slot
+  for(var i=1;i<=100;i++){
+    if(!localStorage.getItem(STORAGE_PREFIX+i)){
+      loadNote(i);return;
+    }
+  }
+  // All full, go to current+1
+  loadNote(currentId<100?currentId+1:1);
+}
+
+function clearNote(){
+  if(!confirm('确定清空这条笔记？'))return;
+  document.getElementById('editor').value='';
+  localStorage.removeItem(STORAGE_PREFIX+currentId);
+  updateStatus();
+  updateGrid();
+  showToast('已清空');
+}
+
+function exportNote(){
+  var text=document.getElementById('editor').value;
+  if(!text){showToast('没有内容');return}
+  navigator.clipboard.writeText(text).then(function(){showToast('已复制到剪贴板')}).catch(function(){showToast('复制失败')});
+}
+
+function updateGrid(){
+  var h='';
+  for(var i=1;i<=100;i++){
+    var data=localStorage.getItem(STORAGE_PREFIX+i);
+    var cls='note-card'+(i===currentId?' active':'');
+    h+='<div class="'+cls+'" onclick="loadNote('+i+')">';
+    h+='<div class="nc-id">#'+i+'</div>';
+    if(data){
+      var preview=data.substring(0,60).replace(/\n/g,' ');
+      h+='<div class="nc-preview">'+esc(preview)+'</div>';
+    }else{
+      h+='<div class="nc-empty">空白</div>';
+    }
+    h+='</div>';
+  }
+  document.getElementById('notesGrid').innerHTML=h;
+}
+
+function updateURL(){
+  var url='/note/'+currentId;
+  history.replaceState(null,'',url);
+}
+
+function esc(t){var d=document.createElement('div');d.textContent=t;return d.innerHTML}
+
+function showToast(msg){
+  var el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  setTimeout(function(){el.classList.remove('show')},2000);
+}
+
+// Keyboard shortcut
+document.addEventListener('keydown',function(e){
+  if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveNote()}
+});
+
+// Init
+loadNote(getNoteIdFromURL());
+document.getElementById('charCount').textContent=document.getElementById('editor').value.length+' 字';
+</script>
+</body>
+</html>
