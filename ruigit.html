@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>RuiGit - 协同工作平台</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+body{min-height:100vh;background:#f8fafc;color:#111827;display:flex;flex-direction:column}
+a{text-decoration:none;color:inherit}button{cursor:pointer;border:none;background:none;font:inherit}
+input,select,textarea{font:inherit;outline:none}
+.nav{width:100%;padding:12px 20px;border-bottom:1px solid #e5e7eb;background:#fff;position:sticky;top:0;z-index:50}
+.nav-in{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:18px;font-weight:800;background:linear-gradient(135deg,#6366f1,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-lk{display:flex;gap:16px;font-size:13px}.nav-lk a{color:#6b7280;transition:.15s}.nav-lk a:hover{color:#111827}
+.nav-r{display:flex;align-items:center;gap:8px}
+.btn-s{padding:5px 12px;font-size:11px;font-weight:600;border-radius:8px;transition:.15s}
+.btn-s.primary{background:#6366f1;color:#fff}.btn-s.primary:hover{background:#4f46e5}
+.btn-s.ghost{background:#f3f4f6;color:#374151}.btn-s.ghost:hover{background:#e5e7eb}
+.layout{flex:1;display:flex;max-width:1200px;width:100%;margin:0 auto}
+.sidebar{width:220px;border-right:1px solid #e5e7eb;padding:16px 12px;flex-shrink:0;background:#fff}
+.sb-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;font-size:13px;color:#6b7280;cursor:pointer;transition:.1s;margin-bottom:2px}
+.sb-item:hover{background:#f3f4f6;color:#111827}.sb-item.active{background:#eef2ff;color:#4f46e5;font-weight:600}
+.sb-item .icon{font-size:16px;width:20px;text-align:center}
+.sb-section{font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:1px;padding:16px 12px 6px}
+.content{flex:1;padding:20px;min-width:0}
+.page-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.page-head h1{font-size:20px;font-weight:700}
+.page-head .sub{font-size:12px;color:#9ca3af}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:18px;margin-bottom:14px;transition:.15s}
+.card:hover{border-color:#d1d5db;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.card-title{font-size:14px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.card-desc{font-size:12px;color:#6b7280;line-height:1.5}
+.card-meta{display:flex;gap:12px;margin-top:10px;font-size:11px;color:#9ca3af;align-items:center;flex-wrap:wrap}
+.tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600}
+.tag.blue{background:#eff6ff;color:#2563eb}.tag.green{background:#f0fdf4;color:#16a34a}.tag.yellow{background:#fefce8;color:#ca8a04}.tag.red{background:#fef2f2;color:#dc2626}.tag.purple{background:#faf5ff;color:#7c3aed}.tag.gray{background:#f3f4f6;color:#6b7280}
+.avatar{width:24px;height:24px;border-radius:6px;background:#e0e7ff;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#4f46e5}
+.board-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.board-col{background:#f8fafc;border-radius:12px;padding:12px}
+.board-col h3{font-size:12px;font-weight:700;color:#6b7280;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid #e5e7eb}
+.board-card{background:#fff;border-radius:10px;padding:12px;margin-bottom:8px;border:1px solid #e5e7eb;cursor:pointer;transition:.15s}
+.board-card:hover{box-shadow:0 2px 6px rgba(0,0,0,.06)}
+.chat-area{background:#fff;border-radius:14px;border:1px solid #e5e7eb;overflow:hidden;display:flex;flex-direction:column;height:calc(100vh - 140px)}
+.chat-msgs{flex:1;overflow-y:auto;padding:16px}
+.chat-msg{margin-bottom:12px;display:flex;gap:10px}
+.chat-msg .av{width:32px;height:32px;border-radius:8px;background:#e0e7ff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#4f46e5;flex-shrink:0}
+.chat-msg .body{flex:1;min-width:0}
+.chat-msg .name{font-size:12px;font-weight:600;color:#111827}
+.chat-msg .time{font-size:10px;color:#9ca3af;margin-left:8px}
+.chat-msg .text{font-size:13px;color:#374151;margin-top:3px;line-height:1.5}
+.chat-input{padding:12px;border-top:1px solid #e5e7eb;display:flex;gap:8px}
+.chat-input input{flex:1;padding:10px 14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;font-size:13px}
+.chat-input input:focus{border-color:#6366f1;background:#fff}
+.chat-input button{padding:10px 18px;background:#6366f1;color:#fff;font-size:13px;font-weight:600;border-radius:10px;transition:.15s}
+.chat-input button:hover{background:#4f46e5}
+.doc-editor{width:100%;min-height:400px;padding:20px;background:#fff;border:1px solid #e5e7eb;border-radius:14px;font-size:14px;line-height:1.8;resize:vertical}
+.doc-editor:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.1)}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:200;justify-content:center;align-items:center}
+.modal-bg.show{display:flex}
+.modal{background:#fff;border-radius:16px;width:90%;max-width:440px;box-shadow:0 8px 40px rgba(0,0,0,.15)}
+.modal-head{padding:18px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f3f4f6}
+.modal-head h2{font-size:16px;font-weight:700}
+.modal-body{padding:20px}
+.fd{margin-bottom:10px}.fd label{display:block;font-size:12px;color:#6b7280;margin-bottom:4px;font-weight:500}
+.fd input,.fd select,.fd textarea{width:100%;padding:9px 12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;font-size:13px}
+.fd input:focus,.fd select:focus,.fd textarea:focus{border-color:#6366f1;background:#fff}
+.modal-foot{padding:12px 20px;display:flex;justify-content:flex-end;gap:8px;border-top:1px solid #f3f4f6}
+.empty{text-align:center;padding:60px 20px;color:#9ca3af;font-size:14px}
+@media(max-width:768px){
+  .sidebar{display:none}
+  .layout{display:block}
+  .content{padding:16px}
+  .board-grid{grid-template-columns:1fr}
+  .chat-area{height:calc(100vh - 120px)}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav"><div class="nav-in">
+  <a href="/" class="logo">RuiGit</a>
+  <div class="nav-lk"><a href="/learn.html">📚 学习</a><a href="/exam.html">📝 考试</a><a href="/oj.html">💻 OJ</a><a href="/note.html">📋 Note</a></div>
+  <div class="nav-r">
+    <button class="btn-s ghost" onclick="showCreateModal()">+ 新建</button>
+  </div>
+</div></nav>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sb-item active" onclick="switchPage('dashboard',this)"><span class="icon">📊</span>工作台</div>
+    <div class="sb-item" onclick="switchPage('projects',this)"><span class="icon">📁</span>项目</div>
+    <div class="sb-item" onclick="switchPage('board',this)"><span class="icon">📋</span>看板</div>
+    <div class="sb-item" onclick="switchPage('docs',this)"><span class="icon">📄</span>文档</div>
+    <div class="sb-item" onclick="switchPage('chat',this)"><span class="icon">💬</span>群聊</div>
+    <div class="sb-section">工具</div>
+    <div class="sb-item" onclick="switchPage('calendar',this)"><span class="icon">📅</span>日历</div>
+    <div class="sb-item" onclick="switchPage('todo',this)"><span class="icon">✅</span>待办</div>
+  </div>
+
+  <div class="content">
+    <!-- Dashboard -->
+    <div id="page-dashboard">
+      <div class="page-head"><h1>工作台</h1><span class="sub">欢迎回来</span></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px">
+        <div class="card" style="background:linear-gradient(135deg,#eff6ff,#f0f9ff);border-color:#bfdbfe"><div style="font-size:24px;font-weight:800;color:#1d4ed8" id="statProjects">0</div><div style="font-size:11px;color:#6b7280;margin-top:4px">项目</div></div>
+        <div class="card" style="background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border-color:#bbf7d0"><div style="font-size:24px;font-weight:800;color:#15803d" id="statTasks">0</div><div style="font-size:11px;color:#6b7280;margin-top:4px">任务</div></div>
+        <div class="card" style="background:linear-gradient(135deg,#fefce8,#fff7ed);border-color:#fde68a"><div style="font-size:24px;font-weight:800;color:#b45309" id="statDocs">0</div><div style="font-size:11px;color:#6b7280;margin-top:4px">文档</div></div>
+        <div class="card" style="background:linear-gradient(135deg,#faf5ff,#fdf4ff);border-color:#e9d5ff"><div style="font-size:24px;font-weight:800;color:#7e22ce" id="statTodos">0</div><div style="font-size:11px;color:#6b7280;margin-top:4px">待办</div></div>
+      </div>
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:12px">最近动态</h3>
+      <div id="recentActivity"><div class="empty">暂无动态</div></div>
+    </div>
+
+    <!-- Projects -->
+    <div id="page-projects" style="display:none">
+      <div class="page-head"><h1>项目</h1><button class="btn-s primary" onclick="showCreateModal()">+ 新建项目</button></div>
+      <div id="projectList"><div class="empty">暂无项目，点击新建开始</div></div>
+    </div>
+
+    <!-- Board -->
+    <div id="page-board" style="display:none">
+      <div class="page-head"><h1>看板</h1></div>
+      <div class="board-grid" id="boardGrid"></div>
+    </div>
+
+    <!-- Docs -->
+    <div id="page-docs" style="display:none">
+      <div class="page-head"><h1>文档</h1><button class="btn-s primary" onclick="createDoc()">+ 新建文档</button></div>
+      <div id="docList"></div>
+      <div id="docEditor" style="display:none">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <button class="btn-s ghost" onclick="closeDoc()">← 返回</button>
+          <input id="docTitle" placeholder="文档标题" style="flex:1;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;font-weight:600">
+          <button class="btn-s primary" onclick="saveDoc()">保存</button>
+        </div>
+        <textarea class="doc-editor" id="docContent" placeholder="开始写文档..."></textarea>
+      </div>
+    </div>
+
+    <!-- Chat -->
+    <div id="page-chat" style="display:none">
+      <div class="page-head"><h1>团队群聊</h1><span class="sub">实时协作沟通</span></div>
+      <div class="chat-area">
+        <div class="chat-msgs" id="chatMsgs"></div>
+        <div class="chat-input">
+          <input id="chatInput" placeholder="输入消息..." onkeydown="if(event.key==='Enter')sendChat()">
+          <button onclick="sendChat()">发送</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calendar -->
+    <div id="page-calendar" style="display:none">
+      <div class="page-head"><h1>日历</h1></div>
+      <div id="calendarView" class="card"></div>
+    </div>
+
+    <!-- Todo -->
+    <div id="page-todo" style="display:none">
+      <div class="page-head"><h1>待办</h1></div>
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <input id="todoInput" placeholder="添加待办事项..." style="flex:1;padding:10px 14px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;font-size:13px" onkeydown="if(event.key==='Enter')addTodo()">
+        <button class="btn-s primary" onclick="addTodo()">添加</button>
+      </div>
+      <div id="todoList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Create Modal -->
+<div class="modal-bg" id="createModal">
+  <div class="modal">
+    <div class="modal-head"><h2>新建</h2><button onclick="closeModal()" style="font-size:18px;color:#9ca3af">×</button></div>
+    <div class="modal-body">
+      <div class="fd"><label>类型</label><select id="createType"><option value="project">项目</option><option value="task">任务</option><option value="doc">文档</option></select></div>
+      <div class="fd"><label>名称</label><input id="createName" placeholder="输入名称"></div>
+      <div class="fd" id="createDescFd"><label>描述</label><textarea id="createDesc" rows="2" placeholder="简要描述"></textarea></div>
+    </div>
+    <div class="modal-foot"><button class="btn-s ghost" onclick="closeModal()">取消</button><button class="btn-s primary" onclick="createItem()">创建</button></div>
+  </div>
+</div>
+
+<script>
+var STORAGE='rui_git_';
+var esc=function(t){var d=document.createElement('div');d.textContent=t;return d.innerHTML};
+
+function getData(key,def){try{return JSON.parse(localStorage.getItem(STORAGE+key))||def}catch(e){return def}}
+function setData(key,val){localStorage.setItem(STORAGE+key,JSON.stringify(val))}
+
+// Pages
+function switchPage(page,el){
+  document.querySelectorAll('[id^="page-"]').forEach(function(p){p.style.display='none'});
+  var target=document.getElementById('page-'+page);if(target)target.style.display='';
+  document.querySelectorAll('.sb-item').forEach(function(s){s.classList.remove('active')});
+  if(el)el.classList.add('active');
+  if(page==='dashboard')renderDashboard();
+  if(page==='projects')renderProjects();
+  if(page==='board')renderBoard();
+  if(page==='docs')renderDocs();
+  if(page==='chat')renderChat();
+  if(page==='todo')renderTodos();
+  if(page==='calendar')renderCalendar();
+}
+
+// Dashboard
+function renderDashboard(){
+  var projects=getData('projects',[]);
+  var tasks=getData('tasks',[]);
+  var docs=getData('docs',[]);
+  var todos=getData('todos',[]);
+  document.getElementById('statProjects').textContent=projects.length;
+  document.getElementById('statTasks').textContent=tasks.length;
+  document.getElementById('statDocs').textContent=docs.length;
+  document.getElementById('statTodos').textContent=todos.filter(function(t){return!t.done}).length;
+  var activities=[];
+  projects.forEach(function(p){activities.push({text:'项目 '+p.name+' 已创建',time:p.createdAt})});
+  docs.forEach(function(d){activities.push({text:'文档 '+d.title+' 已创建',time:d.createdAt})});
+  activities.sort(function(a,b){return new Date(b.time)-new Date(a.time)});
+  var h='';
+  activities.slice(0,10).forEach(function(a){
+    h+='<div class="card"><div class="card-desc">'+esc(a.text)+'</div><div class="card-meta">'+ft(a.time)+'</div></div>';
+  });
+  document.getElementById('recentActivity').innerHTML=h||'<div class="empty">暂无动态</div>';
+}
+
+function ft(s){var d=new Date(s),n=new Date(),df=n-d;if(df<6e4)return'刚刚';if(df<36e5)return Math.floor(df/6e4)+'分钟前';if(df<864e5)return Math.floor(df/36e5)+'小时前';return d.toLocaleDateString('zh-CN')}
+
+// Projects
+function renderProjects(){
+  var projects=getData('projects',[]);
+  var h='';
+  projects.forEach(function(p,i){
+    h+='<div class="card"><div class="card-title">'+esc(p.name)+'</div><div class="card-desc">'+esc(p.desc||'暂无描述')+'</div><div class="card-meta"><span class="tag blue">项目</span><span>'+ft(p.createdAt)+'</span><button style="color:#dc2626;font-size:11px" onclick="delProject('+i+')">删除</button></div></div>';
+  });
+  document.getElementById('projectList').innerHTML=h||'<div class="empty">暂无项目</div>';
+}
+function delProject(i){var p=getData('projects',[]);p.splice(i,1);setData('projects',p);renderProjects();renderDashboard()}
+
+// Board (Kanban)
+function renderBoard(){
+  var tasks=getData('tasks',[]);
+  var cols=[{key:'todo',label:'待办',color:'#6b7280'},{key:'doing',label:'进行中',color:'#2563eb'},{key:'done',label:'已完成',color:'#16a34a'}];
+  var h='';
+  cols.forEach(function(col){
+    var items=tasks.filter(function(t){return t.status===col.key});
+    h+='<div class="board-col"><h3 style="border-bottom-color:'+col.color+';color:'+col.color+'">'+col.label+' ('+items.length+')</h3>';
+    items.forEach(function(t,i){
+      var idx=tasks.indexOf(t);
+      h+='<div class="board-card"><div style="font-size:13px;font-weight:500">'+esc(t.name)+'</div><div style="margin-top:6px;display:flex;gap:4px">';
+      if(col.key!=='done')h+='<button class="tag green" style="cursor:pointer" onclick="moveTask('+idx+',\''+(col.key==='todo'?'doing':'done')+'\')">→</button>';
+      if(col.key!=='todo')h+='<button class="tag gray" style="cursor:pointer" onclick="moveTask('+idx+',\''+(col.key==='done'?'doing':'todo')+'\')">←</button>';
+      h+='<button class="tag red" style="cursor:pointer" onclick="delTask('+idx+')">×</button></div></div>';
+    });
+    h+='</div>';
+  });
+  document.getElementById('boardGrid').innerHTML=h;
+}
+function moveTask(i,status){var t=getData('tasks',[]);t[i].status=status;setData('tasks',t);renderBoard();renderDashboard()}
+function delTask(i){var t=getData('tasks',[]);t.splice(i,1);setData('tasks',t);renderBoard();renderDashboard()}
+
+// Docs
+var currentDocIdx=-1;
+function renderDocs(){
+  var docs=getData('docs',[]);
+  document.getElementById('docEditor').style.display='none';
+  document.getElementById('docList').style.display='';
+  var h='';
+  docs.forEach(function(d,i){
+    h+='<div class="card" onclick="openDoc('+i+')"><div class="card-title">📄 '+esc(d.title)+'</div><div class="card-desc">'+esc((d.content||'').substring(0,80))+'</div><div class="card-meta"><span>'+ft(d.updatedAt||d.createdAt)+'</span><button style="color:#dc2626;font-size:11px" onclick="event.stopPropagation();delDoc('+i+')">删除</button></div></div>';
+  });
+  document.getElementById('docList').innerHTML=h||'<div class="empty">暂无文档</div>';
+}
+function openDoc(i){currentDocIdx=i;var docs=getData('docs',[]);var d=docs[i];document.getElementById('docTitle').value=d.title;document.getElementById('docContent').value=d.content||'';document.getElementById('docList').style.display='none';document.getElementById('docEditor').style.display=''}
+function closeDoc(){currentDocIdx=-1;renderDocs()}
+function saveDoc(){if(currentDocIdx<0)return;var docs=getData('docs',[]);docs[currentDocIdx].title=document.getElementById('docTitle').value;docs[currentDocIdx].content=document.getElementById('docContent').value;docs[currentDocIdx].updatedAt=new Date().toISOString();setData('docs',docs);showToast('文档已保存');closeDoc();renderDashboard()}
+function createDoc(){var docs=getData('docs',[]);var d={title:'未命名文档',content:'',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};docs.unshift(d);setData('docs',docs);openDoc(0)}
+function delDoc(i){var docs=getData('docs',[]);docs.splice(i,1);setData('docs',docs);renderDocs();renderDashboard()}
+
+// Chat (local simulation)
+function renderChat(){
+  var msgs=getData('chat',[]);
+  var h='';
+  msgs.forEach(function(m){
+    h+='<div class="chat-msg"><div class="av">'+esc(m.user.charAt(0).toUpperCase())+'</div><div class="body"><span class="name">'+esc(m.user)+'</span><span class="time">'+ft(m.time)+'</span><div class="text">'+esc(m.text)+'</div></div></div>';
+  });
+  document.getElementById('chatMsgs').innerHTML=h||'<div class="empty">暂无消息</div>';
+  var el=document.getElementById('chatMsgs');el.scrollTop=el.scrollHeight;
+}
+function sendChat(){
+  var input=document.getElementById('chatInput');var text=input.value.trim();if(!text)return;
+  var msgs=getData('chat',[]);
+  msgs.push({user:'我',text:text,time:new Date().toISOString()});
+  setData('chat',msgs);input.value='';renderChat();
+}
+
+// Todos
+function renderTodos(){
+  var todos=getData('todos',[]);
+  var h='';
+  todos.forEach(function(t,i){
+    h+='<div class="card" style="display:flex;align-items:center;gap:12px;padding:14px;'+(t.done?'opacity:.5':'')+'">';
+    h+='<input type="checkbox" '+(t.done?'checked':'')+' onchange="toggleTodo('+i+')" style="width:18px;height:18px;accent-color:#6366f1">';
+    h+='<span style="flex:1;font-size:13px;'+(t.done?'text-decoration:line-through;color:#9ca3af':'')+'">'+esc(t.text)+'</span>';
+    h+='<button style="color:#dc2626;font-size:12px" onclick="rmTodo('+i+')">×</button>';
+    h+='</div>';
+  });
+  document.getElementById('todoList').innerHTML=h||'<div class="empty">暂无待办</div>';
+}
+function addTodo(){var input=document.getElementById('todoInput');var text=input.value.trim();if(!text)return;var todos=getData('todos',[]);todos.push({text:text,done:false});setData('todos',todos);input.value='';renderTodos();renderDashboard()}
+function toggleTodo(i){var todos=getData('todos',[]);todos[i].done=!todos[i].done;setData('todos',todos);renderTodos();renderDashboard()}
+function rmTodo(i){var todos=getData('todos',[]);todos.splice(i,1);setData('todos',todos);renderTodos();renderDashboard()}
+
+// Calendar
+function renderCalendar(){
+  var now=new Date();var y=now.getFullYear();var m=now.getMonth();
+  var first=new Date(y,m,1);var last=new Date(y,m+1,0);
+  var startDay=first.getDay();var days=last.getDate();
+  var months=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+  var h='<div style="text-align:center;margin-bottom:16px"><h3 style="font-size:16px;font-weight:700">'+y+'年 '+months[m]+'</h3></div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center">';
+  ['日','一','二','三','四','五','六'].forEach(function(d){h+='<div style="font-size:11px;color:#9ca3af;font-weight:600;padding:6px">'+d+'</div>'});
+  for(var i=0;i<startDay;i++)h+='<div></div>';
+  for(var d=1;d<=days;d++){
+    var isToday=d===now.getDate();
+    h+='<div style="padding:6px;font-size:12px;border-radius:8px;'+(isToday?'background:#6366f1;color:#fff;font-weight:700':'')+'">'+d+'</div>';
+  }
+  h+='</div>';
+  document.getElementById('calendarView').innerHTML=h;
+}
+
+// Create Modal
+function showCreateModal(){document.getElementById('createModal').classList.add('show')}
+function closeModal(){document.getElementById('createModal').classList.remove('show')}
+function createItem(){
+  var type=document.getElementById('createType').value;
+  var name=document.getElementById('createName').value.trim();
+  var desc=document.getElementById('createDesc').value.trim();
+  if(!name){showToast('请输入名称');return}
+  if(type==='project'){var p=getData('projects',[]);p.push({name:name,desc:desc,createdAt:new Date().toISOString()});setData('projects',p)}
+  else if(type==='task'){var t=getData('tasks',[]);t.push({name:name,desc:desc,status:'todo',createdAt:new Date().toISOString()});setData('tasks',t)}
+  else if(type==='doc'){var d=getData('docs',[]);d.push({title:name,content:desc,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()});setData('docs',d)}
+  closeModal();document.getElementById('createName').value='';document.getElementById('createDesc').value='';
+  renderDashboard();showToast('创建成功');
+}
+
+// Toast
+function showToast(msg){var el=document.getElementById('toast');if(!el){el=document.createElement('div');el.id='toast';el.className='toast';document.body.appendChild(el)}el.textContent=msg;el.classList.add('show');setTimeout(function(){el.classList.remove('show')},2000)}
+
+// Init
+renderDashboard();
+</script>
+</body>
+</html>
