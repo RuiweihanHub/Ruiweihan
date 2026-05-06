@@ -9,6 +9,11 @@
   <title>404 - 页面未找到</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>* { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }</style>
+<script>
+  // SPA routing for /note/N
+  var p=window.location.pathname;
+  if(p.match(/^\/note\/\d+$/)){window.location.replace('/note.html?id='+p.split('/').pop())}
+</script>
 </head>
 <body class="min-h-screen bg-white text-gray-900 flex flex-col items-center justify-center px-6">
   
