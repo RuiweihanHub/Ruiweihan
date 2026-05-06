@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>RuiGit - 协同工作平台</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
@@ -140,8 +142,8 @@ input,select,textarea{font:inherit;outline:none}
 
     <!-- Chat -->
     <div id="page-chat" style="display:none">
-      <div class="page-head"><h1>团队群聊</h1><span class="sub">实时协作沟通</span></div>
-      <div class="chat-area">
+      <div class="page-head"><h1>公共群聊</h1><span class="sub">💬 离线可用 · 消息保存在本地</span></div>
+      <div id="offlineBanner" style="display:none;padding:8px 16px;background:#fef3c7;color:#92400e;font-size:12px;text-align:center;border-radius:10px 10px 0 0">⚠️ 当前离线模式，消息保存在本地，联网后可同步</div><div class="chat-area" style="border-radius:0 0 14px 14px">
         <div class="chat-msgs" id="chatMsgs"></div>
         <div class="chat-input">
           <input id="chatInput" placeholder="输入消息..." onkeydown="if(event.key==='Enter')sendChat()">
@@ -349,6 +351,22 @@ function showToast(msg){var el=document.getElementById('toast');if(!el){el=docum
 
 // Init
 renderDashboard();
+</script>
+
+<script>
+// Offline detection
+function updateOnlineStatus(){
+  var banner=document.getElementById('offlineBanner');
+  if(banner)banner.style.display=navigator.onLine?'none':'block';
+}
+window.addEventListener('online',updateOnlineStatus);
+window.addEventListener('offline',updateOnlineStatus);
+updateOnlineStatus();
+
+// Register Service Worker for offline support
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+}
 </script>
 </body>
 </html>
