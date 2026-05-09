@@ -647,62 +647,43 @@
     function runJSSandbox(code,stdin){
       // 解析stdin为变量
       var lines=(stdin||'').split('\n').filter(function(l){return l.trim()!==''});
-      var inputVals=lines.map(function(l){var n=Number(l);return isNaN(n)?l:n});
+      var inputVals=lines.map(function(l){var n=Number(l);return isNaN(n)?l.trim():n});
       var inputIdx=0;
-      // 创建readline函数模拟输入
-      var sandbox={
-        console:{log:function(){var a=Array.prototype.slice.call(arguments);sandbox.__output.push(a.map(String).join(' '))},warn:function(){},error:function(){},info:function(){}},
-        __output:[],
-        readline:function(){return inputIdx<inputVals.length?String(inputVals[inputIdx++]):''},
-        readInt:function(){return inputIdx<inputVals.length?Number(inputVals[inputIdx++]):0},
-        readFloat:function(){return inputIdx<inputVals.length?Number(inputVals[inputIdx++]):0},
-        readLine:function(){return inputIdx<inputVals.length?String(inputVals[inputIdx++]):''},
-        print:function(){var a=Array.prototype.slice.call(arguments);sandbox.__output.push(a.map(String).join(' '))},
-        parseInt:function(s){return Number(s)},
-        parseFloat:function(s){return Number(s)},
-        Math:Math,
-        Array:Array,
-        String:String,
-        Number:Number,
-        Object:Object,
-        JSON:JSON,
-        Map:Map,
-        Set:Set,
-        Date:Date,
-        RegExp:RegExp,
-        Error:Error,
-        Boolean:Boolean,
-        Infinity:Infinity,
-        NaN:NaN,
-        undefined:undefined,
-        isNaN:isNaN,
-        isFinite:isFinite,
-        parseInt_:parseInt,
-        parseFloat_:parseFloat
-      };
+      // 输出收集
+      var outputArr=[];
+      // 创建输入函数（闭包，可以正确访问inputIdx和inputVals）
+      var _readline=function(){return inputIdx<inputVals.length?String(inputVals[inputIdx++]):''};
+      var _readInt=function(){return inputIdx<inputVals.length?Number(inputVals[inputIdx++]):0};
+      var _readFloat=function(){return inputIdx<inputVals.length?Number(inputVals[inputIdx++]):0};
+      var _readLine=function(){return inputIdx<inputVals.length?String(inputVals[inputIdx++]):''};
+      var _print=function(){var a=Array.prototype.slice.call(arguments);outputArr.push(a.map(String).join(' '))};
+      var _console={log:function(){var a=Array.prototype.slice.call(arguments);outputArr.push(a.map(String).join(' '))},warn:function(){},error:function(msg){outputArr.push('Error: '+String(msg))},info:function(){}};
+
       // 替换代码中的常见输入模式
       var processedCode=code
         .replace(/readline\s*\(\)/g,'readline()')
         .replace(/parseInt\s*\(\s*readline\s*\(\)\s*\)/g,'readInt()')
         .replace(/parseFloat\s*\(\s*readline\s*\(\)\s*\)/g,'readFloat()');
-      // 用Function构造沙箱
-      var keys=Object.keys(sandbox);
-      var vals=keys.map(function(k){return sandbox[k]});
-      var fn=new Function(keys.join(','),
-        '"use strict";var console=this.console;var readline=this.readline;var readInt=this.readInt;var readFloat=this.readFloat;var readLine=this.readLine;var print=this.print;var parseInt=this.parseInt;var parseFloat=this.parseFloat;var Math=this.Math;var Array=this.Array;var String=this.String;var Number=this.Number;var Object=this.Object;var JSON=this.JSON;var Map=this.Map;var Set=this.Set;var isNaN=this.isNaN;var isFinite=this.isFinite;try{'+processedCode+'}catch(e){console.error(e.message)}'
+
+      // 用Function构造，将闭包函数作为参数传入
+      var fn=new Function('console','readline','readInt','readFloat','readLine','print','Math','Array','String','Number','Object','JSON','Map','Set','isNaN','isFinite',
+        '"use strict";try{'+processedCode+'}catch(e){console.error(e.message)}'
       );
+
       // 超时保护
-      var timeoutMs=3000;
       var timedOut=false;
-      var timer=setTimeout(function(){timedOut=true;throw new Error('TIMEOUT')},timeoutMs);
+      var timer=setTimeout(function(){timedOut=true},3000);
+
       try{
-        fn.apply(sandbox,vals);
+        fn(_console,_readline,_readInt,_readFloat,_readLine,_print,Math,Array,String,Number,Object,JSON,Map,Set,isNaN,isFinite);
       }catch(e){
+        clearTimeout(timer);
         if(timedOut)throw new Error('TIMEOUT');
         throw e;
       }
       clearTimeout(timer);
-      return sandbox.__output.join('\n');
+      if(timedOut)throw new Error('TIMEOUT');
+      return outputArr.join('\n');
     }
 
     function runOutputCompare(lang,code,stdin,expected,timeLimit,startTime){
