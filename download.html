@@ -8,7 +8,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>下载 - Rui Hub</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>* { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }</style>
+  <style>* { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    /* ===== Mobile Responsive ===== */
+    @media(max-width:640px){
+      nav .max-w-6xl{flex-wrap:nowrap;gap:12px}
+      nav .flex.items-center.gap-8{gap:12px;flex:1;min-width:0}
+      nav .flex.items-center.gap-6{gap:12px;font-size:13px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap!important;scrollbar-width:none}
+      nav .flex.items-center.gap-6::-webkit-scrollbar{display:none}
+      main{padding:24px 12px}
+      main .space-y-4>div{padding:16px}
+      main .flex.items-start.justify-between{flex-direction:column;gap:12px}
+      main .flex.items-start.gap-4{gap:12px}
+      main .w-14{width:48px;height:48px;font-size:1.5rem}
+      footer .max-w-6xl{flex-direction:column;gap:8px;text-align:center}
+    }
+  </style>
 </head>
 <body class="min-h-screen bg-white text-gray-900 flex flex-col">
   
