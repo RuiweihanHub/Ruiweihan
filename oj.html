@@ -1,1039 +1,673 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>OJ 在线判题 - RuiHub</title>
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --primary:#111827;--secondary:#6b7280;--bg:#f3f4f6;--white:#fff;--border:#e5e7eb;
-  --accent:#3b82f6;--accent-hover:#2563eb;--green:#10b981;--red:#ef4444;
-  --orange:#f59e0b;--purple:#8b5cf6;
-  --editor-bg:#1e1e1e;--editor-text:#d4d4d4;--editor-keyword:#569cd6;
-  --editor-string:#ce9178;--editor-comment:#6a9955;--editor-number:#b5cea8;
-  --radius:8px;--shadow:0 1px 3px rgba(0,0,0,.1);--shadow-lg:0 10px 40px rgba(0,0,0,.15)
-}
-html{font-size:16px;-webkit-text-size-adjust:100%}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans SC',sans-serif;color:var(--primary);background:var(--bg);line-height:1.6;min-height:100vh;overflow-x:hidden}
-a{color:var(--accent);text-decoration:none}
-button{cursor:pointer;font-family:inherit;border:none;outline:none}
-input,textarea,select{font-family:inherit;outline:none}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>OJ 在线判题 - Rui Hub</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💻</text></svg>">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+    body{min-height:100vh;background:#fff;color:#111827;display:flex;flex-direction:column}
+    a{text-decoration:none;color:inherit}button{cursor:pointer;border:none;background:none;font:inherit}
+    input,select,textarea{font:inherit;outline:none}
 
-/* NAV */
-.nav{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
-.nav-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:56px}
-.nav-logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:1.25rem;color:var(--primary);cursor:default}
-.nav-logo .r{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;border-radius:6px;font-size:1rem;font-weight:800}
-.nav-links{display:flex;gap:2px}
-.nav-links a{padding:8px 16px;border-radius:var(--radius);color:var(--secondary);font-size:.9rem;font-weight:500;transition:all .2s}
-.nav-links a:hover{color:var(--primary);background:var(--bg)}
-.nav-links a.active{color:var(--accent);background:#eff6ff;font-weight:600}
-.nav-user{display:flex;align-items:center;gap:10px}
-.nav-user .uname{font-size:.875rem;color:var(--primary);font-weight:500}
-.nav-user .logout-btn{font-size:.8rem;color:var(--secondary);background:none;padding:4px 10px;border-radius:var(--radius);transition:all .2s}
-.nav-user .logout-btn:hover{color:var(--red);background:#fef2f2}
+    .nav{width:100%;padding:14px 24px;border-bottom:1px solid #f3f4f6}
+    .nav-in{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+    .nav-lk{display:flex;gap:24px;font-size:14px}.nav-lk a{color:#6b7280;transition:.15s}.nav-lk a:hover{color:#111827}
+    .nav-r{display:flex;align-items:center;gap:10px}
+    .btn-r{padding:6px 14px;background:#f3f4f6;color:#374151;font-size:12px;font-weight:500;border-radius:8px;transition:.15s}.btn-r:hover{background:#e5e7eb}
+    .btn-b{padding:6px 14px;background:#111827;color:#fff;font-size:12px;font-weight:500;border-radius:8px;transition:.15s}.btn-b:hover{background:#1f2937}
+    .umenu{position:relative;display:flex;align-items:center;gap:8px}
+    .ubtn{display:flex;align-items:center;gap:6px;padding:6px 12px;background:#f3f4f6;border-radius:8px;font-size:13px;color:#374151;transition:.15s}.ubtn:hover{background:#e5e7eb}
+    .udd{display:none;position:absolute;right:0;top:100%;margin-top:8px;width:140px;background:#fff;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.1);border:1px solid #f3f4f6;overflow:hidden;z-index:50}
+    .udd.show{display:block}.udd a{display:block;padding:8px 16px;font-size:13px;color:#374151;transition:.1s}.udd a:hover{background:#f9fafb}.udd .out{color:#dc2626}.udd .out:hover{background:#fef2f2}.udd .sp{height:1px;background:#f3f4f6}
 
-/* MAIN */
-.main{max-width:1400px;margin:0 auto;padding:20px}
+    .main{flex:1;max-width:1000px;width:100%;margin:0 auto;padding:28px 24px}
+    .hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+    .hd h1{font-size:22px;font-weight:700}.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;background:#111827;color:#fff;font-weight:700;margin-left:8px;vertical-align:middle}
+    .hd .sub{color:#6b7280;font-size:13px;margin-top:4px}
+    .hbtns{display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap}
+    .bg{padding:8px 14px;background:#f3f4f6;color:#374151;font-size:13px;font-weight:500;border-radius:12px;transition:.15s;display:flex;align-items:center;gap:6px}.bg:hover{background:#e5e7eb}
+    .bd{padding:8px 14px;background:#111827;color:#fff;font-size:13px;font-weight:500;border-radius:12px;transition:.15s;display:flex;align-items:center;gap:6px}.bd:hover{background:#1f2937}
+    .cats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px}
+    .cb{padding:7px 14px;font-size:13px;border-radius:12px;border:1px solid #e5e7eb;color:#6b7280;transition:.15s;background:#fff}.cb:hover{background:#f9fafb}.cb.on{background:#111827;color:#fff;border-color:#111827}
+    .sw{position:relative;margin-bottom:18px}
+    .sw svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#9ca3af}
+    .sw input{width:100%;padding:10px 14px 10px 38px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;font-size:13px;transition:.15s}.sw input:focus{border-color:#9ca3af;background:#fff}
 
-/* PAGE HEADER */
-.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
-.page-header h1{font-size:1.5rem;font-weight:700;display:flex;align-items:center;gap:10px}
-.page-header h1 .icon{font-size:1.3rem}
-.page-header h1 .count{font-size:.875rem;color:var(--secondary);font-weight:400;background:var(--bg);padding:2px 10px;border-radius:20px}
-.create-btn{padding:8px 20px;background:var(--accent);color:#fff;border-radius:var(--radius);font-size:.85rem;font-weight:600;transition:all .2s;box-shadow:0 2px 8px rgba(59,130,246,.3)}
-.create-btn:hover{background:var(--accent-hover);box-shadow:0 4px 12px rgba(59,130,246,.4)}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+    @media(max-width:640px){.grid{grid-template-columns:1fr}}
+    .card{background:#fff;border:1px solid #f3f4f6;border-radius:16px;padding:16px;cursor:pointer;transition:.15s;position:relative}.card:hover{border-color:#e5e7eb;box-shadow:0 4px 16px -4px rgba(0,0,0,.06);transform:translateY(-1px)}
+    .card .del-btn{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:50%;background:#fef2f2;color:#dc2626;display:none;align-items:center;justify-content:center;font-size:14px;font-weight:700;border:1px solid #fecaca;transition:.15s;z-index:5}.card .del-btn:hover{background:#dc2626;color:#fff}
+    .card:hover .del-btn.can-del{display:flex}
+    .ct{display:flex;align-items:flex-start;gap:12px}
+    .ci{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .ci.doc{background:#eff6ff;color:#2563eb}.ci.vid{background:#fef2f2;color:#dc2626}.ci.lnk{background:#f0fdf4;color:#16a34a}.ci.img{background:#fefce8;color:#ca8a04}
+    .cf{flex:1;min-width:0}.cf h3{font-size:14px;font-weight:600;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .cf p{font-size:12px;color:#6b7280;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:8px}
+    .cm{display:flex;flex-wrap:wrap;gap:5px;font-size:11px;color:#9ca3af;align-items:center}
+    .tg{padding:2px 8px;border-radius:20px;font-weight:500;font-size:11px}
+    .tg.doc{background:#eff6ff;color:#2563eb}.tg.vid{background:#fef2f2;color:#dc2626}.tg.lnk{background:#f0fdf4;color:#16a34a}.tg.img{background:#fefce8;color:#ca8a04}.tg.cat{background:#f3f4f6;color:#4b5563}
+    .empty{text-align:center;padding:60px 20px;color:#9ca3af;font-size:14px}
 
-/* FILTERS */
-.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:center}
-.filter-group{display:flex;gap:4px;flex-wrap:wrap}
-.filter-btn{padding:6px 14px;border-radius:20px;font-size:.8rem;background:var(--white);color:var(--secondary);border:1px solid var(--border);transition:all .2s;font-weight:500}
-.filter-btn:hover{border-color:var(--accent);color:var(--accent)}
-.filter-btn.active{background:var(--accent);color:var(--white);border-color:var(--accent);box-shadow:0 2px 6px rgba(59,130,246,.25)}
-.filter-label{font-size:.75rem;color:var(--secondary);margin-right:2px;align-self:center;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
-.search-box{flex:1;min-width:200px;max-width:400px}
-.search-box input{width:100%;padding:9px 14px 9px 38px;border:1px solid var(--border);border-radius:var(--radius);font-size:.875rem;background:var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 10-1.397 1.398h-.001l3.85 3.85a1 1 0 001.415-1.414l-3.85-3.85zm-5.242.156a5 5 0 110-10 5 5 0 010 10z'/%3E%3C/svg%3E") 12px center no-repeat;transition:all .2s}
-.search-box input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+    .fov{display:none;position:fixed;inset:0;z-index:100;background:#fff;flex-direction:column}.fov.show{display:flex}
+    .fbar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;border-bottom:1px solid #f3f4f6;flex-shrink:0}
+    .fbar h2{font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;margin-right:12px}
+    .fbar .r{display:flex;align-items:center;gap:10px;flex-shrink:0}
+    .bsm{padding:5px 12px;background:#f3f4f6;color:#374151;font-size:12px;font-weight:500;border-radius:8px;transition:.15s}.bsm:hover{background:#e5e7eb}
+    .xbtn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;transition:.15s;color:#6b7280}.xbtn:hover{background:#f3f4f6}
+    .fbody{flex:1;overflow:auto;background:#f9fafb}
+    .fbody iframe{width:100%;height:100%;border:none}
+    .fbody video{width:100%;min-height:80vh;background:#000}
+    .fbody .tw{max-width:800px;margin:0 auto;padding:32px;background:#fff;border-radius:12px;font-size:13px;line-height:1.8;white-space:pre-wrap;font-family:'Courier New',monospace}
+    .fbody .iw{display:flex;align-items:center;justify-content:center;min-height:100%;padding:32px}.fbody .iw img{max-width:100%;max-height:90vh;border-radius:8px;object-fit:contain}
 
-/* TABLE */
-.prob-table{width:100%;background:var(--white);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
-.prob-table table{width:100%;border-collapse:collapse}
-.prob-table th{background:#f8f9fb;padding:11px 14px;text-align:left;font-size:.75rem;color:var(--secondary);font-weight:600;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--border)}
-.prob-table td{padding:11px 14px;border-bottom:1px solid #f0f1f3;font-size:.875rem;vertical-align:middle;transition:background .15s}
-.prob-table tr:hover td{background:#f9fafb}
-.prob-table tr:last-child td{border-bottom:none}
-.prob-title{color:var(--accent);cursor:pointer;font-weight:500;transition:all .2s}
-.prob-title:hover{color:var(--accent-hover);text-decoration:underline}
-.prob-id{font-family:'Cascadia Code',Consolas,monospace;color:var(--secondary);font-size:.8rem;font-weight:600}
-.badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:.7rem;font-weight:600;letter-spacing:.3px}
-.badge-easy,.badge-simple{background:#ecfdf5;color:#059669}
-.badge-medium{background:#fef3c7;color:#d97706}
-.badge-hard{background:#fee2e2;color:#dc2626}
-.badge-challenge{background:#ede9fe;color:#7c3aed}
-.badge-entry{background:#e0f2fe;color:#0284c7}
-.status-icon{font-size:1rem;width:24px;text-align:center;display:inline-block}
-.status-ac{color:var(--green);font-weight:700}
-.status-wa{color:var(--red);font-weight:700}
-.status-na{color:#d1d5db}
+    .mbg{display:none;position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.25);backdrop-filter:blur(4px);align-items:center;justify-content:center}.mbg.show{display:flex}
+    .mdl{background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.12);width:100%;max-width:460px;margin:16px;overflow:hidden;max-height:90vh;display:flex;flex-direction:column}
+    .mh{padding:16px 20px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}.mh h2{font-size:16px;font-weight:600}
+    .mb{padding:20px;overflow-y:auto;flex:1}.mf{padding:14px 20px;border-top:1px solid #f3f4f6;display:flex;justify-content:flex-end;gap:8px;flex-shrink:0}
+    .fd{margin-bottom:12px}.fd label{display:block;font-size:13px;font-weight:500;color:#374151;margin-bottom:5px}
+    .fd input,.fd select,.fd textarea{width:100%;padding:9px 12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;font-size:13px;transition:.15s}.fd input:focus,.fd select:focus,.fd textarea:focus{border-color:#9ca3af;background:#fff}
+    .fd textarea{resize:none}.rw{display:flex;gap:10px}.rw .fd{flex:1}
+    .dz{border:2px dashed #d1d5db;border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:.15s}.dz:hover,.dz.ov{border-color:#111827;background:#f9fafb}
+    .dz svg{margin:0 auto 6px;color:#d1d5db}.dz p{font-size:13px;color:#6b7280}.dz .ht{font-size:11px;color:#9ca3af;margin-top:4px}.dz .sf{font-size:13px;font-weight:500;color:#111827;margin-top:6px;display:none}
+    .dz .img-prev{margin-top:10px;max-width:100%;max-height:120px;border-radius:8px;display:none}
+    .prog{margin-top:10px;display:none}.prog .tp{display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-bottom:3px}
+    .prog .br{height:5px;background:#f3f4f6;border-radius:3px;overflow:hidden}.prog .br div{height:100%;background:#111827;border-radius:3px;transition:width .3s}
 
-/* PAGINATION */
-.pagination{display:flex;justify-content:center;gap:4px;margin-top:20px;padding-bottom:20px}
-.pagination button{width:36px;height:36px;border-radius:var(--radius);background:var(--white);color:var(--primary);font-size:.875rem;border:1px solid var(--border);transition:all .2s;display:flex;align-items:center;justify-content:center}
-.pagination button:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
-.pagination button.active{background:var(--accent);color:var(--white);border-color:var(--accent)}
-.pagination button:disabled{opacity:.35;cursor:not-allowed}
+    .eov{display:none;position:fixed;inset:0;z-index:90;background:#fff;flex-direction:column}.eov.show{display:flex}
+    .ebar{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-bottom:1px solid #f3f4f6;flex-wrap:wrap;gap:8px}
+    .ebar h2{font-size:16px;font-weight:600}
+    .ebar .timer{font-size:14px;font-weight:600;color:#dc2626;display:flex;align-items:center;gap:6px}
+    .ebody{flex:1;overflow:auto;padding:24px;max-width:800px;margin:0 auto;width:100%}
 
-/* SPLIT VIEW */
-.split-view{display:flex;gap:0;height:calc(100vh - 76px);min-height:500px;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
-.panel-left{flex:1;overflow-y:auto;background:var(--white);padding:24px;min-width:0;border-right:1px solid var(--border)}
-.panel-right{flex:1;display:flex;flex-direction:column;background:var(--editor-bg);min-width:0;position:relative}
+    .qopt{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 14px;border:1px solid #e5e7eb;border-radius:12px;font-size:13px;color:#374151;transition:.15s;margin-bottom:6px}
+    .qopt:hover{border-color:#9ca3af;background:#f9fafb}
+    .qopt.sel{border-color:#111827;background:#f3f4f6}
+    .qopt.ok{border-color:#16a34a;background:#f0fdf4;color:#16a34a}
+    .qopt.no{border-color:#dc2626;background:#fef2f2;color:#dc2626}
+    .qcir{width:24px;height:24px;border-radius:50%;border:2px solid #d1d5db;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0}
+    .qi{background:#f9fafb;border-radius:14px;padding:16px;border:1px solid #e5e7eb;margin-bottom:14px}
+    .qi .qh{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;font-weight:500;color:#374151}
+    .qi .qh button{font-size:11px;color:#dc2626}.qi .qh button:hover{color:#b91c1c}
+    .qi input,.qi select{width:100%;padding:7px 10px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;margin-bottom:5px}
+    .tf-btns{display:flex;gap:8px;margin-top:8px}
+    .tf-btn{padding:8px 20px;border:1px solid #e5e7eb;border-radius:10px;font-size:13px;color:#374151;transition:.15s}.tf-btn:hover{background:#f9fafb}.tf-btn.sel{background:#111827;color:#fff;border-color:#111827}
+    .tf-btn.ok{border-color:#16a34a;background:#f0fdf4;color:#16a34a}.tf-btn.no{border-color:#dc2626;background:#fef2f2;color:#dc2626}
+    .fill-input{margin-top:8px;padding:8px 12px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;font-size:13px;width:100%;transition:.15s}.fill-input:focus{border-color:#9ca3af}
+    .fill-input.ok{border-color:#16a34a;background:#f0fdf4}.fill-input.no{border-color:#dc2626;background:#fef2f2}
 
-/* Resize handle */
-.resize-handle{width:6px;background:var(--border);cursor:col-resize;transition:background .2s;flex-shrink:0;position:relative;z-index:5}
-.resize-handle:hover,.resize-handle.dragging{background:var(--accent)}
+    .lp{position:fixed;inset:0;z-index:50;background:#fff;display:none;align-items:center;justify-content:center}.lp.show{display:flex}
+    .lb{text-align:center}.lb .ic{width:72px;height:72px;margin:0 auto 16px;background:#f3f4f6;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#6b7280}
+    .lb h2{font-size:22px;font-weight:700;margin-bottom:6px}.lb p{color:#6b7280;font-size:14px;margin-bottom:20px}
+    .lb button{padding:12px 32px;background:#111827;color:#fff;font-weight:500;border-radius:12px;transition:.15s}.lb button:hover{background:#1f2937}
 
-/* Problem detail */
-.prob-detail h2{font-size:1.35rem;margin-bottom:10px;line-height:1.4}
-.prob-detail .meta{display:flex;gap:8px;align-items:center;margin-bottom:20px;flex-wrap:wrap}
-.prob-detail .section{margin-top:22px}
-.prob-detail .section h3{font-size:.95rem;font-weight:700;margin-bottom:10px;color:var(--primary);border-left:3px solid var(--accent);padding-left:12px}
-.prob-detail .section p,.prob-detail .section pre{font-size:.875rem;color:#374151;line-height:1.75}
-.prob-detail .section pre{background:var(--bg);padding:14px 16px;border-radius:var(--radius);overflow-x:auto;white-space:pre-wrap;word-break:break-all;font-family:'Cascadia Code',Consolas,'Courier New',monospace;font-size:.8rem;margin:8px 0;border:1px solid var(--border)}
-.sample-box{position:relative;background:var(--bg);border-radius:var(--radius);margin:8px 0;overflow:hidden;border:1px solid var(--border)}
-.sample-box .sample-label{font-size:.7rem;font-weight:700;color:var(--secondary);padding:6px 12px;background:#e5e7eb;letter-spacing:.5px}
-.sample-box pre{padding:12px 16px;margin:0;font-family:'Cascadia Code',Consolas,'Courier New',monospace;font-size:.8rem;white-space:pre-wrap;word-break:break-all;background:transparent}
-.copy-btn{position:absolute;top:6px;right:6px;padding:3px 8px;font-size:.65rem;background:var(--white);border:1px solid var(--border);border-radius:4px;color:var(--secondary);cursor:pointer;z-index:2;transition:all .15s}
-.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
-.back-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:var(--bg);color:var(--secondary);border-radius:var(--radius);font-size:.85rem;margin-bottom:16px;transition:all .2s;font-weight:500}
-.back-btn:hover{background:var(--border);color:var(--primary)}
+    .oj-wrap{padding:20px 0}
+    .oj-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+    .oj-header h3{font-size:18px;font-weight:700}
+    .oj-problem{background:#f9fafb;border-radius:14px;padding:20px;border:1px solid #e5e7eb;margin-bottom:16px}
+    .oj-problem h4{font-size:15px;font-weight:600;margin-bottom:8px}.oj-problem p{font-size:13px;color:#6b7280;line-height:1.7;margin-bottom:8px}
+    .oj-problem pre{background:#1f2937;color:#e5e7eb;padding:14px;border-radius:10px;font-size:12px;overflow-x:auto;margin:8px 0;font-family:'Courier New',monospace}
+    .oj-problem .sample{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}
+    @media(max-width:600px){.oj-problem .sample{grid-template-columns:1fr}}
+    .oj-problem .sample-box label{font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;margin-bottom:4px;display:block}
+    .oj-editor{margin-bottom:16px}
+    .oj-editor textarea{width:100%;min-height:220px;padding:14px;background:#1f2937;color:#e5e7eb;border:1px solid #374151;border-radius:12px;font-size:13px;font-family:'Courier New',monospace;line-height:1.6;resize:vertical;tab-size:4}
+    .oj-editor select{padding:8px 14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;font-size:13px}
+    .oj-result{margin-top:16px;padding:20px;border-radius:14px;display:none}
+    .oj-result.show{display:block}
+    .oj-result.ac{background:#f0fdf4;border:1px solid #bbf7d0}.oj-result.wa{background:#fef2f2;border:1px solid #fecaca}.oj-result.ce{background:#fff7ed;border:1px solid #fed7aa}.oj-result.re{background:#f5f3ff;border:1px solid #ddd6fe}.oj-result.tle{background:#fefce8;border:1px solid #fde68a}
+    .oj-result h4{font-size:15px;font-weight:700;margin-bottom:8px}
+    .oj-result.ac h4{color:#16a34a}.oj-result.wa h4{color:#dc2626}.oj-result.ce h4{color:#ea580c}.oj-result.re h4{color:#7c3aed}.oj-result.tle h4{color:#ca8a04}
+    .oj-result pre{background:#fff;padding:10px;border-radius:8px;font-size:12px;overflow-x:auto;white-space:pre-wrap;font-family:'Courier New',monospace}
+    .oj-stats{display:flex;gap:16px;font-size:12px;color:#6b7280;margin-top:6px}
+    .oj-verdict{display:inline-block;padding:3px 12px;border-radius:8px;font-size:13px;font-weight:700;margin-right:8px}
+    .oj-verdict.ac{background:#dcfce7;color:#16a34a}.oj-verdict.wa{background:#fee2e2;color:#dc2626}.oj-verdict.tle{background:#fef9c3;color:#ca8a04}.oj-verdict.ce{background:#ffedd5;color:#ea580c}.oj-verdict.re{background:#ede9fe;color:#7c3aed}
+    .oj-score-bar{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;margin:10px 0}.oj-score-bar div{height:100%;border-radius:4px;transition:width .5s}
 
-/* Code editor */
-.editor-toolbar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#252526;border-bottom:1px solid #3e3e3e;flex-wrap:wrap}
-.editor-toolbar select{background:#3c3c3c;color:var(--editor-text);border:1px solid #555;padding:5px 12px;border-radius:4px;font-size:.8rem;cursor:pointer;transition:border-color .2s}
-.editor-toolbar select:hover{border-color:#777}
-.editor-toolbar select option{background:#3c3c3c;color:var(--editor-text)}
-.editor-actions{display:flex;gap:8px;margin-left:auto}
-.run-btn,.submit-btn{padding:7px 18px;border-radius:5px;font-size:.8rem;font-weight:700;transition:all .2s;letter-spacing:.3px}
-.run-btn{background:#4a5568;color:#e2e8f0}
-.run-btn:hover:not(:disabled){background:#5a6578}
-.submit-btn{background:var(--green);color:#fff}
-.submit-btn:hover:not(:disabled){background:#059669;box-shadow:0 2px 8px rgba(16,185,129,.3)}
-.run-btn:disabled,.submit-btn:disabled{opacity:.45;cursor:not-allowed}
-.code-area{flex:1;display:flex;overflow:hidden;position:relative}
-.line-numbers{padding:14px 8px 14px 12px;background:#1a1a1a;color:#555;font-family:'Cascadia Code',Consolas,'Courier New',monospace;font-size:.8rem;line-height:1.65;text-align:right;user-select:none;overflow:hidden;min-width:44px;border-right:1px solid #2d2d2d}
-.line-numbers .active-line{color:#c6c6c6}
-.code-textarea{flex:1;background:var(--editor-bg);color:var(--editor-text);border:none;padding:14px 16px;font-family:'Cascadia Code',Consolas,'Courier New',monospace;font-size:.8rem;line-height:1.65;resize:none;tab-size:4;white-space:pre;overflow:auto;-webkit-overflow-scrolling:touch}
-.code-textarea::placeholder{color:#555}
-.code-textarea::selection{background:#264f78}
-.code-textarea:focus{box-shadow:none}
+    .tab-nav{display:flex;gap:0;border-bottom:2px solid #f3f4f6;margin-bottom:20px}
+    .tab-btn{padding:10px 20px;font-size:14px;font-weight:500;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;transition:.15s;background:none}
+    .tab-btn:hover{color:#374151}.tab-btn.on{color:#111827;border-bottom-color:#111827}
 
-/* Result panel */
-.result-panel{border-top:1px solid #3e3e3e;max-height:280px;overflow-y:auto;background:#1a1a1a;flex-shrink:0}
-.result-header{padding:8px 14px;font-size:.75rem;font-weight:700;color:var(--editor-text);background:#252526;border-bottom:1px solid #3e3e3e;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;transition:background .15s}
-.result-header:hover{background:#2d2d2d}
-.result-content{padding:14px;font-size:.8rem;color:var(--editor-text);font-family:'Cascadia Code',Consolas,'Courier New',monospace;white-space:pre-wrap;word-break:break-all}
-.test-case{margin:6px 0;padding:10px 14px;border-radius:5px;font-size:.78rem;transition:all .2s}
-.test-case.pass{background:#0d3320;border-left:3px solid var(--green)}
-.test-case.fail{background:#3d1111;border-left:3px solid var(--red)}
-.test-case .tc-label{font-weight:700;margin-bottom:4px}
-.test-case .tc-detail{color:#999;font-size:.72rem;margin-top:2px}
-.test-case .tc-detail span{color:#bbb;font-weight:500}
+    .qnav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;padding:12px;background:#f9fafb;border-radius:12px;border:1px solid #e5e7eb}
+    .qnav-b{width:32px;height:32px;border-radius:8px;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;color:#6b7280;background:#fff}
+    .qnav-b:hover{border-color:#9ca3af}.qnav-b.done{background:#111827;color:#fff;border-color:#111827}.qnav-b.cur{border-color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,.2)}
+    .exam-stat{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+    .exam-stat .si{background:#f9fafb;border-radius:12px;padding:14px;text-align:center;border:1px solid #e5e7eb}
+    .exam-stat .si .n{font-size:24px;font-weight:700;color:#111827}.exam-stat .si .l{font-size:11px;color:#6b7280;margin-top:2px}
 
-/* AC CELEBRATION */
-.ac-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.7);opacity:0;transition:opacity .3s;pointer-events:none;backdrop-filter:blur(4px)}
-.ac-overlay.show{opacity:1;pointer-events:auto}
-.ac-banner{text-align:center;transform:scale(0.2);opacity:0;transition:all .6s cubic-bezier(.34,1.56,.64,1)}
-.ac-overlay.show .ac-banner{transform:scale(1);opacity:1}
-.ac-banner .ac-text{font-size:3.5rem;font-weight:900;color:var(--green);text-shadow:0 0 60px rgba(16,185,129,.6),0 0 120px rgba(16,185,129,.3);letter-spacing:6px;margin-bottom:8px;animation:acGlow 2s ease-in-out infinite}
-@keyframes acGlow{0%,100%{text-shadow:0 0 60px rgba(16,185,129,.6),0 0 120px rgba(16,185,129,.3)}50%{text-shadow:0 0 80px rgba(16,185,129,.8),0 0 160px rgba(16,185,129,.4)}}
-.ac-banner .ac-sub{font-size:1.1rem;color:rgba(255,255,255,.7);margin-bottom:6px}
-.ac-banner .ac-score{font-size:1rem;color:rgba(255,255,255,.6);margin-bottom:24px}
-.ac-banner .ac-close{padding:12px 36px;background:var(--green);color:#fff;border-radius:var(--radius);font-size:1rem;font-weight:700;transition:all .2s;box-shadow:0 4px 16px rgba(16,185,129,.4)}
-.ac-banner .ac-close:hover{background:#059669;transform:translateY(-1px);box-shadow:0 6px 20px rgba(16,185,129,.5)}
+    .score-card{margin-top:20px;border-radius:16px;overflow:hidden;border:1px solid #e5e7eb}
+    .score-card .sc-head{padding:24px;text-align:center;color:#fff}
+    .score-card .sc-head.pass{background:linear-gradient(135deg,#16a34a,#22c55e)}.score-card .sc-head.fail{background:linear-gradient(135deg,#dc2626,#ef4444)}
+    .score-card .sc-head .sc-score{font-size:56px;font-weight:800;line-height:1}.score-card .sc-head .sc-label{font-size:14px;opacity:.85;margin-top:6px}
+    .score-card .sc-body{padding:20px;background:#fff}
+    .score-card .sc-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:13px}
+    .score-card .sc-row:last-child{border-bottom:none}
+    .score-card .sc-row .sc-k{color:#6b7280}.score-card .sc-row .sc-v{font-weight:600;color:#111827}
 
-/* Confetti canvas */
-#confetti-canvas{position:fixed;inset:0;z-index:10000;pointer-events:none}
+    .exam-card{padding:14px 18px;background:#f9fafb;border-radius:12px;border:1px solid #e5e7eb;margin-bottom:8px;transition:.15s}
+    .exam-card:hover{border-color:#d1d5db;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+    .exam-card .ec-top{display:flex;align-items:center;justify-content:space-between}
+    .exam-card .ec-title{font-weight:500;font-size:14px;cursor:pointer}.exam-card .ec-title:hover{color:#2563eb}
+    .exam-card .ec-meta{font-size:11px;color:#9ca3af;margin-top:4px}
+    .exam-card .ec-id{font-size:10px;color:#9ca3af;font-family:monospace;margin-top:2px}
+    .exam-card .ec-actions{display:flex;align-items:center;gap:8px}
+    .exam-del{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;font-size:12px;transition:.15s;cursor:pointer}.exam-del:hover{background:#dc2626;color:#fff}
 
-/* MOBILE TABS */
-.mobile-tabs{display:none;background:var(--white);border-radius:var(--radius);margin-bottom:0;overflow:hidden;box-shadow:var(--shadow)}
-.mobile-tabs button{flex:1;padding:12px;font-size:.9rem;font-weight:600;background:var(--white);color:var(--secondary);border-bottom:2px solid transparent;transition:all .2s}
-.mobile-tabs button.active{color:var(--accent);border-bottom-color:var(--accent);background:#eff6ff}
+    .pv-del{padding:5px 12px;background:#fef2f2;color:#dc2626;font-size:12px;font-weight:500;border-radius:8px;transition:.15s;border:1px solid #fecaca}.pv-del:hover{background:#dc2626;color:#fff}
 
-/* CREATE PROBLEM */
-.create-form{background:var(--white);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);max-width:840px;margin:0 auto}
-.create-form h2{margin-bottom:24px;font-size:1.3rem}
-.form-group{margin-bottom:16px}
-.form-group label{display:block;font-size:.875rem;font-weight:600;margin-bottom:6px;color:var(--primary)}
-.form-group input,.form-group textarea,.form-group select{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius);font-size:.875rem;transition:all .2s;background:var(--white)}
-.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
-.form-group textarea{min-height:100px;resize:vertical;font-family:'Cascadia Code',Consolas,'Courier New',monospace;font-size:.82rem}
-.form-row{display:flex;gap:12px}
-.form-row .form-group{flex:1}
-.sample-row{display:flex;gap:12px;align-items:flex-start;margin:8px 0;padding:12px;background:var(--bg);border-radius:var(--radius);position:relative}
-.sample-row .form-group{margin-bottom:0;flex:1}
-.add-btn{padding:7px 16px;background:var(--white);color:var(--accent);border:1px dashed var(--accent);border-radius:var(--radius);font-size:.8rem;transition:all .2s;font-weight:500}
-.add-btn:hover{background:#eff6ff}
-.remove-btn{padding:5px 12px;background:#fee2e2;color:var(--red);border-radius:4px;font-size:.75rem;font-weight:600;transition:all .15s;flex-shrink:0;margin-top:24px}
-.remove-btn:hover{background:#fca5a5}
-.submit-create{padding:12px 36px;background:var(--accent);color:#fff;border-radius:var(--radius);font-size:1rem;font-weight:600;transition:all .2s;box-shadow:0 2px 8px rgba(59,130,246,.3)}
-.submit-create:hover{background:var(--accent-hover);box-shadow:0 4px 12px rgba(59,130,246,.4)}
-
-/* LOGIN PAGE */
-.login-page{display:flex;align-items:center;justify-content:center;min-height:60vh}
-.login-box{background:var(--white);padding:40px;border-radius:var(--radius);box-shadow:var(--shadow-lg);width:100%;max-width:400px}
-.login-box h2{text-align:center;margin-bottom:8px;font-size:1.4rem}
-.login-box .login-sub{text-align:center;color:var(--secondary);font-size:.85rem;margin-bottom:24px}
-.login-box .form-group{margin-bottom:16px}
-.login-box label{display:block;font-size:.85rem;font-weight:600;margin-bottom:6px;color:var(--primary)}
-.login-box input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius);font-size:.9rem;transition:all .2s}
-.login-box input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
-.login-btn{width:100%;padding:12px;background:var(--accent);color:#fff;border-radius:var(--radius);font-size:1rem;font-weight:600;margin-top:12px;transition:all .2s;box-shadow:0 2px 8px rgba(59,130,246,.3)}
-.login-btn:hover{background:var(--accent-hover)}
-.login-error{color:var(--red);font-size:.85rem;text-align:center;margin-top:12px;min-height:20px}
-.remember-row{display:flex;align-items:center;gap:8px;margin-top:10px}
-.remember-row input[type=checkbox]{width:auto}
-.remember-row label{font-size:.85rem;color:var(--secondary);cursor:pointer}
-
-/* LOADING */
-.loading{text-align:center;padding:60px 20px;color:var(--secondary)}
-.spinner{display:inline-block;width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* TOAST */
-.toast{position:fixed;top:70px;right:20px;padding:12px 20px;border-radius:var(--radius);color:#fff;font-size:.875rem;z-index:11000;transform:translateX(120%);transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow-lg);font-weight:500}
-.toast.show{transform:translateX(0)}
-.toast.success{background:var(--green)}
-.toast.error{background:var(--red)}
-.toast.info{background:var(--accent)}
-
-/* RESPONSIVE */
-@media(max-width:768px){
-  .nav-inner{padding:0 12px;height:50px}
-  .nav-links a{padding:6px 10px;font-size:.8rem}
-  .main{padding:12px}
-  .page-header h1{font-size:1.2rem}
-  .split-view{flex-direction:column;height:auto;min-height:auto}
-  .panel-left{max-height:none;overflow-y:visible;border-right:none;border-bottom:1px solid var(--border)}
-  .panel-right{min-height:420px}
-  .mobile-tabs{display:flex}
-  .split-view .panel-left.mobile-hide,.split-view .panel-right.mobile-hide{display:none}
-  .form-row{flex-direction:column;gap:0}
-  .ac-banner .ac-text{font-size:2.2rem}
-  .search-box{min-width:100%;max-width:100%;order:10;margin-top:4px}
-  .prob-table th:nth-child(3),.prob-table td:nth-child(3){display:none}
-  .editor-toolbar{gap:4px;padding:6px 8px}
-  .run-btn,.submit-btn{padding:6px 12px;font-size:.75rem}
-  .resize-handle{display:none}
-  .toast{right:12px;left:12px;top:60px}
-}
-@media(max-width:480px){
-  .nav-links a{padding:4px 8px;font-size:.72rem}
-  .prob-table th:nth-child(4),.prob-table td:nth-child(4){display:none}
-  .prob-table td,.prob-table th{padding:8px 10px}
-}
-
-/* Scrollbar */
-::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:#ccc;border-radius:3px}
-::-webkit-scrollbar-thumb:hover{background:#aaa}
-.panel-right::-webkit-scrollbar-thumb{background:#444}
-.panel-right::-webkit-scrollbar-thumb:hover{background:#666}
-.code-textarea::-webkit-scrollbar-thumb{background:#444}
+    .oj-prob-card{padding:14px 18px;background:#f9fafb;border-radius:12px;border:1px solid #e5e7eb;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:space-between}
+    .oj-prob-card:hover{border-color:#d1d5db;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+  
+    .oj-search{position:relative;margin-bottom:14px}
+    .oj-search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#9ca3af}
+    .oj-search input{width:100%;padding:10px 14px 10px 38px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;font-size:13px;transition:.15s}.oj-search input:focus{border-color:#9ca3af;background:#fff}
+    .oj-filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;align-items:center}
+    .oj-filters .fl{font-size:12px;color:#9ca3af;margin-right:2px}
+    .oj-diff{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;transition:.15s;border:1px solid transparent}
+    .oj-diff:hover{opacity:.8}.oj-diff.入门{background:#f0fdf4;color:#16a34a}.oj-diff.简单{background:#eff6ff;color:#2563eb}.oj-diff.中等{background:#fefce8;color:#ca8a04}.oj-diff.困难{background:#fff7ed;color:#ea580c}.oj-diff.挑战{background:#fef2f2;color:#dc2626}
+    .oj-diff.active{box-shadow:0 0 0 2px currentColor}
+    .oj-cat{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;background:#f3f4f6;color:#6b7280;cursor:pointer;transition:.15s}.oj-cat:hover{background:#e5e7eb}.oj-cat.active{background:#111827;color:#fff}
+    .oj-list-header{display:grid;grid-template-columns:60px 1fr 60px 60px 40px;gap:8px;align-items:center;padding:8px 16px;border-bottom:1px solid #e5e7eb;font-size:11px;color:#9ca3af;font-weight:600}
+    .oj-list-row{display:grid;grid-template-columns:60px 1fr 60px 60px 40px;gap:8px;align-items:center;padding:10px 16px;border-bottom:1px solid #f3f4f6;font-size:13px;cursor:pointer;transition:.1s}.oj-list-row:hover{background:#f9fafb}
+    .oj-list-row .pid{font-size:12px;color:#9ca3af;font-family:monospace}.oj-list-row .ptitle{font-weight:500;color:#111827;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .oj-list-row .pcat{font-size:10px;text-align:center}.oj-list-row .pdiff{text-align:center}.oj-list-row .pstatus{text-align:center;font-size:14px}
+    .oj-pagi{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:16px}
+    .oj-pagi button{padding:5px 12px;background:#f3f4f6;color:#374151;font-size:12px;border-radius:8px;transition:.15s;cursor:pointer}.oj-pagi button:hover{background:#e5e7eb}
+    .oj-pagi .cur{background:#111827;color:#fff;font-weight:600}.oj-pagi .cur:hover{background:#1f2937}
+    .oj-pagi .dots{padding:0 6px;color:#9ca3af;font-size:12px}
+    .oj-notice{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:8px;font-size:12px;color:#166534}
 </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav class="nav">
-  <div class="nav-inner">
-    <div class="nav-logo"><span class="r">R</span>RuiHub</div>
-    <div class="nav-links">
-      <a href="#">学习</a>
-      <a href="#">考试</a>
-      <a href="#" class="active" id="nav-oj">OJ</a>
-      <a href="#">Note</a>
+  <nav class="nav"><div class="nav-in">
+    <div style="display:flex;align-items:center;gap:28px">
+      <a href="/index.html" style="font-size:18px;font-weight:600">Rui</a>
+      <div class="nav-lk"><a href="/download.html">下载</a><a href="/ruiflow.html">论坛</a><a href="/chat.html">💬 聊天</a><a href="/cloud.html">云盘</a><a href="/learn.html">📚 学习</a><a href="/exam.html">📝 考试</a><a href="/oj.html" style="color:#111827;font-weight:500">💻 OJ</a></div>
     </div>
-    <div class="nav-user" id="nav-user"></div>
+    <div class="nav-r">
+      <div id="authBtns"><a href="/register.html" class="btn-r">注册</a><button class="btn-b" onclick="showLoginModal()">登录</button></div>
+      <div id="userMenu" class="umenu" style="display:none">
+        <span id="lvlB" style="font-size:11px;padding:2px 8px;border-radius:20px;background:#f3f4f6;color:#374151;font-weight:600"></span>
+        <button class="ubtn" id="uBtn"><span id="uName"></span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></button>
+        <div class="udd" id="udd"><a href="/cloud.html">云盘</a><a href="/chat.html">聊天</a><a href="/ruiflow.html">论坛</a><a href="/profile.html">我的</a><div class="sp"></div><a href="javascript:void(0)" onclick="logout()" class="out">退出</a></div>
+      </div>
+    </div>
+  </div></nav>
+
+  <div class="lp" id="loginPage"><div class="lb"><div class="ic"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg></div><h2>OJ 在线判题</h2><p>请先登录以开始刷题</p><button onclick="showLoginModal()">登录 / 注册</button></div></div>
+
+  <div class="main" id="mainContent" style="display:none">
+    <div class="hd">
+      <div><h1>OJ 在线判题<span class="badge">V3.0</span></h1><p class="sub">在线编程 · 即时判题 | 管理员可出题</p></div>
+      <div class="hbtns">
+      </div>
+    </div>
+    <div class="oj-wrap" id="ojWrap">
+      <div class="oj-header"><h3>OJ 在线判题</h3><span id="ojCount" style="font-size:12px;color:#9ca3af"></span><span id="ojAddBtn"></span></div>
+      <div class="oj-notice"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg><span>安全环境：所有代码在沙箱中运行，测试数据对用户不可见</span></div>
+      <div class="oj-search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><input id="ojSearchInput" placeholder="搜索题号、标题、分类..." oninput="ojSearchFn()"></div>
+      <div class="oj-filters" id="ojDiffFilters"><span class="fl">难度：</span></div>
+      <div class="oj-filters" id="ojCatFilters"><span class="fl">分类：</span></div>
+      <div id="ojListArea"></div>
+    </div>
   </div>
-</nav>
 
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
+  <div class="mbg" id="lModal"><div class="mdl" style="max-width:360px">
+    <div class="mh"><h2>登录</h2></div>
+    <form id="lForm" style="padding:20px">
+      <div id="lErr" style="display:none;padding:10px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;font-size:13px;color:#dc2626;margin-bottom:12px"></div>
+      <div class="fd"><input id="lU" placeholder="用户名" required></div>
+      <div class="fd"><input id="lP" type="password" placeholder="密码" required></div>
+      <button type="submit" class="bd" style="width:100%;padding:12px;border-radius:12px">登录</button>
+      <p style="text-align:center;font-size:13px;color:#6b7280;margin-top:12px">没有账号？<a href="/register.html" style="color:#111827;font-weight:500">立即注册</a></p>
+    </form>
+  </div></div>
 
-<!-- CONFETTI CANVAS -->
-<canvas id="confetti-canvas"></canvas>
 
-<!-- AC OVERLAY -->
-<div class="ac-overlay" id="ac-overlay" onclick="if(event.target===this)closeAC()">
-  <div class="ac-banner">
-    <div class="ac-text">✓ Accepted</div>
-    <div class="ac-sub">恭喜你通过了所有测试点！</div>
-    <div class="ac-score" id="ac-score"></div>
-    <button class="ac-close" onclick="closeAC()">继续刷题 →</button>
-  </div>
-</div>
+  <script>
+    window.onerror=function(msg,url,line){
+      var d=document.getElementById('jsErr');if(d){d.style.display='block';d.innerHTML+='<div style="padding:8px 12px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;margin-bottom:6px;font-size:12px;color:#dc2626">JS错误: '+msg+' (行:'+line+')</div>'}
+      return false;
+    };
+  </script>
+  <div id="jsErr" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:12px;background:#fff;border-bottom:2px solid #dc2626;max-height:200px;overflow-y:auto"></div>
 
-<!-- MAIN CONTAINER -->
-<div class="main" id="app"></div>
+  <script>
+  <script>
+    function hashPasswordSync(p){var h=0,s=p+'ruihub_salt_2024';for(var i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h=h&h}return Math.abs(h).toString(36).padStart(8,'0')}
+    function toBase64(s){var b=new TextEncoder().encode(s),r='';for(var i=0;i<b.length;i++)r+=String.fromCharCode(b[i]);return btoa(r)}
+    function fromBase64(b){var s=atob(b),r=new Uint8Array(s.length);for(var i=0;i<s.length;i++)r[i]=s.charCodeAt(i);return new TextDecoder().decode(r)}
+    var AUTH_LOCAL_USERS={users:[{uid:'Administrator',username:'Administrator',passwordHash:hashPasswordSync('admin123'),role:'admin'},{uid:'000001',username:'Ruiweihan',passwordHash:hashPasswordSync('rui123'),role:'admin'},{uid:'000002',username:'Xvjiarui',passwordHash:hashPasswordSync('xvj123'),role:'user'}]};
+    var AUTH_REPO='RuiweihanHub/ruiuser',AUTH_TK=function(){return['ghp_','aJxbQaU0S56e8pl6N8zrkWoHkfJHi92GOiFQ'].join('')};
 
-<script>
-// ============ AUTH SYSTEM (inlined auth-v2.js) ============
-function hashPasswordSync(p){var h=0,s=p+'ruihub_salt_2024';for(var i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h=h&h}return Math.abs(h).toString(36).padStart(8,'0')}
-function toBase64(s){var b=new TextEncoder().encode(s),r='';for(var i=0;i<b.length;i++)r+=String.fromCharCode(b[i]);return btoa(r)}
-function fromBase64(b){var s=atob(b),r=new Uint8Array(s.length);for(var i=0;i<s.length;i++)r[i]=s.charCodeAt(i);return new TextDecoder().decode(r)}
-var AUTH_LOCAL_USERS={users:[{uid:'Administrator',username:'Administrator',passwordHash:hashPasswordSync('admin123'),role:'admin'},{uid:'000001',username:'Ruiweihan',passwordHash:hashPasswordSync('rui123'),role:'admin'},{uid:'000002',username:'Xvjiarui',passwordHash:hashPasswordSync('xvj123'),role:'user'}]};
-var AUTH_REPO='RuiweihanHub/ruiuser',AUTH_TK=function(){return['ghp_','aJxbQaU0S56e8pl6N8zrkWoHkfJHi92GOiFQ'].join('')};
-function syncLoginState(){var su=sessionStorage.getItem('rui_user'),suid=sessionStorage.getItem('rui_uid');if(su&&suid)return{isLoggedIn:true,username:su,uid:suid};var lu=localStorage.getItem('rui_user_remember'),luid=localStorage.getItem('rui_uid_remember'),exp=localStorage.getItem('rui_user_expire');if(lu&&luid){if(exp&&parseInt(exp)>Date.now()){sessionStorage.setItem('rui_user',lu);sessionStorage.setItem('rui_uid',luid);return{isLoggedIn:true,username:lu,uid:luid}}else{localStorage.removeItem('rui_user_remember');localStorage.removeItem('rui_uid_remember');localStorage.removeItem('rui_user_expire')}}return{isLoggedIn:false}}
-async function getAuth(){var auth={initialized:false,users:null,usersSha:null};async function init(){if(auth.initialized)return true;try{var r=await fetch('https://api.github.com/repos/'+AUTH_REPO+'/contents/users.json?ref=main&_='+Date.now(),{headers:{'Authorization':'token '+AUTH_TK(),'Accept':'application/vnd.github.v3+json'}});if(r.ok){var d=await r.json();auth.usersSha=d.sha;auth.users=JSON.parse(fromBase64(d.content));auth.initialized=true;return true}}catch(e){}auth.initialized=true;return false}return{validateUser:async function(usernameOrUid,password){if(!auth.initialized)await init();var hashed=hashPasswordSync(password);if(!auth.users){var lu=AUTH_LOCAL_USERS.users.find(function(u){return(u.username===usernameOrUid||u.uid===usernameOrUid)&&u.passwordHash===hashed});return lu?{success:true,user:{uid:lu.uid,username:lu.username,role:lu.role}}:{success:false,error:'用户名或密码错误'}}var idx=-1;if(auth.users.index&&auth.users.index.byUsername&&auth.users.index.byUsername[usernameOrUid]!==undefined)idx=auth.users.index.byUsername[usernameOrUid];if(idx===-1&&auth.users.index&&auth.users.index.byUid&&auth.users.index.byUid[usernameOrUid]!==undefined)idx=auth.users.index.byUid[usernameOrUid];if(idx===-1)idx=auth.users.users.findIndex(function(u){return u.username===usernameOrUid||u.uid===usernameOrUid});if(idx===-1)return{success:false,error:'用户名或密码错误'};var user=auth.users.users[idx];if(user.status==='disabled')return{success:false,error:'账户已被禁用'};if(user.passwordHash===hashed){return{success:true,user:{uid:user.uid,username:user.username,displayName:user.displayName,role:user.role,profile:user.profile}}}return{success:false,error:'用户名或密码错误'}}}}
-
-// ============ APP CONFIG ============
-var REPO='RuiweihanHub/ruiuser';
-var OJF='oj-problems.json';
-var OJ_URL='https://raw.githubusercontent.com/'+REPO+'/main/'+OJF;
-var TK=function(){return['ghp_','aJxbQaU0S56e8pl6N8zrkWoHkfJHi92GOiFQ'].join('')};
-var ADMINS=['Administrator','Ruiweihan','000001'];
-var UP=['Administrator','Ruiweihan','Xvjiarui','Wangpengyi','000001','000002'];
-var JUDGE0_URL='https://judge0-ce.p.rapidapi.com';
-var JUDGE0_KEY='e3f1f2b842mshb0a4e94d3ae4da2p18b53ejsna4e0df8e7c0a';
-var JUDGE0_HOST='judge0-ce.p.rapidapi.com';
-
-// Judge0 language IDs
-var LANG_IDS={cpp:54,c:50,python:71,java:62};
-var LANG_NAMES={cpp:'C++ (GCC 9.2.0)',c:'C (GCC 9.2.0)',python:'Python 3',java:'Java (OpenJDK 13.0.1)'};
-var LANG_TEMPLATES={
-  cpp:'#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n    \n    \n    return 0;\n}',
-  c:'#include <stdio.h>\n\nint main() {\n    \n    return 0;\n}',
-  python:'import sys\n\ndef main():\n    data = sys.stdin.read().split()\n    \n\nif __name__ == "__main__":\n    main()',
-  java:'import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        \n    }\n}'
-};
-
-// ============ APP STATE ============
-var problems=[];
-var currentPage='list';
-var currentProblem=null;
-var currentLang='cpp';
-var currentCode='';
-var currentPageNum=1;
-var pageSize=30;
-var diffFilter='all';
-var catFilter='all';
-var categories=[];
-var userSubmissions={};
-var isRunning=false;
-var mobileTab='problem';
-var authInstance=null;
-var ojFileSha=null;
-
-// ============ UTILITY ============
-function showToast(msg,type){
-  var t=document.getElementById('toast');
-  t.textContent=msg;
-  t.className='toast '+type+' show';
-  clearTimeout(t._timer);
-  t._timer=setTimeout(function(){t.classList.remove('show')},3000);
-}
-function isAdmin(u){return ADMINS.indexOf(u)!==-1}
-function canCreate(u){return UP.indexOf(u)!==-1}
-function diffClass(d){var m={'入门':'badge-entry','简单':'badge-easy','中等':'badge-medium','困难':'badge-hard','挑战':'badge-challenge'};return m[d]||'badge-simple'}
-function escapeHtml(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML}
-function formatDesc(text){if(!text)return'';return escapeHtml(text).replace(/\n/g,'<br>')}
-
-// ============ NAV ============
-function renderNav(){
-  var st=syncLoginState();
-  var el=document.getElementById('nav-user');
-  if(st.isLoggedIn){
-    el.innerHTML='<span class="uname">'+escapeHtml(st.username)+'</span><button class="logout-btn" onclick="doLogout()">退出</button>';
-  }else{
-    el.innerHTML='<button class="logout-btn" onclick="currentPage=\'login\';render()">登录</button>';
-  }
-}
-function doLogout(){
-  sessionStorage.removeItem('rui_user');sessionStorage.removeItem('rui_uid');
-  localStorage.removeItem('rui_user_remember');localStorage.removeItem('rui_uid_remember');localStorage.removeItem('rui_user_expire');
-  renderNav();render();
-  showToast('已退出登录','info');
-}
-
-// ============ LOGIN ============
-function renderLogin(){
-  return '<div class="login-page"><div class="login-box"><h2>OJ 登录</h2><p class="login-sub">请登录后使用在线判题系统</p>'+
-    '<div class="form-group"><label>用户名 / UID</label><input id="login-user" type="text" placeholder="输入用户名或UID" onkeydown="if(event.key===\'Enter\')doLogin()"></div>'+
-    '<div class="form-group"><label>密码</label><input id="login-pass" type="password" placeholder="输入密码" onkeydown="if(event.key===\'Enter\')doLogin()"></div>'+
-    '<div class="remember-row"><input type="checkbox" id="login-remember"><label for="login-remember">7天内免登录</label></div>'+
-    '<button class="login-btn" onclick="doLogin()">登 录</button>'+
-    '<div class="login-error" id="login-error"></div></div></div>';
-}
-async function doLogin(){
-  var u=document.getElementById('login-user').value.trim();
-  var p=document.getElementById('login-pass').value;
-  var rem=document.getElementById('login-remember').checked;
-  var errEl=document.getElementById('login-error');
-  if(!u||!p){errEl.textContent='请输入用户名和密码';return}
-  errEl.textContent='登录中...';
-  if(!authInstance)authInstance=await getAuth();
-  var res=await authInstance.validateUser(u,p);
-  if(res.success){
-    sessionStorage.setItem('rui_user',res.user.username);
-    sessionStorage.setItem('rui_uid',res.user.uid);
-    if(rem){localStorage.setItem('rui_user_remember',res.user.username);localStorage.setItem('rui_uid_remember',res.user.uid);localStorage.setItem('rui_user_expire',''+(Date.now()+7*24*60*60*1000))}
-    renderNav();currentPage='list';render();showToast('欢迎, '+res.user.username+'!','success');
-  }else{errEl.textContent=res.error}
-}
-
-// ============ LOAD PROBLEMS ============
-async function loadProblems(){
-  var app=document.getElementById('app');
-  app.innerHTML='<div class="loading"><div class="spinner"></div><p style="margin-top:16px">加载题库中...</p><p style="font-size:.8rem;color:#999;margin-top:4px">首次加载可能需要几秒</p></div>';
-  try{
-    var r=await fetch(OJ_URL);
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    problems=await r.json();
-    if(!Array.isArray(problems))problems=[];
-    // Sort by id
-    problems.sort(function(a,b){return a.id-b.id});
-    var cs={};problems.forEach(function(p){if(p.category)cs[p.category]=1});
-    categories=Object.keys(cs).sort();
-    loadSubmissions();
-    currentPage='list';
-    render();
-  }catch(e){
-    app.innerHTML='<div class="loading"><p style="color:var(--red);font-weight:600">加载失败</p><p style="margin-top:8px;font-size:.9rem">'+escapeHtml(e.message)+'</p><button onclick="loadProblems()" style="margin-top:16px;padding:10px 24px;background:var(--accent);color:#fff;border-radius:var(--radius);font-weight:600">重新加载</button></div>';
-  }
-}
-function loadSubmissions(){try{var s=localStorage.getItem('oj_submissions');if(s)userSubmissions=JSON.parse(s)}catch(e){}}
-function saveSubmissions(){try{localStorage.setItem('oj_submissions',JSON.stringify(userSubmissions))}catch(e){}}
-
-// ============ MAIN RENDER ============
-function render(){
-  var app=document.getElementById('app');
-  var st=syncLoginState();
-  if(!st.isLoggedIn){app.innerHTML=renderLogin();return}
-  if(currentPage==='login'){app.innerHTML=renderLogin();return}
-  if(currentPage==='list'){renderProblemList();return}
-  if(currentPage==='detail'){renderProblemDetail();return}
-  if(currentPage==='create'){renderCreateProblem();return}
-}
-
-// ============ PROBLEM LIST ============
-var _searchInputCreated=false;
-
-function renderProblemList(){
-  var app=document.getElementById('app');
-  var st=syncLoginState();
-
-  if(!_searchInputCreated){
-    var html='<div class="page-header"><h1><span class="icon">🏆</span>OJ 在线判题<span class="count" id="prob-count"></span></h1>';
-    if(canCreate(st.username))html+='<button class="create-btn" onclick="goCreate()">+ 出题</button>';
-    html+='</div>';
-    html+='<div class="filters" id="filters-area">';
-    html+='<span class="filter-label">难度</span><div class="filter-group" id="diff-filters"></div>';
-    html+='<span class="filter-label">分类</span><div class="filter-group" id="cat-filters"></div>';
-    html+='<div class="search-box"><input id="oj-search-input" type="text" placeholder="搜索题号或标题..." oninput="onSearchChange()"></div>';
-    html+='</div>';
-    html+='<div id="oj-problem-list"></div>';
-    app.innerHTML=html;
-    _searchInputCreated=true;
-    renderDiffFilters();
-    renderCatFilters();
-  }else{
-    // Update create button if needed
-    var header=document.querySelector('.page-header');
-    if(header&&!header.querySelector('.create-btn')&&canCreate(st.username)){
-      var btn=document.createElement('button');btn.className='create-btn';btn.textContent='+ 出题';btn.onclick=goCreate;header.appendChild(btn);
+    function syncLoginState(){
+      var su=sessionStorage.getItem('rui_user'),suid=sessionStorage.getItem('rui_uid');
+      if(su&&suid)return{isLoggedIn:true,username:su,uid:suid};
+      var lu=localStorage.getItem('rui_user_remember'),luid=localStorage.getItem('rui_uid_remember'),exp=localStorage.getItem('rui_user_expire');
+      if(lu&&luid){if(exp&&parseInt(exp)>Date.now()){sessionStorage.setItem('rui_user',lu);sessionStorage.setItem('rui_uid',luid);return{isLoggedIn:true,username:lu,uid:luid}}else{localStorage.removeItem('rui_user_remember');localStorage.removeItem('rui_uid_remember');localStorage.removeItem('rui_user_expire')}}
+      return{isLoggedIn:false}
     }
-    renderDiffFilters();
-    renderCatFilters();
-  }
 
-  var searchVal=(document.getElementById('oj-search-input')||{}).value||'';
-  var filtered=getFilteredProblems(searchVal);
-  var countEl=document.getElementById('prob-count');
-  if(countEl)countEl.textContent=filtered.length+' 题';
-  renderProblemListContent(filtered);
-}
-
-function renderDiffFilters(){
-  var el=document.getElementById('diff-filters');if(!el)return;
-  var diffs=['all','入门','简单','中等','困难','挑战'];
-  var labels={'all':'全部'};
-  el.innerHTML=diffs.map(function(d){return'<button class="filter-btn'+(diffFilter===d?' active':'')+'" onclick="setDiffFilter(\''+d+'\')">'+(labels[d]||d)+'</button>'}).join('');
-}
-function renderCatFilters(){
-  var el=document.getElementById('cat-filters');if(!el)return;
-  var cats=['all'].concat(categories);
-  var labels={'all':'全部'};
-  el.innerHTML=cats.map(function(c){return'<button class="filter-btn'+(catFilter===c?' active':'')+'" onclick="setCatFilter(this)" data-cat="'+escapeHtml(c)+'">'+(labels[c]||escapeHtml(c))+'</button>'}).join('');
-}
-function setDiffFilter(d){diffFilter=d;renderProblemList()}
-function setCatFilter(btn){catFilter=btn.getAttribute('data-cat');renderProblemList()}
-function onSearchChange(){renderProblemList()}
-
-function getFilteredProblems(search){
-  var s=search.toLowerCase().trim();
-  return problems.filter(function(p){
-    if(diffFilter!=='all'&&p.difficulty!==diffFilter)return false;
-    if(catFilter!=='all'&&p.category!==catFilter)return false;
-    if(s){var id=''+p.id;var title=(p.title||'').toLowerCase();if(id.indexOf(s)===-1&&title.indexOf(s)===-1)return false}
-    return true;
-  });
-}
-
-function renderProblemListContent(filtered){
-  var el=document.getElementById('oj-problem-list');if(!el)return;
-  var total=filtered.length;
-  var totalPages=Math.max(1,Math.ceil(total/pageSize));
-  if(currentPageNum>totalPages)currentPageNum=totalPages;
-  var start=(currentPageNum-1)*pageSize;
-  var pageItems=filtered.slice(start,start+pageSize);
-
-  var html='<div class="prob-table"><table><thead><tr><th style="width:70px">ID</th><th>标题</th><th>分类</th><th>难度</th><th style="width:50px">状态</th></tr></thead><tbody>';
-  if(pageItems.length===0){
-    html+='<tr><td colspan="5" style="text-align:center;padding:48px;color:var(--secondary)">暂无匹配的题目</td></tr>';
-  }else{
-    pageItems.forEach(function(p){
-      var sub=userSubmissions[''+p.id];
-      var statusIcon=sub==='ac'?'<span class="status-icon status-ac">✓</span>':sub==='wa'?'<span class="status-icon status-wa">✗</span>':'<span class="status-icon status-na">○</span>';
-      html+='<tr><td class="prob-id">'+p.id+'</td><td><span class="prob-title" onclick="goDetail('+p.id+')">'+escapeHtml(p.title||'无标题')+'</span></td><td style="color:var(--secondary);font-size:.82rem">'+escapeHtml(p.category||'')+'</td><td><span class="badge '+diffClass(p.difficulty)+'">'+escapeHtml(p.difficulty||'')+'</span></td><td>'+statusIcon+'</td></tr>';
-    });
-  }
-  html+='</tbody></table></div>';
-
-  // Pagination
-  if(totalPages>1){
-    html+='<div class="pagination">';
-    html+='<button '+(currentPageNum<=1?'disabled':'')+' onclick="currentPageNum--;renderProblemList()">‹</button>';
-    var startP=Math.max(1,currentPageNum-3),endP=Math.min(totalPages,currentPageNum+3);
-    if(startP>1){html+='<button onclick="currentPageNum=1;renderProblemList()">1</button>';if(startP>2)html+='<button disabled>...</button>'}
-    for(var i=startP;i<=endP;i++){html+='<button class="'+(i===currentPageNum?'active':'')+'" onclick="currentPageNum='+i+';renderProblemList()">'+i+'</button>'}
-    if(endP<totalPages){if(endP<totalPages-1)html+='<button disabled>...</button>';html+='<button onclick="currentPageNum='+totalPages+';renderProblemList()">'+totalPages+'</button>'}
-    html+='<button '+(currentPageNum>=totalPages?'disabled':'')+' onclick="currentPageNum++;renderProblemList()">›</button>';
-    html+='</div>';
-  }
-  el.innerHTML=html;
-}
-
-// ============ PROBLEM DETAIL + CODING ============
-function goDetail(id){
-  var p=problems.find(function(x){return x.id===id});
-  if(!p){showToast('题目不存在','error');return}
-  currentProblem=p;currentPage='detail';mobileTab='problem';currentCode=LANG_TEMPLATES[currentLang]||'';
-  _searchInputCreated=false;render();
-}
-function goBack(){currentPage='list';currentProblem=null;_searchInputCreated=false;render()}
-
-function renderProblemDetail(){
-  var app=document.getElementById('app');
-  var p=currentProblem;
-  if(!p){goBack();return}
-
-  var html='';
-
-  // Mobile tabs
-  html+='<div class="mobile-tabs"><button class="'+(mobileTab==='problem'?'active':'')+'" onclick="mobileTab=\'problem\';toggleMobileView()">📝 题目</button><button class="'+(mobileTab==='code'?'active':'')+'" onclick="mobileTab=\'code\';toggleMobileView()">💻 代码</button></div>';
-
-  html+='<div class="split-view" id="split-view">';
-
-  // LEFT - Problem description
-  html+='<div class="panel-left'+(mobileTab==='code'?' mobile-hide':'')+'" id="panel-left">';
-  html+='<button class="back-btn" onclick="goBack()">← 返回题库</button>';
-  html+='<div class="prob-detail">';
-  html+='<h2>#'+p.id+' '+escapeHtml(p.title||'')+'</h2>';
-  html+='<div class="meta"><span class="badge '+diffClass(p.difficulty)+'">'+escapeHtml(p.difficulty||'')+'</span>';
-  html+='<span class="badge" style="background:var(--bg);color:var(--secondary)">'+escapeHtml(p.category||'')+'</span>';
-  if(p.timeLimit)html+='<span class="badge" style="background:#fef3c7;color:#92400e">⏱ '+p.timeLimit+'ms</span>';
-  if(p.memoryLimit)html+='<span class="badge" style="background:#e0f2fe;color:#075985">💾 '+p.memoryLimit+'MB</span>';
-  if(p.author)html+='<span class="badge" style="background:#f3e8ff;color:#7c3aed">@'+escapeHtml(p.author)+'</span>';
-  html+='</div>';
-
-  if(p.description)html+='<div class="section"><h3>题目描述</h3><div>'+formatDesc(p.description)+'</div></div>';
-  if(p.inputFormat)html+='<div class="section"><h3>输入格式</h3><div>'+formatDesc(p.inputFormat)+'</div></div>';
-  if(p.outputFormat)html+='<div class="section"><h3>输出格式</h3><div>'+formatDesc(p.outputFormat)+'</div></div>';
-  if(p.constraints)html+='<div class="section"><h3>数据范围</h3><div>'+formatDesc(p.constraints)+'</div></div>';
-
-  if(p.samples&&p.samples.length>0){
-    html+='<div class="section"><h3>样例</h3>';
-    p.samples.forEach(function(s,i){
-      html+='<div class="sample-box"><button class="copy-btn" onclick="copySample(this)">复制</button><div class="sample-label">输入 #'+(i+1)+'</div><pre class="sample-data">'+escapeHtml(s.input||'')+'</pre></div>';
-      html+='<div class="sample-box"><button class="copy-btn" onclick="copySample(this)">复制</button><div class="sample-label">输出 #'+(i+1)+'</div><pre class="sample-data">'+escapeHtml(s.output||'')+'</pre></div>';
-    });
-    html+='</div>';
-  }
-  html+='</div></div>';
-
-  // RIGHT - Code editor
-  html+='<div class="panel-right'+(mobileTab==='problem'?' mobile-hide':'')+'" id="panel-right">';
-  html+='<div class="editor-toolbar">';
-  html+='<select id="lang-select" onchange="changeLang(this.value)">';
-  ['cpp','c','python','java'].forEach(function(k){html+='<option value="'+k+'"'+(currentLang===k?' selected':'')+'>'+LANG_NAMES[k]+'</option>'});
-  html+='</select>';
-  html+='<div class="editor-actions">';
-  html+='<button class="run-btn" id="run-btn" onclick="runCode(false)" title="运行样例测试">▶ 运行</button>';
-  html+='<button class="submit-btn" id="submit-btn" onclick="runCode(true)" title="提交全部测试数据">提交</button>';
-  html+='</div></div>';
-
-  html+='<div class="code-area">';
-  html+='<div class="line-numbers" id="line-numbers">1</div>';
-  html+='<textarea class="code-textarea" id="code-editor" spellcheck="false" placeholder="在此编写代码..." oninput="onCodeInput()" onscroll="syncScroll()">'+escapeHtml(currentCode)+'</textarea>';
-  html+='</div>';
-
-  html+='<div class="result-panel" id="result-panel" style="display:none">';
-  html+='<div class="result-header" onclick="toggleResult()"><span id="result-title">运行结果</span><span id="result-toggle" style="font-size:.65rem">▼</span></div>';
-  html+='<div class="result-content" id="result-content"></div>';
-  html+='</div>';
-
-  html+='</div></div>';
-
-  app.innerHTML=html;
-  setTimeout(initEditor,50);
-}
-
-function toggleMobileView(){
-  var left=document.getElementById('panel-left');
-  var right=document.getElementById('panel-right');
-  if(mobileTab==='problem'){
-    if(left)left.classList.remove('mobile-hide');
-    if(right)right.classList.add('mobile-hide');
-  }else{
-    if(left)left.classList.add('mobile-hide');
-    if(right)right.classList.remove('mobile-hide');
-  }
-  // Update tab buttons
-  document.querySelectorAll('.mobile-tabs button').forEach(function(b,i){
-    b.className=(i===0&&mobileTab==='problem')||(i===1&&mobileTab==='code')?'active':'';
-  });
-}
-
-function copySample(btn){
-  var pre=btn.parentElement.querySelector('.sample-data');
-  if(pre){
-    navigator.clipboard.writeText(pre.textContent).then(function(){btn.textContent='已复制!';setTimeout(function(){btn.textContent='复制'},1200)}).catch(function(){btn.textContent='失败';setTimeout(function(){btn.textContent='复制'},1200)});
-  }
-}
-
-function changeLang(lang){
-  var oldLang=currentLang;
-  currentLang=lang;
-  // Switch template if code hasn't been meaningfully edited
-  var isTemplate=false;
-  Object.keys(LANG_TEMPLATES).forEach(function(k){if(currentCode===LANG_TEMPLATES[k])isTemplate=true});
-  if(isTemplate||!currentCode.trim()){currentCode=LANG_TEMPLATES[lang]||''}
-  var ta=document.getElementById('code-editor');if(ta){ta.value=currentCode;onCodeInput()}
-}
-
-function initEditor(){
-  var ta=document.getElementById('code-editor');
-  if(!ta)return;
-  updateLineNumbers();
-  ta.addEventListener('keydown',function(e){
-    if(e.key==='Tab'){
-      e.preventDefault();
-      var s=this.selectionStart,end=this.selectionEnd;
-      this.value=this.value.substring(0,s)+'    '+this.value.substring(end);
-      this.selectionStart=this.selectionEnd=s+4;
-      currentCode=this.value;
-      updateLineNumbers();
-    }
-    // Ctrl+Enter to submit
-    if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){
-      e.preventDefault();runCode(true);
-    }
-  });
-}
-
-function onCodeInput(){
-  var ta=document.getElementById('code-editor');
-  if(ta)currentCode=ta.value;
-  updateLineNumbers();
-}
-
-function updateLineNumbers(){
-  var ta=document.getElementById('code-editor');
-  var ln=document.getElementById('line-numbers');
-  if(!ta||!ln)return;
-  var lines=ta.value.split('\n').length;
-  var nums=[];for(var i=1;i<=lines;i++)nums.push(i);
-  ln.innerHTML=nums.join('<br>');
-}
-
-function syncScroll(){
-  var ta=document.getElementById('code-editor');
-  var ln=document.getElementById('line-numbers');
-  if(ta&&ln)ln.scrollTop=ta.scrollTop;
-}
-
-function toggleResult(){
-  var c=document.getElementById('result-content');
-  var t=document.getElementById('result-toggle');
-  if(c){if(c.style.display==='none'){c.style.display='block';t.textContent='▼'}else{c.style.display='none';t.textContent='▶'}}
-}
-
-// ============ JUDGE0 EXECUTION ============
-async function submitToJudge0(code,langId,input,timeLimit,memoryLimit){
-  var body={source_code:code,language_id:langId,stdin:input||'',cpu_time_limit:Math.max(1,(timeLimit||2000)/1000),memory_limit:(memoryLimit||256)*1024};
-  var r=await fetch(JUDGE0_URL+'/submissions?base64_encoded=false&wait=true',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','X-RapidAPI-Key':JUDGE0_KEY,'X-RapidAPI-Host':JUDGE0_HOST},
-    body:JSON.stringify(body)
-  });
-  if(!r.ok)throw new Error('Judge0 错误: '+r.status);
-  return await r.json();
-}
-
-async function runCode(isSubmit){
-  if(isRunning)return;
-  var ta=document.getElementById('code-editor');
-  if(!ta||!ta.value.trim()){showToast('请先编写代码','error');return}
-  currentCode=ta.value;
-  isRunning=true;
-  var runBtn=document.getElementById('run-btn'),submitBtn=document.getElementById('submit-btn');
-  if(runBtn)runBtn.disabled=true;if(submitBtn)submitBtn.disabled=true;
-
-  var rp=document.getElementById('result-panel'),rt=document.getElementById('result-title'),rc=document.getElementById('result-content');
-  if(rp)rp.style.display='block';
-  if(rt)rt.textContent=isSubmit?'⏳ 提交判题中...':'⏳ 运行样例中...';
-  if(rc)rc.innerHTML='<div style="color:#888;padding:8px">正在编译和运行，请稍候...</div>';
-
-  var p=currentProblem;
-  var langId=LANG_IDS[currentLang];
-  var testCases=isSubmit?(p.testData&&p.testData.length?p.testData:p.samples||[]):(p.samples||[]);
-  var timeLimit=p.timeLimit||2000,memoryLimit=p.memoryLimit||256;
-
-  if(testCases.length===0){
-    if(rc)rc.innerHTML='<div style="color:#f59e0b;padding:8px">⚠ 没有可用的测试数据</div>';
-    if(rt)rt.textContent='无测试数据';
-    isRunning=false;if(runBtn)runBtn.disabled=false;if(submitBtn)submitBtn.disabled=false;return;
-  }
-
-  var maxCases=isSubmit?Math.min(testCases.length,20):Math.min(testCases.length,3);
-  var results=[];
-  var allPassed=true;
-
-  for(var i=0;i<maxCases;i++){
-    var tc=testCases[i];
-    if(rt)rt.textContent=(isSubmit?'提交':'运行')+'中... ('+(i+1)+'/'+maxCases+')';
-    try{
-      var res=await submitToJudge0(currentCode,langId,tc.input,timeLimit,memoryLimit);
-      var status=res.status||{};
-      var passed=false;
-
-      if(status.id===3){
-        // Accepted by Judge0 - now compare output
-        var actual=(res.stdout||'').replace(/\r\n/g,'\n').trim();
-        var expected=(tc.output||'').replace(/\r\n/g,'\n').trim();
-        passed=actual===expected;
-        if(!passed)allPassed=false;
-        results.push({pass:passed,status:passed?'Accepted':'Wrong Answer',actual:actual,expected:expected,time:res.time,mem:res.memory});
-      }else if(status.id===4){
-        allPassed=false;
-        results.push({pass:false,status:'Wrong Answer',actual:(res.stdout||'').trim(),expected:(tc.output||'').trim(),time:res.time,mem:res.memory});
-      }else if(status.id===5){
-        allPassed=false;
-        results.push({pass:false,status:'Time Limit Exceeded',time:res.time});
-      }else if(status.id===6){
-        allPassed=false;
-        results.push({pass:false,status:'Compile Error',detail:res.compile_output||res.stderr||'Unknown compile error'});
-      }else if(status.id===7){
-        allPassed=false;
-        results.push({pass:false,status:'Memory Limit Exceeded'});
-      }else if(status.id>=8&&status.id<=12){
-        allPassed=false;
-        results.push({pass:false,status:'Runtime Error',detail:res.stderr||status.description||''});
-      }else{
-        allPassed=false;
-        results.push({pass:false,status:status.description||'Error',detail:res.stderr||''});
+    async function getAuth(){
+      var auth={initialized:false,users:null,usersSha:null};
+      async function init(){
+        if(auth.initialized)return true;
+        try{var r=await fetch('https://api.github.com/repos/'+AUTH_REPO+'/contents/users.json?ref=main&_='+Date.now(),{headers:{'Authorization':'token '+AUTH_TK(),'Accept':'application/vnd.github.v3+json'}});if(r.ok){var d=await r.json();auth.usersSha=d.sha;auth.users=JSON.parse(fromBase64(d.content));auth.initialized=true;return true}}catch(e){}
+        auth.initialized=true;return false
       }
-    }catch(e){
-      allPassed=false;
-      results.push({pass:false,status:'Network Error',detail:e.message});
-    }
-    // Live update results
-    if(rc)rc.innerHTML=renderResults(results,isSubmit);
-  }
-
-  // Final update
-  if(rc)rc.innerHTML=renderResults(results,isSubmit);
-
-  if(isSubmit){
-    if(allPassed){
-      if(rt)rt.innerHTML='<span style="color:var(--green)">✓ Accepted</span>';
-      userSubmissions[''+p.id]='ac';saveSubmissions();
-      showACEffect(results.length,results.length);
-    }else{
-      var passCnt=results.filter(function(r){return r.pass}).length;
-      if(rt)rt.innerHTML='<span style="color:var(--red)">✗ 未通过</span> <span style="color:#999;font-weight:400">'+passCnt+'/'+results.length+'</span>';
-      userSubmissions[''+p.id]='wa';saveSubmissions();
-    }
-  }else{
-    var passCnt2=results.filter(function(r){return r.pass}).length;
-    if(rt)rt.innerHTML='<span style="color:'+(passCnt2===results.length?'var(--green)':'var(--orange)')+'">'+(passCnt2===results.length?'✓':'⚠')+' 样例 '+passCnt2+'/'+results.length+'</span>';
-  }
-
-  isRunning=false;if(runBtn)runBtn.disabled=false;if(submitBtn)submitBtn.disabled=false;
-}
-
-function renderResults(results,isSubmit){
-  var html='';
-  results.forEach(function(r,i){
-    var cls=r.pass?'pass':'fail';
-    var icon=r.pass?'✓':'✗';
-    html+='<div class="test-case '+cls+'">';
-    html+='<div class="tc-label">'+icon+' '+(isSubmit?'测试点':'样例')+' #'+(i+1)+' — '+r.status;
-    if(r.time)html+=' ('+r.time+'s)';
-    if(r.mem)html+=' ['+Math.round(r.mem/1024)+'KB]';
-    html+='</div>';
-    if(!r.pass){
-      if(r.actual!==undefined)html+='<div class="tc-detail"><span>输出:</span> '+escapeHtml(r.actual.substring(0,500))+'</div>';
-      if(r.expected!==undefined)html+='<div class="tc-detail"><span>期望:</span> '+escapeHtml(r.expected.substring(0,500))+'</div>';
-      if(r.detail)html+='<div class="tc-detail"><span>信息:</span> '+escapeHtml(r.detail.substring(0,600))+'</div>';
-    }
-    html+='</div>';
-  });
-  return html;
-}
-
-// ============ AC CELEBRATION ============
-function showACEffect(passed,total){
-  var overlay=document.getElementById('ac-overlay');
-  var scoreEl=document.getElementById('ac-score');
-  if(scoreEl)scoreEl.textContent='通过 '+passed+'/'+total+' 个测试点';
-  overlay.classList.add('show');
-  playACSound();
-  launchConfetti();
-}
-function closeAC(){
-  document.getElementById('ac-overlay').classList.remove('show');
-  stopConfetti();
-}
-
-function playACSound(){
-  try{
-    var ctx=new(window.AudioContext||window.webkitAudioContext)();
-    // Happy ascending C major chord
-    var notes=[523.25,659.25,783.99,1046.50,1318.51];
-    notes.forEach(function(freq,i){
-      var osc=ctx.createOscillator();var gain=ctx.createGain();
-      osc.connect(gain);gain.connect(ctx.destination);
-      osc.type='sine';osc.frequency.value=freq;
-      gain.gain.setValueAtTime(0.12,ctx.currentTime+i*0.1);
-      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.1+0.5);
-      osc.start(ctx.currentTime+i*0.1);osc.stop(ctx.currentTime+i*0.1+0.6);
-    });
-  }catch(e){}
-}
-
-// ============ CONFETTI ENGINE ============
-var confettiAnim=null;
-var confettiParticles=[];
-
-function launchConfetti(){
-  var canvas=document.getElementById('confetti-canvas');
-  canvas.width=window.innerWidth;canvas.height=window.innerHeight;
-  var ctx=canvas.getContext('2d');
-  confettiParticles=[];
-  var colors=['#10b981','#3b82f6','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4','#f97316','#84cc16','#14b8a6'];
-
-  // Burst from center
-  for(var i=0;i<250;i++){
-    var angle=Math.random()*Math.PI*2;
-    var speed=Math.random()*14+4;
-    confettiParticles.push({
-      x:canvas.width/2,y:canvas.height/2,
-      vx:Math.cos(angle)*speed*(0.5+Math.random()),
-      vy:Math.sin(angle)*speed*(0.5+Math.random())-4,
-      color:colors[Math.floor(Math.random()*colors.length)],
-      size:Math.random()*7+3,
-      rotation:Math.random()*360,
-      rotSpeed:(Math.random()-0.5)*14,
-      gravity:0.22+Math.random()*0.08,
-      opacity:1,
-      shape:Math.random()<0.4?'rect':Math.random()<0.6?'circle':'star',
-      life:1
-    });
-  }
-
-  // Additional bursts from sides
-  for(var j=0;j<80;j++){
-    var side=j%2===0;
-    confettiParticles.push({
-      x:side?0:canvas.width,y:canvas.height*0.5+Math.random()*canvas.height*0.3,
-      vx:(side?1:-1)*(Math.random()*8+3),vy:Math.random()*-8-2,
-      color:colors[Math.floor(Math.random()*colors.length)],
-      size:Math.random()*6+2,rotation:Math.random()*360,rotSpeed:(Math.random()-0.5)*10,
-      gravity:0.18+Math.random()*0.06,opacity:1,shape:Math.random()<0.5?'rect':'circle',life:1
-    });
-  }
-
-  var startTime=Date.now();
-  function animate(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    var alive=false;
-    var elapsed=Date.now()-startTime;
-
-    confettiParticles.forEach(function(p){
-      if(p.opacity<=0)return;
-      alive=true;
-      p.x+=p.vx;p.vy+=p.gravity;p.y+=p.vy;
-      p.vx*=0.99;p.rotation+=p.rotSpeed;
-
-      if(p.y>canvas.height+30)p.opacity-=0.05;
-      if(elapsed>3000)p.opacity-=0.015;
-      p.opacity=Math.max(0,p.opacity);
-
-      ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rotation*Math.PI/180);
-      ctx.globalAlpha=Math.min(1,p.opacity);ctx.fillStyle=p.color;
-
-      if(p.shape==='rect'){
-        ctx.fillRect(-p.size/2,-p.size/3,p.size,p.size*0.6);
-      }else if(p.shape==='circle'){
-        ctx.beginPath();ctx.arc(0,0,p.size/2,0,Math.PI*2);ctx.fill();
-      }else{
-        // Star shape
-        ctx.beginPath();
-        for(var s=0;s<5;s++){
-          var a=s*Math.PI*2/5-Math.PI/2;
-          var r1=p.size/2,r2=p.size/4;
-          ctx.lineTo(Math.cos(a)*r1,Math.sin(a)*r1);
-          var a2=a+Math.PI/5;
-          ctx.lineTo(Math.cos(a2)*r2,Math.sin(a2)*r2);
+      return{
+        validateUser:async function(usernameOrUid,password){
+          if(!auth.initialized)await init();
+          var hashed=hashPasswordSync(password);
+          if(!auth.users){
+            var lu=AUTH_LOCAL_USERS.users.find(function(u){return(u.username===usernameOrUid||u.uid===usernameOrUid)&&u.passwordHash===hashed});
+            return lu?{success:true,user:{uid:lu.uid,username:lu.username,role:lu.role}}:{success:false,error:'用户名或密码错误'}
+          }
+          var idx=-1;
+          if(auth.users.index&&auth.users.index.byUsername&&auth.users.index.byUsername[usernameOrUid]!==undefined)idx=auth.users.index.byUsername[usernameOrUid];
+          if(idx===-1&&auth.users.index&&auth.users.index.byUid&&auth.users.index.byUid[usernameOrUid]!==undefined)idx=auth.users.index.byUid[usernameOrUid];
+          if(idx===-1)idx=auth.users.users.findIndex(function(u){return u.username===usernameOrUid||u.uid===usernameOrUid});
+          if(idx===-1)return{success:false,error:'用户名或密码错误'};
+          var user=auth.users.users[idx];
+          if(user.status==='disabled')return{success:false,error:'账户已被禁用'};
+          if(user.passwordHash===hashed){return{success:true,user:{uid:user.uid,username:user.username,displayName:user.displayName,role:user.role,profile:user.profile}}}
+          return{success:false,error:'用户名或密码错误'}
         }
-        ctx.closePath();ctx.fill();
       }
-      ctx.restore();
-    });
+    }
+  </script>
 
-    if(alive&&elapsed<6000){confettiAnim=requestAnimationFrame(animate)}
-    else{ctx.clearRect(0,0,canvas.width,canvas.height)}
-  }
-  animate();
-}
+  </script>
+  <script>
+    var REPO='RuiweihanHub/ruiuser',LF='learn.json',LD='learn-files',EF='exams.json',OJF='oj-problems.json';
+    var TK=function(){return['ghp_','aJxbQaU0S56e8pl6N8zrkWoHkfJHi92GOiFQ'].join('')};
+    var UP=['Administrator','Ruiweihan','Xvjiarui','Wangpengyi','000001','000002'];
+    var ADMINS=['Administrator','Ruiweihan','000001'];
+    var cu=null,res=[],exams=[],ojProbs=[],curCat='',selFile=null,curTab='res',examTimer=null,currentPvRes=null;
+    var OJ_PER_PAGE=30,ojSearchQ='',ojFilterDiff='',ojFilterCat='',ojPage=1,ojLoaded=false;
 
-function stopConfetti(){
-  if(confettiAnim)cancelAnimationFrame(confettiAnim);
-  confettiAnim=null;
-  var canvas=document.getElementById('confetti-canvas');
-  var ctx=canvas.getContext('2d');
-  if(ctx)ctx.clearRect(0,0,canvas.width,canvas.height);
-}
+    function isAdmin(){return cu&&(ADMINS.indexOf(cu.username)>=0||ADMINS.indexOf(cu.uid)>=0)}
+    function canUpload(){return cu&&(UP.indexOf(cu.username)>=0||UP.indexOf(cu.uid)>=0)}
+    function generateQuickPassword(){var c='0123456789',p='';for(var i=0;i<9;i++)p+=c.charAt(Math.floor(Math.random()*c.length));return p}
+    function checkQuickPasswordCollision(users,qp){var n=0;if(!users||!users.users)return false;for(var i=0;i<users.users.length;i++){if(users.users[i].quickPass===qp)n++}return n>=2}
 
-// ============ CREATE PROBLEM ============
-var createSamples=[{input:'',output:''}];
-var createTestData=[{input:'',output:''}];
+    function b64e(a){var b=new Uint8Array(a),s='';for(var i=0;i<b.length;i++)s+=String.fromCharCode(b[i]);return btoa(s)}
+    function b64d(b){var s=atob(b),b2=new Uint8Array(s.length);for(var i=0;i<s.length;i++)b2[i]=s.charCodeAt(i);return new TextDecoder().decode(b2)}
+    function esc(t){var d=document.createElement('div');d.textContent=t;return d.innerHTML}
+    function fs(b){if(b<1024)return b+' B';if(b<1048576)return(b/1024).toFixed(1)+' KB';return(b/1048576).toFixed(1)+' MB'}
+    function fx(n){return n?n.split('.').pop().toLowerCase():''}
+    function ft(s){var d=new Date(s),n=new Date(),df=n-d;if(df<6e4)return'刚刚';if(df<36e5)return Math.floor(df/6e4)+'分钟前';if(df<864e5)return Math.floor(df/36e5)+'小时前';if(df<6048e5)return Math.floor(df/864e5)+'天前';return d.toLocaleDateString('zh-CN')}
 
-function goCreate(){currentPage='create';createSamples=[{input:'',output:''}];createTestData=[{input:'',output:''}];_searchInputCreated=false;render()}
 
-function renderCreateProblem(){
-  var app=document.getElementById('app');
-  var st=syncLoginState();
-  if(!canCreate(st.username)){showToast('无出题权限','error');goBack();return}
+    (function(){
+      var st=syncLoginState();
+      if(st.isLoggedIn){
+        cu={username:st.username,uid:st.uid};
+        document.getElementById('loginPage').style.display='none';
+        document.getElementById('mainContent').style.display='block';
+        document.getElementById('authBtns').style.display='none';
+        document.getElementById('userMenu').style.display='flex';
+        document.getElementById('uName').textContent=st.username;
+        loadOJ().then(function(){renderOJ()});
+      }else{document.getElementById('loginPage').classList.add('show')}
+    })();
+    document.getElementById('uBtn').onclick=function(e){e.stopPropagation();document.getElementById('udd').classList.toggle('show')};
+    document.addEventListener('click',function(){document.getElementById('udd').classList.remove('show')});
+    function showLoginModal(){document.getElementById('lModal').classList.add('show')}
+    document.getElementById('lForm').onsubmit=async function(e){
+      e.preventDefault();var u=document.getElementById('lU').value.trim(),p=document.getElementById('lP').value;
+      try{var a=await getAuth(),r=await a.validateUser(u,p);if(r.success){sessionStorage.setItem('rui_user',r.user.username);sessionStorage.setItem('rui_uid',r.user.uid);localStorage.setItem('rui_user_remember',r.user.username);localStorage.setItem('rui_uid_remember',r.user.uid);localStorage.setItem('rui_user_expire',''+(Date.now()+6048e5));location.reload()}else{document.getElementById('lErr').textContent=r.error;document.getElementById('lErr').style.display='block'}}catch(e){document.getElementById('lErr').textContent='登录失败';document.getElementById('lErr').style.display='block'}
+    };
+    function logout(){sessionStorage.clear();localStorage.removeItem('rui_user_remember');localStorage.removeItem('rui_uid_remember');localStorage.removeItem('rui_user_expire');location.reload()}
 
-  var html='<button class="back-btn" onclick="goBack()">← 返回题库</button>';
-  html+='<div class="create-form"><h2>📝 创建新题目</h2>';
+    // ====== OJ System ======
+    async function loadOJ(){
+      try{
+        var rawUrl='https://raw.githubusercontent.com/'+REPO+'/main/'+OJF+'?_='+Date.now();
+        var r=await fetch(rawUrl);
+        if(r.ok){ojProbs=await r.json();console.log('OJ loaded:',ojProbs.length,'problems')}
+        else{
+          var r2=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+OJF+'?ref=main&_='+Date.now(),{headers:{'Authorization':'token '+TK(),'Accept':'application/vnd.github.v3.raw'}});
+          if(r2.ok){ojProbs=await r2.json();console.log('OJ loaded via API:',ojProbs.length,'problems')}
+          else{console.error('OJ load failed:',r.status,r2.status);ojProbs=[]}
+        }
+      }catch(e){console.error('loadOJ error:',e);ojProbs=[]}
+      ojLoaded=true;if(curTab==='oj')renderOJList();
+    }
 
-  html+='<div class="form-row"><div class="form-group"><label>题号 ID (留空自动)</label><input id="cp-id" type="number" placeholder="自动分配"></div>';
-  html+='<div class="form-group"><label>难度</label><select id="cp-diff"><option>入门</option><option selected>简单</option><option>中等</option><option>困难</option><option>挑战</option></select></div>';
-  html+='<div class="form-group"><label>分类</label><input id="cp-cat" type="text" placeholder="如：数学、字符串"></div></div>';
+    var OJ_RECORDS_KEY='rui_oj_records';
+    function getOJRecords(){try{return JSON.parse(localStorage.getItem(OJ_RECORDS_KEY)||'[]')}catch(e){return[]}}
+    function saveOJRecord(r){var rs=getOJRecords();rs.unshift(r);if(rs.length>100)rs=rs.slice(0,100);localStorage.setItem(OJ_RECORDS_KEY,JSON.stringify(rs))}
 
-  html+='<div class="form-group"><label>标题 *</label><input id="cp-title" type="text" placeholder="题目标题"></div>';
+    function renderOJ(){
+      if(!ojLoaded){
+        var la=document.getElementById('ojListArea');
+        if(la)la.innerHTML='<div style="text-align:center;padding:60px 20px;color:#9ca3af;font-size:14px">加载题目中...</div>';
+        if(!ojLoaded)loadOJ();
+        return;
+      }
+      showOJList();
+    }
+    function showOJList(){
+      var w=document.getElementById('ojWrap');
+      if(!w)return;
+      // Show static elements
+      var hdr=w.querySelector('.oj-header');if(hdr)hdr.style.display='';
+      var notice=w.querySelector('.oj-notice');if(notice)notice.style.display='';
+      var search=w.querySelector('.oj-search');if(search)search.style.display='';
+      var df=document.getElementById('ojDiffFilters');if(df)df.style.display='';
+      var cf=document.getElementById('ojCatFilters');if(cf)cf.style.display='';
+      var la=document.getElementById('ojListArea');if(la)la.style.display='';
+      // Hide detail/add pages
+      var dp=document.getElementById('ojDetailPage');if(dp)dp.style.display='none';
+      var ap=document.getElementById('ojAddPage');if(ap)ap.style.display='none';
+      renderOJList();
+    }
+    function getFilteredOJ(){var q=ojSearchQ.toLowerCase().trim();return ojProbs.filter(function(p){if(q&&p.title.toLowerCase().indexOf(q)===-1&&p.id.toLowerCase().indexOf(q)===-1&&p.category.toLowerCase().indexOf(q)===-1)return false;if(ojFilterDiff&&p.difficulty!==ojFilterDiff)return false;if(ojFilterCat&&p.category!==ojFilterCat)return false;return true})}
+    function ojSearchFn(){ojSearchQ=document.getElementById('ojSearchInput').value;ojPage=1;renderOJList()}
+    function ojFilterDiffFn(d){ojFilterDiff=ojFilterDiff===d?'':d;ojPage=1;renderOJList()}
+    function ojFilterCatFn(c){ojFilterCat=ojFilterCat===c?'':c;ojPage=1;renderOJList()}
+    function ojGoPage(p){ojPage=p;renderOJList()}
+    function renderOJList(){
+      var c=document.getElementById('ojListArea');if(!c)return;
+      var can=canUpload();
+      var filtered=getFilteredOJ();
+      var totalPages=Math.ceil(filtered.length/OJ_PER_PAGE)||1;
+      if(ojPage>totalPages)ojPage=totalPages;
+      var startIdx=(ojPage-1)*OJ_PER_PAGE;
+      var pageItems=filtered.slice(startIdx,startIdx+OJ_PER_PAGE);
+      var cats=[];ojProbs.forEach(function(p){if(cats.indexOf(p.category)===-1)cats.push(p.category)});
+      var diffs=['入门','简单','中等','困难','挑战'];
+      var diffMap={'入门':'入门','简单':'简单','中等':'中等','困难':'困难','挑战':'挑战','easy':'简单','medium':'中等','hard':'困难'};
+      // Update header count
+      var countEl=document.getElementById('ojCount');
+      if(countEl)countEl.textContent=ojProbs.length+' 道题目'+(filtered.length!==ojProbs.length?' · 筛选 '+filtered.length+' 道':'');
+      var addEl=document.getElementById('ojAddBtn');
+      if(addEl)addEl.innerHTML=can?'<button class="bd" onclick="showAddOJ()">+ 出题</button>':'';
+      // Update diff filters
+      var df=document.getElementById('ojDiffFilters');
+      if(df){
+        var dfh='<span class="fl">难度：</span>';
+        diffs.forEach(function(d){
+          var cls='oj-diff '+d;if(ojFilterDiff===d)cls+=' active';
+          dfh+='<button class="'+cls+'" onclick="ojFilterDiffFn(this.dataset.v)" data-v="'+d+'">'+d+'</button>';
+        });
+        df.innerHTML=dfh;
+      }
+      // Update cat filters
+      var cf=document.getElementById('ojCatFilters');
+      if(cf){
+        var cfh='<span class="fl">分类：</span>';
+        cats.slice(0,12).forEach(function(cat){
+          var cls='oj-cat';if(ojFilterCat===cat)cls+=' active';
+          cfh+='<button class="'+cls+'" onclick="ojFilterCatFn(this.dataset.v)" data-v="'+esc(cat)+'">'+esc(cat)+'</button>';
+        });
+        if(cats.length>12)cfh+='<span class="oj-cat">+'+(cats.length-12)+'</span>';
+        cf.innerHTML=cfh;
+      }
+      // Build list only
+      var h='';
+      h+='<div class="oj-list-header"><span>题号</span><span>标题</span><span>分类</span><span>难度</span><span>状态</span></div>';
+      if(!pageItems.length){
+        h+='<div style="text-align:center;padding:60px 20px;color:#9ca3af;font-size:14px">没有找到匹配的题目</div>';
+      }else{
+        pageItems.forEach(function(p){
+          var recs=getOJRecords().filter(function(r){return cu&&r.user===cu.username&&r.probId===p.id});
+          var bestStatus=recs.length?(recs.some(function(r){return r.status==='ac'})?'ac':'tried'):'none';
+          var statusIcon=bestStatus==='ac'?'<span style="color:#16a34a;font-weight:700">✓</span>':bestStatus==='tried'?'<span style="color:#ca8a04">○</span>':'<span style="color:#d1d5db">-</span>';
+          var pidx=ojProbs.indexOf(p);
+          var diff=diffMap[p.difficulty]||p.difficulty||'简单';
+          var diffCls='oj-diff '+esc(diff);
+          h+='<div class="oj-list-row" onclick="openOJProb('+pidx+')"><span class="pid">'+esc(p.id)+'</span><span class="ptitle">'+esc(p.title)+'</span><span class="pcat"><span class="oj-cat">'+esc(p.category)+'</span></span><span class="pdiff"><span class="'+diffCls+'">'+esc(diff)+'</span></span><span class="pstatus">'+statusIcon+'</span></div>';
+        });
+      }
+      if(totalPages>1){
+        h+='<div class="oj-pagi">';
+        if(ojPage>1)h+='<button onclick="ojGoPage('+(ojPage-1)+')">上一页</button>';
+        var pp=[];for(var i=1;i<=totalPages;i++){if(i===1||i===totalPages||Math.abs(i-ojPage)<=2)pp.push(i);else if(pp[pp.length-1]!=='...')pp.push('...')}
+        pp.forEach(function(p){if(p==='...')h+='<span class="dots">...</span>';else if(p===ojPage)h+='<span class="cur">'+p+'</span>';else h+='<button onclick="ojGoPage('+p+')">'+p+'</button>'});
+        if(ojPage<totalPages)h+='<button onclick="ojGoPage('+(ojPage+1)+')">下一页</button>';
+        h+='</div>';
+      }
+      c.innerHTML=h;
+    }
+    function openOJProb(idx){
+      var p=ojProbs[idx];if(!p)return;
+      var diff={'入门':'入门','简单':'简单','中等':'中等','困难':'困难','挑战':'挑战','easy':'简单','medium':'中等','hard':'困难'}[p.difficulty]||p.difficulty||'简单';
+      var dc={'easy':'#16a34a','medium':'#ca8a04','hard':'#dc2626'}[p.difficulty]||'#16a34a';
+      var sampleCount=(p.samples||[]).length;
+      var testDataCount=(p.testData||[]).length;
+      var totalPoints=sampleCount+testDataCount;
+      // Hide list elements
+      var w=document.getElementById('ojWrap');if(!w)return;
+      var hdr=w.querySelector('.oj-header');if(hdr)hdr.style.display='none';
+      var notice=w.querySelector('.oj-notice');if(notice)notice.style.display='none';
+      var search=w.querySelector('.oj-search');if(search)search.style.display='none';
+      var df=document.getElementById('ojDiffFilters');if(df)df.style.display='none';
+      var cf=document.getElementById('ojCatFilters');if(cf)cf.style.display='none';
+      var la=document.getElementById('ojListArea');if(la)la.style.display='none';
+      // Create or reuse detail page
+      var dp=document.getElementById('ojDetailPage');
+      if(!dp){dp=document.createElement('div');dp.id='ojDetailPage';w.appendChild(dp)}
+      dp.style.display='';
+      var h='<div style="margin-bottom:16px"><button class="bg" onclick="showOJList()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M19 12H5m7-7l-7 7 7 7"/></svg> 返回题目列表</button></div>';
+      h+='<div class="oj-problem"><h4>'+esc(p.title)+' <span style="font-size:11px;padding:2px 8px;border-radius:20px;background:'+dc+'22;color:'+dc+';font-weight:600;margin-left:6px">'+esc(diff)+'</span></h4>';
+      h+='<div class="p-meta"><span>'+esc(p.category)+'</span><span>'+esc(p.id)+'</span><span>时间限制:'+(p.timeLimit||'1s')+'</span><span>内存限制:'+(p.memoryLimit||'256MB')+'</span><span>测试点:'+totalPoints+'</span></div>';
+      h+='<div class="p-desc">'+(p.description||'暂无题目描述').split('\n').map(function(l){return'<p>'+esc(l)+'</p>'}).join('')+'</div>';
+      if(p.inputFormat)h+='<div class="p-section"><h5>输入格式</h5><div>'+p.inputFormat.split('\n').map(function(l){return'<p>'+esc(l)+'</p>'}).join('')+'</div></div>';
+      if(p.outputFormat)h+='<div class="p-section"><h5>输出格式</h5><div>'+p.outputFormat.split('\n').map(function(l){return'<p>'+esc(l)+'</p>'}).join('')+'</div></div>';
+      if(p.constraints)h+='<div class="p-section"><h5>数据范围</h5><div>'+p.constraints.split('\n').map(function(l){return'<p>'+esc(l)+'</p>'}).join('')+'</div></div>';
+      if(p.samples&&p.samples.length){
+        h+='<div class="p-section"><h5>样例</h5>';
+        p.samples.forEach(function(s,i){
+          h+='<div class="sample-box"><div class="sample-in"><div class="sample-label">样例输入 '+(i+1)+'</div><pre>'+esc(s.input||'')+'</pre></div><div class="sample-out"><div class="sample-label">样例输出 '+(i+1)+'</div><pre>'+esc(s.output||'')+'</pre></div></div>';
+        });
+        h+='</div>';
+      }
+      h+='<div class="p-section"><h5>提交代码</h5>';
+      h+='<div class="lang-sel"><label>语言：</label><select id="ojLang"><option value="cpp">C++</option><option value="c">C</option><option value="python">Python</option><option value="java">Java</option></select></div>';
+      h+='<textarea id="ojCode" class="code-editor" placeholder="在此输入代码..." rows="12"></textarea>';
+      h+='<div style="display:flex;gap:8px;margin-top:10px"><button class="bd" onclick="submitOJ(\''+p.id+'\')">提交</button><button class="bg" onclick="clearOJCode()">清空</button></div>';
+      h+='<div id="ojResult"></div></div>';
+      h+='</div>';
+      dp.innerHTML=h;
+    }
 
-  html+='<div class="form-row"><div class="form-group"><label>时间限制(ms)</label><input id="cp-tl" type="number" value="2000"></div>';
-  html+='<div class="form-group"><label>内存限制(MB)</label><input id="cp-ml" type="number" value="256"></div></div>';
+    function changeLang(){
+      var lang=document.getElementById('ojLang').value;
+      var templates={cpp:'#include <iostream>\nusing namespace std;\n\nint main() {\n    \n    return 0;\n}',c:'#include <stdio.h>\n\nint main() {\n    \n    return 0;\n}',python:'# Python代码\ndef main():\n    pass\n\nif __name__ == "__main__":\n    main()',java:'import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        \n    }\n}',javascript:'// JavaScript代码\nfunction main() {\n    \n}\n\nmain();'};
+      document.getElementById('ojCode').value=templates[lang]||'';
+    }
 
-  html+='<div class="form-group"><label>题目描述</label><textarea id="cp-desc" placeholder="详细描述题目..."></textarea></div>';
-  html+='<div class="form-group"><label>输入格式</label><textarea id="cp-input" placeholder="描述输入格式..."></textarea></div>';
-  html+='<div class="form-group"><label>输出格式</label><textarea id="cp-output" placeholder="描述输出格式..."></textarea></div>';
-  html+='<div class="form-group"><label>数据范围与约束</label><textarea id="cp-constraints" placeholder="数据范围..."></textarea></div>';
+    var JUDGE0='https://ce.judge0.com';
+    var LANG_IDS={c:50,cpp:54,java:91,python:92,javascript:93};
 
-  // Samples
-  html+='<div class="form-group"><label>样例 (公开)</label><div id="cp-samples">';
-  createSamples.forEach(function(s,i){html+=renderSampleRow(i,s,'sample')});
-  html+='</div><button class="add-btn" onclick="addCreateSample()">+ 添加样例</button></div>';
+    async function runJudge0(langId,code,stdin,cpuLimit,memLimit){
+      var r=await fetch(JUDGE0+'/submissions?base64_encoded=false&wait=true',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({source_code:code,language_id:langId,stdin:stdin||'',cpu_time_limit:cpuLimit||2,memory_limit:(memLimit||128)*1024})
+      });
+      if(!r.ok)throw new Error('Judge0请求失败('+r.status+')');
+      return await r.json();
+    }
 
-  // Test data
-  html+='<div class="form-group"><label>测试数据 (隐藏)</label><div id="cp-testdata">';
-  createTestData.forEach(function(s,i){html+=renderSampleRow(i,s,'testdata')});
-  html+='</div><button class="add-btn" onclick="addCreateTestData()">+ 添加测试数据</button></div>';
+    function showOJResult(verdict,score,total,extra){
+      var resEl=document.getElementById('ojRes');
+      var label={ac:'Accepted',wa:'Wrong Answer',tle:'Time Limit Exceeded',ce:'Compilation Error',re:'Runtime Error'}[verdict]||verdict;
+      resEl.className='oj-result show '+verdict;
+      var pct=total>0?Math.round(score/total*100):0;
+      var barColor=verdict==='ac'?'#16a34a':verdict==='wa'?'#dc2626':verdict==='tle'?'#ca8a04':verdict==='ce'?'#ea580c':'#7c3aed';
+      var h='<div style="display:flex;align-items:center;margin-bottom:12px"><span class="oj-verdict '+verdict+'">'+verdict.toUpperCase()+'</span><span style="font-size:14px;font-weight:600">'+label+'</span></div>';
+      h+='<div style="font-size:16px;font-weight:700;margin-bottom:4px">'+verdict.toUpperCase()+' '+score+'/'+total+'</div>';
+      h+='<div class="oj-score-bar"><div style="width:'+pct+'%;background:'+barColor+'"></div></div>';
+      if(extra)h+='<pre style="margin-top:10px">'+extra+'</pre>';
+      resEl.innerHTML=h;
+    }
 
-  html+='<div style="text-align:center;padding-top:12px"><button class="submit-create" onclick="submitCreateProblem()">📤 提交题目</button></div>';
-  html+='</div>';
-  app.innerHTML=html;
-}
+    async function submitOJ(idx){
+      var p=ojProbs[idx];if(!p)return;
+      var code=document.getElementById('ojCode').value;
+      var lang=document.getElementById('ojLang').value;
+      var langId=LANG_IDS[lang]||54;
+      var resEl=document.getElementById('ojRes');resEl.className='oj-result show ce';resEl.innerHTML='<h4>判题中...</h4><pre>正在运行，请稍候...</pre>';
 
-function renderSampleRow(i,s,type){
-  return '<div class="sample-row"><div class="form-group"><label>输入</label><textarea data-type="'+type+'" data-idx="'+i+'" data-field="input" rows="3" oninput="updateCreateData(this)">'+escapeHtml(s.input)+'</textarea></div><div class="form-group"><label>输出</label><textarea data-type="'+type+'" data-idx="'+i+'" data-field="output" rows="3" oninput="updateCreateData(this)">'+escapeHtml(s.output)+'</textarea></div>'+(i>0?'<button class="remove-btn" onclick="removeCreateData(\''+type+'\','+i+')">✕</button>':'')+'</div>';
-}
+      var allTests=[];
+      if(p.samples&&p.samples.length){p.samples.forEach(function(s){allTests.push({input:s.input,output:s.output})})}
+      if(p.testData&&p.testData.length){p.testData.forEach(function(s){allTests.push({input:s.input,output:s.output})})}
 
-function updateCreateData(el){
-  var type=el.getAttribute('data-type'),idx=parseInt(el.getAttribute('data-idx')),field=el.getAttribute('data-field');
-  var arr=type==='sample'?createSamples:createTestData;
-  if(arr[idx])arr[idx][field]=el.value;
-}
-function addCreateSample(){createSamples.push({input:'',output:''});renderCreateProblem()}
-function addCreateTestData(){createTestData.push({input:'',output:''});renderCreateProblem()}
-function removeCreateData(type,idx){if(type==='sample')createSamples.splice(idx,1);else createTestData.splice(idx,1);renderCreateProblem()}
+      if(!allTests.length){resEl.className='oj-result show ce';resEl.innerHTML='<h4>无测试数据</h4><pre>该题目没有设置测试数据</pre>';return}
+      var totalTests=allTests.length;
+      var acCount=0,tleCount=0;
 
-async function submitCreateProblem(){
-  var st=syncLoginState();if(!canCreate(st.username)){showToast('无权限','error');return}
-  var id=document.getElementById('cp-id').value.trim();
-  var title=document.getElementById('cp-title').value.trim();
-  if(!title){showToast('请填写标题','error');return}
+      try{
+        for(var si=0;si<totalTests;si++){
+          var s=allTests[si];
+          try{
+            var d=await runJudge0(langId,code,s.input,p.timeLimit||2,p.memoryLimit||128);
+            if(d.status&&d.status.id===3){
+              var output=(d.stdout||'').trim();
+              var expected=(s.output||'').trim();
+              if(output===expected){acCount++}
+            }else if(d.status&&(d.status.id===5||d.status.id===6)){
+              var errMsg=(d.compile_output||'').substring(0,300);
+              showOJResult('ce',acCount,totalTests,'编译错误\n\n'+errMsg);
+              saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'ce',score:acCount,total:totalTests,time:new Date().toISOString()});
+              return;
+            }else if(d.status&&(d.status.id===7||d.status.id===8||d.status.id===9||d.status.id===10||d.status.id===11||d.status.id===12)){
+              var errMsg=(d.stderr||d.status.description||'运行时错误').substring(0,300);
+              showOJResult('re',acCount,totalTests,'Runtime Error\n\n'+errMsg);
+              saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'re',score:acCount,total:totalTests,time:new Date().toISOString()});
+              return;
+            }else{
+              var desc=(d.status&&d.status.description)||'';
+              if(desc.indexOf('Time Limit')>=0){tleCount++}
+            }
+          }catch(e){
+            showOJResult('re',acCount,totalTests,'运行时错误\n\n'+e.message);
+            saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'re',score:acCount,total:totalTests,time:new Date().toISOString()});
+            return;
+          }
+        }
 
-  var diff=document.getElementById('cp-diff').value;
-  var cat=document.getElementById('cp-cat').value.trim()||'未分类';
-  var tl=parseInt(document.getElementById('cp-tl').value)||2000;
-  var ml=parseInt(document.getElementById('cp-ml').value)||256;
-  var desc=document.getElementById('cp-desc').value;
-  var inputF=document.getElementById('cp-input').value;
-  var outputF=document.getElementById('cp-output').value;
-  var constraints=document.getElementById('cp-constraints').value;
+        if(acCount===totalTests){
+          showOJResult('ac',acCount,totalTests,'');
+          saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'ac',score:acCount,total:totalTests,time:new Date().toISOString()});
+        }else if(tleCount>0){
+          showOJResult('tle',acCount,totalTests,'');
+          saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'tle',score:acCount,total:totalTests,time:new Date().toISOString()});
+        }else{
+          showOJResult('wa',acCount,totalTests,'');
+          saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'wa',score:acCount,total:totalTests,time:new Date().toISOString()});
+        }
+      }catch(err){
+        showOJResult('ce',0,totalTests,'判题服务暂不可用\n\n'+esc(err.message));
+      }
+    }
 
-  if(!id){var maxId=0;problems.forEach(function(p){if(p.id>maxId)maxId=p.id});id=maxId+1}else{id=parseInt(id)}
+    function testOJ(idx){
+      var p=ojProbs[idx];if(!p)return;
+      var code=document.getElementById('ojCode').value;
+      var lang=document.getElementById('ojLang').value;
+      var langId=LANG_IDS[lang]||54;
+      var resEl=document.getElementById('ojRes');resEl.className='oj-result show ce';resEl.innerHTML='<h4>运行中...</h4><pre>正在执行样例测试...</pre>';
+      var stdin=p.samples&&p.samples[0]?p.samples[0].input:'';
+      var expected=p.samples&&p.samples[0]?(p.samples[0].output||'').trim():'';
+      runJudge0(langId,code,stdin,p.timeLimit||2,p.memoryLimit||128).then(function(d){
+        if(d.status&&d.status.id===3){
+          var output=(d.stdout||'').trim();
+          var matched=output===expected;
+          var h='<div style="display:flex;align-items:center;margin-bottom:12px"><span class="oj-verdict '+(matched?'ac':'wa')+'">'+(matched?'MATCH':'MISMATCH')+'</span><span style="font-size:14px;font-weight:600">样例运行结果</span></div>';
+          h+='<pre>'+(output?'你的输出:\n'+esc(output):'(无输出)')+(expected?'\n\n期望输出:\n'+esc(expected):'');
+          var err=d.stderr||'';
+          if(err)h+='\n\n标准错误:\n'+esc(err);
+          h+='\n\n运行时间: '+(d.time||'?')+'s\n内存: '+(d.memory?Math.round(d.memory/1024)+'MB':'?')+'</pre>';
+          resEl.className='oj-result show '+(matched?'ac':'wa');
+          resEl.innerHTML=h;
+        }else{
+          resEl.className='oj-result show ce';
+          var errMsg=d.compile_output||d.stderr||(d.status&&d.status.description)||'运行错误';
+          resEl.innerHTML='<h4>运行错误</h4><pre>'+esc(errMsg.substring(0,500))+'</pre>';
+        }
+      }).catch(function(e){resEl.className='oj-result show ce';resEl.innerHTML='<h4>运行失败</h4><pre>'+esc(e.message)+'</pre>'});
+    }
 
-  var newProb={
-    id:id,title:title,category:cat,difficulty:diff,
-    description:desc,inputFormat:inputF,outputFormat:outputF,constraints:constraints,
-    timeLimit:tl,memoryLimit:ml,
-    samples:createSamples.filter(function(s){return s.input||s.output}),
-    testData:createTestData.filter(function(s){return s.input||s.output}),
-    author:st.username,createdAt:new Date().toISOString().split('T')[0]
-  };
+    function showAddOJ(){
+      var w=document.getElementById('ojWrap');if(!w)return;
+      // Hide list elements
+      var hdr=w.querySelector('.oj-header');if(hdr)hdr.style.display='none';
+      var notice=w.querySelector('.oj-notice');if(notice)notice.style.display='none';
+      var search=w.querySelector('.oj-search');if(search)search.style.display='none';
+      var df=document.getElementById('ojDiffFilters');if(df)df.style.display='none';
+      var cf=document.getElementById('ojCatFilters');if(cf)cf.style.display='none';
+      var la=document.getElementById('ojListArea');if(la)la.style.display='none';
+      var oldDp=document.getElementById('ojDetailPage');if(oldDp)oldDp.style.display='none';
+      // Create or reuse add page
+      var ap=document.getElementById('ojAddPage');
+      if(!ap){ap=document.createElement('div');ap.id='ojAddPage';w.appendChild(ap)}
+      ap.style.display='';
+      var h='<div style="margin-bottom:16px"><button class="bg" onclick="showOJList()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M19 12H5m7-7l-7 7 7 7"/></svg> 返回</button></div>';
+      h+='<div style="background:#f9fafb;border-radius:14px;padding:20px;border:1px solid #e5e7eb">';
+      h+='<h3 style="font-size:16px;font-weight:600;margin-bottom:14px">出题</h3>';
+      h+='<div class="fd"><label>题目名称</label><input id="ojT" placeholder="例如：两数之和"></div>';
+      h+='<div class="rw"><div class="fd"><label>难度</label><select id="ojD"><option value="easy">简单</option><option value="medium">中等</option><option value="hard">困难</option></select></div>';
+      h+='<div class="fd"><label>时间限制(秒)</label><input id="ojTL" type="number" value="1"></div>';
+      h+='<div class="fd"><label>内存限制(MB)</label><input id="ojML" type="number" value="128"></div></div>';
+      h+='<div class="fd"><label>题目描述</label><textarea id="ojDesc" rows="4" placeholder="详细描述题目要求..."></textarea></div>';
+      h+='<div class="fd"><label>输入格式</label><input id="ojIn" placeholder="描述输入格式"></div>';
+      h+='<div class="fd"><label>输出格式</label><input id="ojOut" placeholder="描述输出格式"></div>';
+      h+='<div id="ojSamples"><div class="fd"><label>样例1 输入</label><textarea class="oj-si" rows="2" placeholder="3 5"></textarea><label>样例1 输出</label><textarea class="oj-so" rows="2" placeholder="8"></textarea></div></div>';
+      h+='<div style="display:flex;gap:8px;margin-bottom:12px"><button class="bg" onclick="addOJSample()">+ 添加样例</button><span style="font-size:11px;color:#9ca3af;line-height:32px">最多2个样例（显示给用户）</span></div>';
+      h+='<div id="ojTestData"><div class="fd" style="padding:12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px"><label style="color:#ea580c">隐藏测试数据1 输入</label><textarea class="oj-tdi" rows="2" placeholder="隐藏测试输入（不显示给用户）"></textarea><label style="color:#ea580c">隐藏测试数据1 输出</label><textarea class="oj-tdo" rows="2" placeholder="隐藏测试输出"></textarea></div></div>';
+      h+='<div style="display:flex;gap:8px;margin-bottom:12px"><button class="bg" onclick="addOJTestData()" style="background:#fff7ed;color:#ea580c;border-color:#fed7aa">+ 添加隐藏测试数据</button><span style="font-size:11px;color:#9ca3af;line-height:32px">用户不可见，用于判题</span></div>';
+      h+='<button class="bd" onclick="createOJ()" style="width:100%;padding:10px">发布题目</button></div>';
+      ap.innerHTML=h;
+    }
 
-  showToast('正在提交题目...','info');
-  try{
-    var r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+OJF+'?ref=main',{headers:{'Authorization':'token '+TK(),'Accept':'application/vnd.github.v3+json'}});
-    if(!r.ok)throw new Error('无法获取文件');
-    var d=await r.json();
-    var rawContent=JSON.parse(fromBase64(d.content));
-    rawContent.push(newProb);
-    var newContent=JSON.stringify(rawContent);
+    function addOJSample(){
+      var c=document.getElementById('ojSamples');
+      var n=c.querySelectorAll('.oj-si').length+1;
+      if(n>2){alert('样例最多2个');return}
+      var d=document.createElement('div');d.className='fd';
+      d.innerHTML='<label>样例'+n+' 输入</label><textarea class="oj-si" rows="2" placeholder="输入"></textarea><label>样例'+n+' 输出</label><textarea class="oj-so" rows="2" placeholder="输出"></textarea>';
+      c.appendChild(d);
+    }
 
-    var pushR=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+OJF,{
-      method:'PUT',
-      headers:{'Authorization':'token '+TK(),'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Add problem #'+id+': '+title,content:toBase64(newContent),sha:d.sha})
-    });
-    if(!pushR.ok){var err=await pushR.json();throw new Error(err.message||'推送失败')}
+    function addOJTestData(){
+      var c=document.getElementById('ojTestData');
+      var n=c.querySelectorAll('.oj-tdi').length+1;
+      var d=document.createElement('div');d.className='fd';
+      d.style.cssText='padding:12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;margin-top:8px';
+      d.innerHTML='<label style="color:#ea580c">隐藏测试数据'+n+' 输入</label><textarea class="oj-tdi" rows="2" placeholder="隐藏测试输入"></textarea><label style="color:#ea580c">隐藏测试数据'+n+' 输出</label><textarea class="oj-tdo" rows="2" placeholder="隐藏测试输出"></textarea>';
+      c.appendChild(d);
+    }
 
-    showToast('题目 #'+id+' 创建成功!','success');
-    problems.push(newProb);problems.sort(function(a,b){return a.id-b.id});
-    goBack();
-  }catch(e){showToast('创建失败: '+e.message,'error')}
-}
+    async function createOJ(){
+      var t=document.getElementById('ojT').value.trim(),d=document.getElementById('ojD').value;
+      var desc=document.getElementById('ojDesc').value.trim(),ind=document.getElementById('ojIn').value.trim(),outd=document.getElementById('ojOut').value.trim();
+      var tl=parseInt(document.getElementById('ojTL').value)||1,ml=parseInt(document.getElementById('ojML').value)||128;
+      if(!t||!desc){alert('请填写题目名称和描述');return}
+      var sis=document.querySelectorAll('.oj-si'),sos=document.querySelectorAll('.oj-so');
+      var samples=[];
+      for(var i=0;i<Math.min(sis.length,2);i++){var si=sis[i].value.trim(),soEl=sos[i],so=soEl&&soEl.value?soEl.value.trim():'';if(si||so)samples.push({input:si,output:so})}
+      var tdis=document.querySelectorAll('.oj-tdi'),tdos=document.querySelectorAll('.oj-tdo');
+      var testData=[];
+      for(var i=0;i<tdis.length;i++){var tdi=tdis[i].value.trim(),tdoEl=tdos[i],tdo=tdoEl&&tdoEl.value?tdoEl.value.trim():'';if(tdi||tdo)testData.push({input:tdi,output:tdo})}
+      var np={id:'oj_'+Date.now(),title:t,difficulty:d,description:desc,inputDesc:ind,outputDesc:outd,samples:samples,testData:testData,timeLimit:tl,memoryLimit:ml,author:cu.username,createdAt:new Date().toISOString()};
+      ojProbs.unshift(np);
+      try{var sha=null;var gr=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+OJF+'?ref=main',{headers:{'Authorization':'token '+TK(),'Accept':'application/vnd.github.v3+json'}});if(gr.ok){var gd=await gr.json();sha=gd.sha}
+      var bd={message:'Add OJ: '+t,content:b64e(new TextEncoder().encode(JSON.stringify(ojProbs,null,2)))};if(sha)bd.sha=sha;
+      var sr=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+OJF,{method:'PUT',headers:{'Authorization':'token '+TK(),'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify(bd)});
+      if(sr.ok){alert('题目发布成功！');renderOJ()}else throw new Error('保存失败')}catch(err){alert('发布失败: '+err.message);ojProbs.shift()}
+    }
+  </script>
 
-// ============ INIT ============
-window.addEventListener('resize',function(){
-  if(confettiAnim){var c=document.getElementById('confetti-canvas');c.width=window.innerWidth;c.height=window.innerHeight}
-});
 
-document.addEventListener('keydown',function(e){
-  if(e.key==='Escape'){var o=document.getElementById('ac-overlay');if(o.classList.contains('show'))closeAC()}
-});
+    function clearOJCode(){var e=document.getElementById('ojCode');if(e)e.value=''}
 
-// Boot
-renderNav();
-loadProblems();
-</script>
+  </script>
 </body>
-</html>
