@@ -216,11 +216,14 @@
   <div class="lp" id="loginPage"><div class="lb"><div class="ic"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div><h2>在线考试系统</h2><p>请先登录以参加考试</p><button onclick="showLoginModal()">登录 / 注册</button></div></div>
 
   <div class="main" id="mainContent" style="display:none">
+    <div class="tab-nav">
+      <a class="tab-btn" href="/learn.html">资源</a>
+      <a class="tab-btn on" href="/exam.html">考试</a>
+      <a class="tab-btn" href="/oj.html">OJ</a>
+    </div>
     <div class="hd">
       <div><h1>在线考试<span class="badge">V3.0</span></h1><p class="sub">在线答题 · 即时评分 | 管理员可创建考试</p></div>
-      <div class="hbtns">
-        <a href="/learn.html" class="bg">学习</a><a href="/oj.html" class="bg">OJ</a>
-      </div>
+      <div class="hbtns"></div>
     </div>
     <div id="examHome"></div>
   </div>
