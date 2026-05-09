@@ -180,6 +180,94 @@
     .oj-pagi .cur{background:#111827;color:#fff;font-weight:600}.oj-pagi .cur:hover{background:#1f2937}
     .oj-pagi .dots{padding:0 6px;color:#9ca3af;font-size:12px}
     .oj-notice{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:8px;font-size:12px;color:#166534}
+
+    /* ====== OJ Detail Page - Enhanced Coding UI ====== */
+    #mainContent.oj-detail-active{max-width:1400px}
+    .oj-detail-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+    .oj-topbar-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .oj-detail-split{display:flex;gap:16px;min-height:calc(100vh - 200px)}
+    .oj-prob-left{flex:1;overflow-y:auto;padding-right:8px;min-width:0;max-height:calc(100vh - 160px)}
+    .oj-prob-right{flex:1;display:flex;flex-direction:column;min-width:0}
+    .oj-detail-split.full-editor .oj-prob-left{display:none}
+    .oj-detail-split.full-editor .oj-prob-right{flex:1}
+    @media(max-width:768px){.oj-detail-split{flex-direction:column}.oj-prob-left{max-height:40vh;padding-right:0}}
+    .oj-prob-desc-card{background:#f9fafb;border-radius:14px;padding:20px;border:1px solid #e5e7eb}
+    .oj-prob-desc-card h4{font-size:16px;font-weight:600;margin-bottom:10px}
+    .oj-prob-desc-card .oj-diff-badge{font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600;margin-left:6px;vertical-align:middle}
+    .oj-prob-desc-card .p-meta{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:#6b7280;margin-bottom:14px}
+    .oj-prob-desc-card .p-desc{font-size:13px;color:#374151;line-height:1.8;margin-bottom:10px}
+    .oj-prob-desc-card .p-desc p{margin-bottom:6px}
+    .oj-prob-desc-card .p-section{margin-top:16px;padding-top:14px;border-top:1px solid #e5e7eb}
+    .oj-prob-desc-card .p-section h5{font-size:14px;font-weight:600;margin-bottom:8px;color:#111827}
+    .oj-prob-desc-card .p-section p{font-size:13px;color:#6b7280;line-height:1.7;margin-bottom:6px}
+    .oj-prob-desc-card pre{background:#1e293b;color:#e2e8f0;padding:14px;border-radius:10px;font-size:12px;overflow-x:auto;margin:6px 0;font-family:'Courier New',monospace}
+    .oj-prob-desc-card .sample-box{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:8px 0}
+    .oj-prob-desc-card .sample-label{font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;margin-bottom:4px;display:block}
+    @media(max-width:600px){.oj-prob-desc-card .sample-box{grid-template-columns:1fr}}
+    .oj-editor-toolbar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#1e293b;border:1px solid #334155;border-bottom:none;border-radius:12px 12px 0 0;flex-wrap:wrap;gap:8px}
+    .oj-toolbar-left{display:flex;align-items:center;gap:10px}
+    .oj-lang-sel select{padding:5px 10px;background:#334155;color:#e2e8f0;border:1px solid #475569;border-radius:8px;font-size:12px;cursor:pointer}
+    .oj-lang-sel select option{background:#1e293b;color:#e2e8f0}
+    .oj-font-sel{display:flex;gap:2px}
+    .oj-font-btn{padding:3px 8px;background:#334155;color:#94a3b8;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:.15s;border:1px solid transparent}
+    .oj-font-btn:hover{background:#475569;color:#e2e8f0}
+    .oj-font-btn.active{background:#475569;color:#22c55e;border-color:#22c55e}
+    .oj-font-btn:first-child{font-size:10px}
+    .oj-font-btn:last-child{font-size:14px}
+    .oj-editor-container{display:flex;background:#1e293b;border:1px solid #334155;border-top:none;min-height:280px;position:relative}
+    .oj-line-numbers{width:48px;background:#0f172a;color:#64748b;padding:14px 8px 14px 4px;text-align:right;font-family:'Courier New',monospace;font-size:13px;line-height:1.6;overflow:hidden;user-select:none;flex-shrink:0;border-right:1px solid #334155}
+    .oj-code-textarea{flex:1;padding:14px;background:#1e293b;color:#e2e8f0;border:none;font-size:13px;font-family:'Courier New',monospace;line-height:1.6;resize:vertical;min-height:280px;tab-size:4;outline:none;white-space:pre;overflow-wrap:normal;overflow-x:auto}
+    .oj-code-textarea::placeholder{color:#475569}
+    .oj-code-textarea.font-s,.oj-line-numbers.font-s{font-size:11px;line-height:1.5}
+    .oj-code-textarea.font-l,.oj-line-numbers.font-l{font-size:15px;line-height:1.7}
+    .oj-action-bar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+    .oj-submit-btn{background:#16a34a!important}.oj-submit-btn:hover{background:#15803d!important}
+    .oj-result{margin-top:12px;border-radius:14px;display:none;overflow:hidden}
+    .oj-result.show{display:block}
+    .oj-result.ac{background:#f0fdf4;border:2px solid #22c55e;animation:pulse-green 2s ease-in-out 3}
+    .oj-result.wa{background:#fef2f2;border:1px solid #fecaca}
+    .oj-result.ce{background:#fff7ed;border:1px solid #fed7aa}
+    .oj-result.re{background:#f5f3ff;border:1px solid #ddd6fe}
+    .oj-result.tle{background:#fefce8;border:1px solid #fde68a}
+    @keyframes pulse-green{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}50%{box-shadow:0 0 20px 4px rgba(34,197,94,.3)}}
+    .oj-ac-header{text-align:center;padding:20px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-bottom:1px solid #bbf7d0}
+    .oj-ac-header .ac-title{font-size:28px;font-weight:800;color:#16a34a;animation:ac-bounce .6s ease}
+    .oj-ac-header .ac-subtitle{font-size:14px;color:#166534;margin-top:4px}
+    @keyframes ac-bounce{0%{transform:scale(.3);opacity:0}50%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+    .oj-test-table{width:100%;border-collapse:collapse;font-size:12px}
+    .oj-test-table th{background:#f9fafb;padding:8px 12px;text-align:left;font-weight:600;color:#6b7280;border-bottom:1px solid #e5e7eb}
+    .oj-test-table td{padding:8px 12px;border-bottom:1px solid #f3f4f6}
+    .oj-test-badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700}
+    .oj-test-badge.ac{background:#dcfce7;color:#16a34a}
+    .oj-test-badge.wa{background:#fee2e2;color:#dc2626}
+    .oj-test-badge.tle{background:#fef9c3;color:#ca8a04}
+    .oj-test-badge.ce{background:#ffedd5;color:#ea580c}
+    .oj-test-badge.re{background:#ede9fe;color:#7c3aed}
+    .oj-test-badge.running{background:#eff6ff;color:#2563eb;animation:blink 1s infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+    .oj-result-progress{height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden;margin:12px 0}
+    .oj-result-progress div{height:100%;border-radius:3px;transition:width .5s}
+    .confetti-container{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden}
+    .confetti-piece{position:absolute;width:10px;height:10px;top:-10px;animation:confetti-fall 3s ease-in-out forwards}
+    @keyframes confetti-fall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+    .oj-sub-modal{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+    .oj-sub-modal-content{background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.15);width:90%;max-width:500px;max-height:70vh;overflow:hidden;display:flex;flex-direction:column}
+    .oj-sub-modal-header{padding:16px 20px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;justify-content:space-between}
+    .oj-sub-modal-header h3{font-size:15px;font-weight:600}
+    .oj-sub-modal-body{padding:12px;overflow-y:auto;flex:1}
+    .oj-sub-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:10px;background:#f9fafb;margin-bottom:6px;font-size:12px;border:1px solid #f3f4f6}
+    .oj-sub-item .sub-left{display:flex;align-items:center;gap:8px}
+    .oj-sub-item .sub-time{color:#9ca3af;font-size:11px}
+    .oj-sub-empty{text-align:center;padding:30px;color:#9ca3af;font-size:13px}
+    .oj-running-info{padding:12px 16px;font-size:13px;color:#6b7280}
+    .oj-running-info .spin{display:inline-block;animation:spin 1s linear infinite;margin-right:6px}
+    @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    .oj-result h4{font-size:15px;font-weight:700;margin-bottom:8px}
+    .oj-result.ac h4{color:#16a34a}.oj-result.wa h4{color:#dc2626}.oj-result.ce h4{color:#ea580c}.oj-result.re h4{color:#7c3aed}.oj-result.tle h4{color:#ca8a04}
+    .oj-result pre{background:#fff;padding:10px;border-radius:8px;font-size:12px;overflow-x:auto;white-space:pre-wrap;font-family:'Courier New',monospace}
+    .oj-verdict{display:inline-block;padding:3px 12px;border-radius:8px;font-size:13px;font-weight:700;margin-right:8px}
+    .oj-verdict.ac{background:#dcfce7;color:#16a34a}.oj-verdict.wa{background:#fee2e2;color:#dc2626}.oj-verdict.tle{background:#fef9c3;color:#ca8a04}.oj-verdict.ce{background:#ffedd5;color:#ea580c}.oj-verdict.re{background:#ede9fe;color:#7c3aed}
+    .oj-score-bar{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;margin:10px 0}.oj-score-bar div{height:100%;border-radius:4px;transition:width .5s}
 </style>
 </head>
 <body>
@@ -289,7 +377,8 @@
     var UP=['Administrator','Ruiweihan','Xvjiarui','Wangpengyi','000001','000002'];
     var ADMINS=['Administrator','Ruiweihan','000001'];
     var cu=null,res=[],exams=[],ojProbs=[],curCat='',selFile=null,curTab='res',examTimer=null,currentPvRes=null;
-    var OJ_PER_PAGE=30,ojSearchQ='',ojFilterDiff='',ojFilterCat='',ojPage=1,ojLoaded=false;
+    var OJ_PER_PAGE=30,ojSearchQ='',ojFilterDiff='',ojFilterCat='',ojPage=1,ojLoaded=false,currentOJIdx=-1;
+    var OJ_SUBMISSIONS_KEY='rui_oj_submissions';
 
     function isAdmin(){return cu&&(ADMINS.indexOf(cu.username)>=0||ADMINS.indexOf(cu.uid)>=0)}
     function canUpload(){return cu&&(UP.indexOf(cu.username)>=0||UP.indexOf(cu.uid)>=0)}
@@ -366,6 +455,7 @@
       // Hide detail/add pages
       var dp=document.getElementById('ojDetailPage');if(dp)dp.style.display='none';
       var ap=document.getElementById('ojAddPage');if(ap)ap.style.display='none';
+      document.getElementById('mainContent').classList.remove('oj-detail-active');
       renderOJList();
     }
     function getFilteredOJ(){var q=ojSearchQ.toLowerCase().trim();return ojProbs.filter(function(p){if(q&&p.title.toLowerCase().indexOf(q)===-1&&p.id.toLowerCase().indexOf(q)===-1&&p.category.toLowerCase().indexOf(q)===-1)return false;if(ojFilterDiff&&p.difficulty!==ojFilterDiff)return false;if(ojFilterCat&&p.category!==ojFilterCat)return false;return true})}
@@ -438,6 +528,7 @@
     }
     function openOJProb(idx){
       var p=ojProbs[idx];if(!p)return;
+      currentOJIdx=idx;
       var diff={'入门':'入门','简单':'简单','中等':'中等','困难':'困难','挑战':'挑战','easy':'简单','medium':'中等','hard':'困难'}[p.difficulty]||p.difficulty||'简单';
       var dc={'easy':'#16a34a','medium':'#ca8a04','hard':'#dc2626'}[p.difficulty]||'#16a34a';
       var sampleCount=(p.samples||[]).length;
@@ -451,16 +542,28 @@
       var df=document.getElementById('ojDiffFilters');if(df)df.style.display='none';
       var cf=document.getElementById('ojCatFilters');if(cf)cf.style.display='none';
       var la=document.getElementById('ojListArea');if(la)la.style.display='none';
+      document.getElementById('mainContent').classList.add('oj-detail-active');
       // Create or reuse detail page
       var dp=document.getElementById('ojDetailPage');
       if(!dp){dp=document.createElement('div');dp.id='ojDetailPage';w.appendChild(dp)}
       dp.style.display='';
-      var h='<div style="margin-bottom:16px"><button class="bg" onclick="showOJList()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M19 12H5m7-7l-7 7 7 7"/></svg> 返回题目列表</button></div>';
-      h+='<div class="oj-problem"><h4>'+esc(p.title)+' <span style="font-size:11px;padding:2px 8px;border-radius:20px;background:'+dc+'22;color:'+dc+';font-weight:600;margin-left:6px">'+esc(diff)+'</span></h4>';
-      h+='<div class="p-meta"><span>'+esc(p.category)+'</span><span>'+esc(p.id)+'</span><span>时间限制:'+(p.timeLimit||'1s')+'</span><span>内存限制:'+(p.memoryLimit||'256MB')+'</span><span>测试点:'+totalPoints+'</span></div>';
+      // Top bar
+      var h='<div class="oj-detail-topbar">';
+      h+='<button class="bg" onclick="showOJList()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M19 12H5m7-7l-7 7 7 7"/></svg> 返回题目列表</button>';
+      h+='<div class="oj-topbar-actions">';
+      h+='<button class="bg" onclick="showSubmissions(\''+esc(p.id)+'\')">📋 提交记录</button>';
+      h+='<button class="bg" id="ojSplitToggle" onclick="toggleSplitView()">⬜ 切换布局</button>';
+      h+='</div></div>';
+      // Split view
+      h+='<div class="oj-detail-split" id="ojDetailSplit">';
+      // Left panel - Problem description
+      h+='<div class="oj-prob-left" id="ojProbLeft">';
+      h+='<div class="oj-prob-desc-card">';
+      h+='<h4>'+esc(p.title)+' <span class="oj-diff-badge" style="background:'+dc+'22;color:'+dc+'">'+esc(diff)+'</span></h4>';
+      h+='<div class="p-meta"><span>'+esc(p.category)+'</span><span>'+esc(p.id)+'</span><span>⏱ '+(p.timeLimit||'1s')+'</span><span>💾 '+(p.memoryLimit||'256MB')+'</span><span>测试点:'+totalPoints+'</span></div>';
       h+='<div class="p-desc">'+(p.description||'暂无题目描述').split('\n').map(function(l){return'<p>'+esc(l)+'</p>'}).join('')+'</div>';
-      if(p.inputFormat)h+='<div class="p-section"><h5>输入格式</h5><div>'+p.inputFormat.split('\n').map(function(l){return'<p>'+esc(l)+'</p>'}).join('')+'</div></div>';
-      if(p.outputFormat)h+='<div class="p-section"><h5>输出格式</h5><div>'+p.outputFormat.split('\n').map(function(l){return'<p>'+esc(l)+'</p>'}).join('')+'</div></div>';
+      if(p.inputFormat||p.inputDesc)h+='<div class="p-section"><h5>输入格式</h5><div>'+(p.inputFormat||p.inputDesc).split('\n').map(function(l){return'<p>'+esc(l)+'</p>'}).join('')+'</div></div>';
+      if(p.outputFormat||p.outputDesc)h+='<div class="p-section"><h5>输出格式</h5><div>'+(p.outputFormat||p.outputDesc).split('\n').map(function(l){return'<p>'+esc(l)+'</p>'}).join('')+'</div></div>';
       if(p.constraints)h+='<div class="p-section"><h5>数据范围</h5><div>'+p.constraints.split('\n').map(function(l){return'<p>'+esc(l)+'</p>'}).join('')+'</div></div>';
       if(p.samples&&p.samples.length){
         h+='<div class="p-section"><h5>样例</h5>';
@@ -469,13 +572,42 @@
         });
         h+='</div>';
       }
-      h+='<div class="p-section"><h5>提交代码</h5>';
-      h+='<div class="lang-sel"><label>语言：</label><select id="ojLang"><option value="cpp">C++</option><option value="c">C</option><option value="python">Python</option><option value="java">Java</option></select></div>';
-      h+='<textarea id="ojCode" class="code-editor" placeholder="在此输入代码..." rows="12"></textarea>';
-      h+='<div style="display:flex;gap:8px;margin-top:10px"><button class="bd" onclick="submitOJ(\''+p.id+'\')">提交</button><button class="bg" onclick="clearOJCode()">清空</button></div>';
-      h+='<div id="ojResult"></div></div>';
+      h+='</div></div>';
+      // Right panel - Code editor + results
+      h+='<div class="oj-prob-right" id="ojProbRight">';
+      // Editor toolbar
+      h+='<div class="oj-editor-toolbar">';
+      h+='<div class="oj-toolbar-left">';
+      h+='<div class="oj-lang-sel"><select id="ojLang" onchange="changeLang()">';
+      h+='<option value="cpp">🔷 C++</option>';
+      h+='<option value="c">🔶 C</option>';
+      h+='<option value="python">🐍 Python</option>';
+      h+='<option value="java">☕ Java</option>';
+      h+='<option value="javascript">🟨 JS</option>';
+      h+='</select></div>';
+      h+='<div class="oj-font-sel">';
+      h+='<button class="oj-font-btn" onclick="setFontSize(\'s\')" title="小字号">A</button>';
+      h+='<button class="oj-font-btn active" onclick="setFontSize(\'m\')" title="中字号">A</button>';
+      h+='<button class="oj-font-btn" onclick="setFontSize(\'l\')" title="大字号">A</button>';
       h+='</div>';
+      h+='</div></div>';
+      // Code editor with line numbers
+      h+='<div class="oj-editor-container" id="ojEditorContainer">';
+      h+='<div class="oj-line-numbers" id="ojLineNumbers">1</div>';
+      h+='<textarea id="ojCode" class="oj-code-textarea" placeholder="在此输入代码..." spellcheck="false"></textarea>';
+      h+='</div>';
+      // Action buttons
+      h+='<div class="oj-action-bar">';
+      h+='<button class="bd oj-submit-btn" onclick="submitOJ()">📤 提交</button>';
+      h+='<button class="bg" onclick="testOJSample()">▶ 运行样例</button>';
+      h+='<button class="bg" onclick="clearOJCode()">🗑 清空</button>';
+      h+='</div>';
+      // Result area
+      h+='<div class="oj-result" id="ojRes"></div>';
+      h+='</div></div>'; // close oj-prob-right and oj-detail-split
       dp.innerHTML=h;
+      // Setup editor features
+      setupEditor();
     }
 
     function changeLang(){
@@ -496,104 +628,310 @@
       return await r.json();
     }
 
-    function showOJResult(verdict,score,total,extra){
+    function showOJResult(verdict,testResults,extra){
       var resEl=document.getElementById('ojRes');
+      if(!resEl)return;
+      var total=testResults.length;
+      var acCount=testResults.filter(function(t){return t.status==='ac'}).length;
       var label={ac:'Accepted',wa:'Wrong Answer',tle:'Time Limit Exceeded',ce:'Compilation Error',re:'Runtime Error'}[verdict]||verdict;
       resEl.className='oj-result show '+verdict;
-      var pct=total>0?Math.round(score/total*100):0;
+      var pct=total>0?Math.round(acCount/total*100):0;
       var barColor=verdict==='ac'?'#16a34a':verdict==='wa'?'#dc2626':verdict==='tle'?'#ca8a04':verdict==='ce'?'#ea580c':'#7c3aed';
-      var h='<div style="display:flex;align-items:center;margin-bottom:12px"><span class="oj-verdict '+verdict+'">'+verdict.toUpperCase()+'</span><span style="font-size:14px;font-weight:600">'+label+'</span></div>';
-      h+='<div style="font-size:16px;font-weight:700;margin-bottom:4px">'+verdict.toUpperCase()+' '+score+'/'+total+'</div>';
-      h+='<div class="oj-score-bar"><div style="width:'+pct+'%;background:'+barColor+'"></div></div>';
-      if(extra)h+='<pre style="margin-top:10px">'+extra+'</pre>';
+      var h='';
+      // AC celebration header
+      if(verdict==='ac'){
+        h+='<div class="oj-ac-header"><div class="ac-title">🎉 Accepted!</div><div class="ac-subtitle">恭喜！所有测试点通过</div></div>';
+      }else{
+        h+='<div style="display:flex;align-items:center;margin-bottom:12px;padding:12px 16px"><span class="oj-verdict '+verdict+'">'+verdict.toUpperCase()+'</span><span style="font-size:14px;font-weight:600">'+label+'</span></div>';
+      }
+      // Score summary
+      h+='<div style="padding:0 16px">';
+      h+='<div style="font-size:16px;font-weight:700;margin-bottom:4px">'+acCount+'/'+total+' 通过</div>';
+      h+='<div class="oj-result-progress"><div style="width:'+pct+'%;background:'+barColor+'"></div></div>';
+      h+='</div>';
+      // Test case table
+      if(total>0){
+        h+='<div style="padding:8px 16px"><table class="oj-test-table"><thead><tr><th>#</th><th>状态</th><th>耗时</th><th>内存</th></tr></thead><tbody>';
+        testResults.forEach(function(t,i){
+          var statusLabel={ac:'AC',wa:'WA',tle:'TLE',ce:'CE',re:'RE',running:'...'}[t.status]||t.status;
+          h+='<tr><td>'+(i+1)+'</td><td><span class="oj-test-badge '+t.status+'">'+statusLabel+'</span></td><td>'+(t.time||'-')+'</td><td>'+(t.memory||'-')+'</td></tr>';
+        });
+        h+='</tbody></table></div>';
+      }
+      if(extra)h+='<div style="padding:0 16px 12px"><pre style="margin-top:10px">'+extra+'</pre></div>';
+      resEl.innerHTML=h;
+      // AC celebration effects
+      if(verdict==='ac'){
+        showConfetti();
+      }
+    }
+
+    function showRunningResult(currentIdx,totalTests){
+      var resEl=document.getElementById('ojRes');
+      if(!resEl)return;
+      resEl.className='oj-result show ce';
+      var h='<div class="oj-running-info"><span class="spin">⏳</span> 正在运行测试点 '+(currentIdx+1)+'/'+totalTests+'...</div>';
+      h+='<div class="oj-result-progress"><div style="width:'+Math.round(currentIdx/totalTests*100)+'%;background:#3b82f6"></div></div>';
+      // Show already completed test cases
+      if(window._ojTestResults&&window._ojTestResults.length>0){
+        h+='<div style="padding:8px 16px"><table class="oj-test-table"><thead><tr><th>#</th><th>状态</th><th>耗时</th><th>内存</th></tr></thead><tbody>';
+        window._ojTestResults.forEach(function(t,i){
+          var statusLabel={ac:'AC',wa:'WA',tle:'TLE',ce:'CE',re:'RE',running:'...'}[t.status]||t.status;
+          h+='<tr><td>'+(i+1)+'</td><td><span class="oj-test-badge '+t.status+'">'+statusLabel+'</span></td><td>'+(t.time||'-')+'</td><td>'+(t.memory||'-')+'</td></tr>';
+        });
+        // Running row
+        if(currentIdx<totalTests){
+          h+='<tr><td>'+(currentIdx+1)+'</td><td><span class="oj-test-badge running">...</span></td><td>-</td><td>-</td></tr>';
+        }
+        h+='</tbody></table></div>';
+      }
       resEl.innerHTML=h;
     }
 
-    async function submitOJ(idx){
-      var p=ojProbs[idx];if(!p)return;
+    async function submitOJ(){
+      var p=ojProbs[currentOJIdx];if(!p)return;
       var code=document.getElementById('ojCode').value;
       var lang=document.getElementById('ojLang').value;
       var langId=LANG_IDS[lang]||54;
-      var resEl=document.getElementById('ojRes');resEl.className='oj-result show ce';resEl.innerHTML='<h4>判题中...</h4><pre>正在运行，请稍候...</pre>';
-
+      if(!code.trim()){alert('请输入代码');return}
+      var resEl=document.getElementById('ojRes');
+      resEl.className='oj-result show ce';
+      resEl.innerHTML='<div class="oj-running-info"><span class="spin">⏳</span> 准备判题...</div>';
       var allTests=[];
       if(p.samples&&p.samples.length){p.samples.forEach(function(s){allTests.push({input:s.input,output:s.output})})}
       if(p.testData&&p.testData.length){p.testData.forEach(function(s){allTests.push({input:s.input,output:s.output})})}
-
       if(!allTests.length){resEl.className='oj-result show ce';resEl.innerHTML='<h4>无测试数据</h4><pre>该题目没有设置测试数据</pre>';return}
       var totalTests=allTests.length;
-      var acCount=0,tleCount=0;
-
+      var testResults=[];
+      window._ojTestResults=testResults;
+      var acCount=0,tleCount=0,stopped=false;
       try{
         for(var si=0;si<totalTests;si++){
+          if(stopped)break;
+          showRunningResult(si,totalTests);
           var s=allTests[si];
           try{
             var d=await runJudge0(langId,code,s.input,p.timeLimit||2,p.memoryLimit||128);
             if(d.status&&d.status.id===3){
               var output=(d.stdout||'').trim();
               var expected=(s.output||'').trim();
-              if(output===expected){acCount++}
+              if(output===expected){
+                acCount++;
+                testResults.push({status:'ac',time:(d.time||'?')+'s',memory:d.memory?Math.round(d.memory/1024)+'MB':'?'});
+              }else{
+                testResults.push({status:'wa',time:(d.time||'?')+'s',memory:d.memory?Math.round(d.memory/1024)+'MB':'?'});
+              }
             }else if(d.status&&(d.status.id===5||d.status.id===6)){
               var errMsg=(d.compile_output||'').substring(0,300);
-              showOJResult('ce',acCount,totalTests,'编译错误\n\n'+errMsg);
+              testResults.push({status:'ce',time:'-',memory:'-'});
+              var finalVerdict='ce';
+              showOJResult(finalVerdict,testResults,'编译错误\n\n'+errMsg);
               saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'ce',score:acCount,total:totalTests,time:new Date().toISOString()});
-              return;
+              saveOJSubmission({probId:p.id,probTitle:p.title,user:cu.username,verdict:'ce',score:acCount,total:totalTests,language:lang,codeLength:code.length,time:new Date().toISOString()});
+              stopped=true;
             }else if(d.status&&(d.status.id===7||d.status.id===8||d.status.id===9||d.status.id===10||d.status.id===11||d.status.id===12)){
               var errMsg=(d.stderr||d.status.description||'运行时错误').substring(0,300);
-              showOJResult('re',acCount,totalTests,'Runtime Error\n\n'+errMsg);
+              testResults.push({status:'re',time:'-',memory:'-'});
+              var finalVerdict='re';
+              showOJResult(finalVerdict,testResults,'Runtime Error\n\n'+errMsg);
               saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'re',score:acCount,total:totalTests,time:new Date().toISOString()});
-              return;
+              saveOJSubmission({probId:p.id,probTitle:p.title,user:cu.username,verdict:'re',score:acCount,total:totalTests,language:lang,codeLength:code.length,time:new Date().toISOString()});
+              stopped=true;
             }else{
               var desc=(d.status&&d.status.description)||'';
-              if(desc.indexOf('Time Limit')>=0){tleCount++}
+              if(desc.indexOf('Time Limit')>=0){
+                tleCount++;
+                testResults.push({status:'tle',time:'TLE',memory:'-'});
+              }else{
+                testResults.push({status:'wa',time:(d.time||'?')+'s',memory:d.memory?Math.round(d.memory/1024)+'MB':'?'});
+              }
             }
           }catch(e){
-            showOJResult('re',acCount,totalTests,'运行时错误\n\n'+e.message);
+            testResults.push({status:'re',time:'-',memory:'-'});
+            showOJResult('re',testResults,'运行时错误\n\n'+e.message);
             saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'re',score:acCount,total:totalTests,time:new Date().toISOString()});
-            return;
+            saveOJSubmission({probId:p.id,probTitle:p.title,user:cu.username,verdict:'re',score:acCount,total:totalTests,language:lang,codeLength:code.length,time:new Date().toISOString()});
+            stopped=true;
           }
         }
-
-        if(acCount===totalTests){
-          showOJResult('ac',acCount,totalTests,'');
-          saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'ac',score:acCount,total:totalTests,time:new Date().toISOString()});
-        }else if(tleCount>0){
-          showOJResult('tle',acCount,totalTests,'');
-          saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'tle',score:acCount,total:totalTests,time:new Date().toISOString()});
-        }else{
-          showOJResult('wa',acCount,totalTests,'');
-          saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'wa',score:acCount,total:totalTests,time:new Date().toISOString()});
+        if(!stopped){
+          var finalVerdict;
+          if(acCount===totalTests){finalVerdict='ac'}
+          else if(tleCount>0){finalVerdict='tle'}
+          else{finalVerdict='wa'}
+          showOJResult(finalVerdict,testResults,'');
+          saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:finalVerdict,score:acCount,total:totalTests,time:new Date().toISOString()});
+          saveOJSubmission({probId:p.id,probTitle:p.title,user:cu.username,verdict:finalVerdict,score:acCount,total:totalTests,language:lang,codeLength:code.length,time:new Date().toISOString()});
         }
       }catch(err){
-        showOJResult('ce',0,totalTests,'判题服务暂不可用\n\n'+esc(err.message));
+        showOJResult('ce',testResults,'判题服务暂不可用\n\n'+esc(err.message));
       }
     }
 
-    function testOJ(idx){
-      var p=ojProbs[idx];if(!p)return;
+    function testOJSample(){
+      var p=ojProbs[currentOJIdx];if(!p)return;
       var code=document.getElementById('ojCode').value;
       var lang=document.getElementById('ojLang').value;
       var langId=LANG_IDS[lang]||54;
-      var resEl=document.getElementById('ojRes');resEl.className='oj-result show ce';resEl.innerHTML='<h4>运行中...</h4><pre>正在执行样例测试...</pre>';
-      var stdin=p.samples&&p.samples[0]?p.samples[0].input:'';
-      var expected=p.samples&&p.samples[0]?(p.samples[0].output||'').trim():'';
+      if(!code.trim()){alert('请输入代码');return}
+      var resEl=document.getElementById('ojRes');
+      resEl.className='oj-result show ce';
+      resEl.innerHTML='<div class="oj-running-info"><span class="spin">⏳</span> 正在运行样例...</div>';
+      var samples=p.samples||[];
+      if(!samples.length){resEl.className='oj-result show ce';resEl.innerHTML='<h4>无样例</h4><pre>该题目没有设置样例数据</pre>';return}
+      // Run first sample
+      var stdin=samples[0].input||'';
+      var expected=(samples[0].output||'').trim();
       runJudge0(langId,code,stdin,p.timeLimit||2,p.memoryLimit||128).then(function(d){
         if(d.status&&d.status.id===3){
           var output=(d.stdout||'').trim();
           var matched=output===expected;
-          var h='<div style="display:flex;align-items:center;margin-bottom:12px"><span class="oj-verdict '+(matched?'ac':'wa')+'">'+(matched?'MATCH':'MISMATCH')+'</span><span style="font-size:14px;font-weight:600">样例运行结果</span></div>';
+          var h='';
+          h+='<div style="display:flex;align-items:center;margin-bottom:12px;padding:12px 16px"><span class="oj-verdict '+(matched?'ac':'wa')+'">'+(matched?'PASS':'FAIL')+'</span><span style="font-size:14px;font-weight:600">样例运行结果</span></div>';
+          h+='<div style="padding:0 16px 12px">';
           h+='<pre>'+(output?'你的输出:\n'+esc(output):'(无输出)')+(expected?'\n\n期望输出:\n'+esc(expected):'');
           var err=d.stderr||'';
           if(err)h+='\n\n标准错误:\n'+esc(err);
           h+='\n\n运行时间: '+(d.time||'?')+'s\n内存: '+(d.memory?Math.round(d.memory/1024)+'MB':'?')+'</pre>';
+          h+='</div>';
           resEl.className='oj-result show '+(matched?'ac':'wa');
           resEl.innerHTML=h;
         }else{
           resEl.className='oj-result show ce';
           var errMsg=d.compile_output||d.stderr||(d.status&&d.status.description)||'运行错误';
-          resEl.innerHTML='<h4>运行错误</h4><pre>'+esc(errMsg.substring(0,500))+'</pre>';
+          resEl.innerHTML='<h4>运行错误</h4><div style="padding:0 16px 12px"><pre>'+esc(errMsg.substring(0,500))+'</pre></div>';
         }
-      }).catch(function(e){resEl.className='oj-result show ce';resEl.innerHTML='<h4>运行失败</h4><pre>'+esc(e.message)+'</pre>'});
+      }).catch(function(e){resEl.className='oj-result show ce';resEl.innerHTML='<h4>运行失败</h4><div style="padding:0 16px 12px"><pre>'+esc(e.message)+'</pre></div>'});
+    }
+
+    // ====== Helper Functions ======
+
+    function setupEditor(){
+      var textarea=document.getElementById('ojCode');
+      var gutter=document.getElementById('ojLineNumbers');
+      if(!textarea||!gutter)return;
+      // Sync scroll
+      textarea.addEventListener('scroll',function(){
+        gutter.scrollTop=textarea.scrollTop;
+      });
+      // Update line numbers on input
+      textarea.addEventListener('input',function(){updateLineNumbers()});
+      // Tab key support
+      textarea.addEventListener('keydown',function(e){
+        if(e.key==='Tab'){
+          e.preventDefault();
+          var start=textarea.selectionStart;
+          var end=textarea.selectionEnd;
+          textarea.value=textarea.value.substring(0,start)+'    '+textarea.value.substring(end);
+          textarea.selectionStart=textarea.selectionEnd=start+4;
+          updateLineNumbers();
+        }
+        // Auto-indent on Enter
+        if(e.key==='Enter'){
+          e.preventDefault();
+          var start=textarea.selectionStart;
+          var val=textarea.value;
+          var lineStart=val.lastIndexOf('\n',start-1)+1;
+          var currentLine=val.substring(lineStart,start);
+          var indent=currentLine.match(/^(\s*)/)[1];
+          // Add extra indent after { or :
+          var lastChar=val.substring(start-1,start);
+          if(lastChar==='{'||lastChar==='：'){
+            indent+='    ';
+          }
+          textarea.value=val.substring(0,start)+'\n'+indent+val.substring(start);
+          textarea.selectionStart=textarea.selectionEnd=start+1+indent.length;
+          updateLineNumbers();
+        }
+      });
+      updateLineNumbers();
+    }
+
+    function updateLineNumbers(){
+      var textarea=document.getElementById('ojCode');
+      var gutter=document.getElementById('ojLineNumbers');
+      if(!textarea||!gutter)return;
+      var lines=textarea.value.split('\n').length;
+      var nums=[];
+      for(var i=1;i<=lines;i++)nums.push(i);
+      gutter.textContent=nums.join('\n');
+    }
+
+    function setFontSize(size){
+      var textarea=document.getElementById('ojCode');
+      var gutter=document.getElementById('ojLineNumbers');
+      if(!textarea||!gutter)return;
+      textarea.classList.remove('font-s','font-l');
+      gutter.classList.remove('font-s','font-l');
+      if(size==='s'){textarea.classList.add('font-s');gutter.classList.add('font-s')}
+      else if(size==='l'){textarea.classList.add('font-l');gutter.classList.add('font-l')}
+      // Update button states
+      var btns=document.querySelectorAll('.oj-font-btn');
+      btns.forEach(function(b){b.classList.remove('active')});
+      var idx=size==='s'?0:size==='l'?2:1;
+      if(btns[idx])btns[idx].classList.add('active');
+      updateLineNumbers();
+    }
+
+    function toggleSplitView(){
+      var split=document.getElementById('ojDetailSplit');
+      var btn=document.getElementById('ojSplitToggle');
+      if(!split)return;
+      if(split.classList.contains('full-editor')){
+        split.classList.remove('full-editor');
+        btn.textContent='⬜ 切换布局';
+      }else{
+        split.classList.add('full-editor');
+        btn.textContent='◀ 返回分屏';
+      }
+    }
+
+    function showConfetti(){
+      var container=document.createElement('div');
+      container.className='confetti-container';
+      document.body.appendChild(container);
+      var colors=['#16a34a','#22c55e','#4ade80','#86efac','#fbbf24','#f59e0b','#ef4444','#3b82f6','#8b5cf6','#ec4899'];
+      for(var i=0;i<80;i++){
+        var piece=document.createElement('div');
+        piece.className='confetti-piece';
+        piece.style.left=Math.random()*100+'%';
+        piece.style.backgroundColor=colors[Math.floor(Math.random()*colors.length)];
+        piece.style.animationDelay=Math.random()*1.5+'s';
+        piece.style.animationDuration=(2+Math.random()*2)+'s';
+        piece.style.width=(6+Math.random()*8)+'px';
+        piece.style.height=(6+Math.random()*8)+'px';
+        piece.style.borderRadius=Math.random()>0.5?'50%':'2px';
+        container.appendChild(piece);
+      }
+      setTimeout(function(){container.remove()},5000);
+    }
+
+    function getOJSubmissions(){try{return JSON.parse(localStorage.getItem(OJ_SUBMISSIONS_KEY)||'[]')}catch(e){return[]}}
+    function saveOJSubmission(data){var subs=getOJSubmissions();subs.unshift(data);if(subs.length>200)subs=subs.slice(0,200);localStorage.setItem(OJ_SUBMISSIONS_KEY,JSON.stringify(subs))}
+
+    function showSubmissions(probId){
+      // Remove existing modal
+      var existing=document.querySelector('.oj-sub-modal');
+      if(existing)existing.remove();
+      var subs=getOJSubmissions().filter(function(s){return s.probId===probId});
+      var modal=document.createElement('div');
+      modal.className='oj-sub-modal';
+      modal.onclick=function(e){if(e.target===modal)modal.remove()};
+      var h='<div class="oj-sub-modal-content">';
+      h+='<div class="oj-sub-modal-header"><h3>📋 提交记录</h3><button class="xbtn" onclick="this.closest(\'.oj-sub-modal\').remove()">✕</button></div>';
+      h+='<div class="oj-sub-modal-body">';
+      if(!subs.length){
+        h+='<div class="oj-sub-empty">暂无提交记录</div>';
+      }else{
+        subs.forEach(function(s){
+          var vLabel={ac:'AC',wa:'WA',tle:'TLE',ce:'CE',re:'RE'}[s.verdict]||s.verdict;
+          var langLabel={cpp:'C++',c:'C',python:'Python',java:'Java',javascript:'JS'}[s.language]||s.language||'?';
+          h+='<div class="oj-sub-item"><div class="sub-left"><span class="oj-test-badge '+s.verdict+'">'+vLabel+'</span><span>'+s.score+'/'+s.total+'</span><span style="color:#6b7280">'+langLabel+'</span><span style="color:#6b7280">'+s.codeLength+'B</span></div><span class="sub-time">'+ft(s.time)+'</span></div>';
+        });
+      }
+      h+='</div></div>';
+      modal.innerHTML=h;
+      document.body.appendChild(modal);
     }
 
     function showAddOJ(){
@@ -667,7 +1005,7 @@
   </script>
 
 
-    function clearOJCode(){var e=document.getElementById('ojCode');if(e)e.value=''}
+    function clearOJCode(){var e=document.getElementById('ojCode');if(e){e.value='';updateLineNumbers()}}
 
   </script>
 </body>
