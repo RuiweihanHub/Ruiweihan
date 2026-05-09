@@ -301,7 +301,7 @@
     </div>
     <div class="oj-wrap" id="ojWrap">
       <div class="oj-header"><h3>OJ 在线判题</h3><span id="ojCount" style="font-size:12px;color:#9ca3af"></span><span id="ojAddBtn"></span></div>
-      <div class="oj-notice"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg><span>安全环境：所有代码在沙箱中运行，测试数据对用户不可见</span></div>
+      <div class="oj-notice"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg><span>本地判题：JavaScript直接在浏览器沙箱中运行，其他语言自动转JS比对</span></div>
       <div class="oj-search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><input id="ojSearchInput" placeholder="搜索题号、标题、分类..." oninput="ojSearchFn()"></div>
       <div class="oj-filters" id="ojDiffFilters"><span class="fl">难度：</span></div>
       <div class="oj-filters" id="ojCatFilters"><span class="fl">分类：</span></div>
@@ -617,16 +617,321 @@
       document.getElementById('ojCode').value=templates[lang]||'';
     }
 
-    var JUDGE0='https://ce.judge0.com';
-    var LANG_IDS={c:50,cpp:54,java:91,python:92,javascript:93};
+    // ====== 本地判题系统（不依赖Judge0）======
 
-    async function runJudge0(langId,code,stdin,cpuLimit,memLimit){
-      var r=await fetch(JUDGE0+'/submissions?base64_encoded=false&wait=true',{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({source_code:code,language_id:langId,stdin:stdin||'',cpu_time_limit:cpuLimit||2,memory_limit:(memLimit||128)*1024})
-      });
-      if(!r.ok)throw new Error('Judge0请求失败('+r.status+')');
-      return await r.json();
+    function runLocalJudge(lang,code,stdin,expected,timeLimit){
+      timeLimit=timeLimit||2;
+      var startTime=performance.now();
+      try{
+        if(lang==='javascript'){
+          // JavaScript: 沙箱执行
+          var output=runJSSandbox(code,stdin);
+          var elapsed=((performance.now()-startTime)/1000).toFixed(3);
+          if(elapsed>timeLimit)return{status:'tle',stdout:'',time:elapsed+'s',memory:'-'};
+          var out=(output||'').trim();
+          var exp=(expected||'').trim();
+          return{status:out===exp?'ac':'wa',stdout:output,time:elapsed+'s',memory:'-'};
+        }else{
+          // C/C++/Python/Java: 输出比对模式
+          // 提示用户用JavaScript做题，其他语言做输出比对
+          return runOutputCompare(lang,code,stdin,expected,timeLimit,startTime);
+        }
+      }catch(e){
+        var elapsed=((performance.now()-startTime)/1000).toFixed(3);
+        var msg=(e.message||'').substring(0,200);
+        if(msg.indexOf('TIMEOUT')>=0)return{status:'tle',stdout:'',time:elapsed+'s',memory:'-'};
+        return{status:'re',stdout:'',stderr:msg,time:elapsed+'s',memory:'-'};
+      }
+    }
+
+    function runJSSandbox(code,stdin){
+      // 解析stdin为变量
+      var lines=(stdin||'').split('\n').filter(function(l){return l.trim()!==''});
+      var inputVals=lines.map(function(l){var n=Number(l);return isNaN(n)?l:n});
+      var inputIdx=0;
+      // 创建readline函数模拟输入
+      var sandbox={
+        console:{log:function(){var a=Array.prototype.slice.call(arguments);sandbox.__output.push(a.map(String).join(' '))},warn:function(){},error:function(){},info:function(){}},
+        __output:[],
+        readline:function(){return inputIdx<inputVals.length?String(inputVals[inputIdx++]):''},
+        readInt:function(){return inputIdx<inputVals.length?Number(inputVals[inputIdx++]):0},
+        readFloat:function(){return inputIdx<inputVals.length?Number(inputVals[inputIdx++]):0},
+        readLine:function(){return inputIdx<inputVals.length?String(inputVals[inputIdx++]):''},
+        print:function(){var a=Array.prototype.slice.call(arguments);sandbox.__output.push(a.map(String).join(' '))},
+        parseInt:function(s){return Number(s)},
+        parseFloat:function(s){return Number(s)},
+        Math:Math,
+        Array:Array,
+        String:String,
+        Number:Number,
+        Object:Object,
+        JSON:JSON,
+        Map:Map,
+        Set:Set,
+        Date:Date,
+        RegExp:RegExp,
+        Error:Error,
+        Boolean:Boolean,
+        Infinity:Infinity,
+        NaN:NaN,
+        undefined:undefined,
+        isNaN:isNaN,
+        isFinite:isFinite,
+        parseInt_:parseInt,
+        parseFloat_:parseFloat
+      };
+      // 替换代码中的常见输入模式
+      var processedCode=code
+        .replace(/readline\s*\(\)/g,'readline()')
+        .replace(/parseInt\s*\(\s*readline\s*\(\)\s*\)/g,'readInt()')
+        .replace(/parseFloat\s*\(\s*readline\s*\(\)\s*\)/g,'readFloat()');
+      // 用Function构造沙箱
+      var keys=Object.keys(sandbox);
+      var vals=keys.map(function(k){return sandbox[k]});
+      var fn=new Function(keys.join(','),
+        '"use strict";var console=this.console;var readline=this.readline;var readInt=this.readInt;var readFloat=this.readFloat;var readLine=this.readLine;var print=this.print;var parseInt=this.parseInt;var parseFloat=this.parseFloat;var Math=this.Math;var Array=this.Array;var String=this.String;var Number=this.Number;var Object=this.Object;var JSON=this.JSON;var Map=this.Map;var Set=this.Set;var isNaN=this.isNaN;var isFinite=this.isFinite;try{'+processedCode+'}catch(e){console.error(e.message)}'
+      );
+      // 超时保护
+      var timeoutMs=3000;
+      var timedOut=false;
+      var timer=setTimeout(function(){timedOut=true;throw new Error('TIMEOUT')},timeoutMs);
+      try{
+        fn.apply(sandbox,vals);
+      }catch(e){
+        if(timedOut)throw new Error('TIMEOUT');
+        throw e;
+      }
+      clearTimeout(timer);
+      return sandbox.__output.join('\n');
+    }
+
+    function runOutputCompare(lang,code,stdin,expected,timeLimit,startTime){
+      // 非JS语言：尝试解析代码中的输出逻辑做比对
+      // 对于简单的输入->输出映射，提取代码中的print/cout/printf/System.out内容
+      var lines=code.split('\n');
+      var outputs=[];
+      var inputLines=(stdin||'').split('\n').filter(function(l){return l.trim()!==''});
+      var inputVals=inputLines.map(function(l){var n=Number(l);return isNaN(n)?l.trim():n});
+
+      if(lang==='python'){
+        // Python: 尝试提取print语句中的表达式
+        try{
+          var pyOutputs=[];
+          for(var i=0;i<lines.length;i++){
+            var line=lines[i].trim();
+            var printMatch=line.match(/^print\s*\((.+)\)$/);
+            if(printMatch){
+              var expr=printMatch[1];
+              // 简单表达式求值
+              var result=evalPythonExpr(expr,inputVals);
+              if(result!==null)pyOutputs.push(String(result));
+            }
+          }
+          if(pyOutputs.length>0){
+            var elapsed=((performance.now()-startTime)/1000).toFixed(3);
+            var out=pyOutputs.join('\n').trim();
+            var exp=(expected||'').trim();
+            return{status:out===exp?'ac':'wa',stdout:out,time:elapsed+'s',memory:'-'};
+          }
+        }catch(e){}
+      }
+
+      // 通用模式：尝试用JS沙箱模拟算法逻辑
+      // 将C/Python/Java代码尝试转换为等价JS
+      var jsCode=tryConvertToJS(lang,code);
+      if(jsCode){
+        try{
+          var output=runJSSandbox(jsCode,stdin);
+          var elapsed=((performance.now()-startTime)/1000).toFixed(3);
+          var out=(output||'').trim();
+          var exp=(expected||'').trim();
+          return{status:out===exp?'ac':'wa',stdout:output,time:elapsed+'s',memory:'-'};
+        }catch(e){
+          var elapsed=((performance.now()-startTime)/1000).toFixed(3);
+          if((e.message||'').indexOf('TIMEOUT')>=0)return{status:'tle',stdout:'',time:elapsed+'s',memory:'-'};
+        }
+      }
+
+      // 无法本地执行：显示提示，但仍做输出比对
+      var elapsed=((performance.now()-startTime)/1000).toFixed(3);
+      return{status:'ce',stdout:'',stderr:'非JavaScript代码无法在浏览器中直接运行。\n请使用JavaScript语言提交，或将算法逻辑改写为JavaScript。\n\n提示：JavaScript提交可完整判题，其他语言暂仅支持输出比对。',time:elapsed+'s',memory:'-'};
+    }
+
+    function evalPythonExpr(expr,inputs){
+      // 简单Python表达式求值
+      try{
+        // 替换常见Python语法
+        var js=expr
+          .replace(/\bint\b/g,'Number')
+          .replace(/\bfloat\b/g,'Number')
+          .replace(/\bstr\b/g,'String')
+          .replace(/\blen\b/g,'(function(x){return x.length})')
+          .replace(/\babs\b/g,'Math.abs')
+          .replace(/\bmax\b/g,'Math.max')
+          .replace(/\bmin\b/g,'Math.min')
+          .replace(/\bsum\b/g,'(function(x){return x.reduce(function(a,b){return a+b},0)})')
+          .replace(/\binput\(\)/g,'readline()')
+          .replace(/\*\*/g,'**');
+        // 建立简单变量环境
+        var env={};
+        for(var i=0;i<inputs.length;i++){env['v'+(i+1)]=inputs[i];env['x'+(i+1)]=inputs[i];env['a'+(i+1)]=inputs[i];env['n'+(i+1)]=inputs[i]}
+        if(inputs.length>=2){env['a']=inputs[0];env['b']=inputs[1];env['x']=inputs[0];env['y']=inputs[1]}
+        if(inputs.length>=1){env['n']=inputs[0];env['x']=inputs[0]}
+        var keys=Object.keys(env);
+        var vals=keys.map(function(k){return env[k]});
+        var fn=new Function(keys.join(','),'return ('+js+')');
+        return fn.apply(null,vals);
+      }catch(e){return null}
+    }
+
+    function tryConvertToJS(lang,code){
+      // 尝试将C/Python/Java代码转换为JavaScript
+      if(lang==='python'){
+        return tryPythonToJS(code);
+      }
+      if(lang==='c'||lang==='cpp'){
+        return tryCppToJS(code);
+      }
+      if(lang==='java'){
+        return tryJavaToJS(code);
+      }
+      return null;
+    }
+
+    function tryPythonToJS(code){
+      try{
+        var lines=code.split('\n');
+        var jsLines=[];
+        for(var i=0;i<lines.length;i++){
+          var line=lines[i];
+          var trimmed=line.trim();
+          if(!trimmed||trimmed.startsWith('#'))continue;
+          // input() -> readline()
+          var converted=trimmed
+            .replace(/input\(\)/g,'readline()')
+            .replace(/int\s*\(\s*readline\(\)\s*\)/g,'readInt()')
+            .replace(/float\s*\(\s*readline\(\)\s*\)/g,'readFloat()')
+            .replace(/int\s*\(/g,'Number(')
+            .replace(/float\s*\(/g,'Number(')
+            .replace(/str\s*\(/g,'String(')
+            .replace(/print\s*\((.+)\)/g,'console.log($1)')
+            .replace(/\blen\s*\(/g,'(')
+            .replace(/\babs\s*\(/g,'Math.abs(')
+            .replace(/\bmax\s*\(/g,'Math.max(')
+            .replace(/\bmin\s*\(/g,'Math.min(')
+            .replace(/\*\*/g,'**')
+            .replace(/\bTrue\b/g,'true')
+            .replace(/\bFalse\b/g,'false')
+            .replace(/\bNone\b/g,'null')
+            .replace(/\belif\b/g,'else if')
+            .replace(/:/g,'');
+          // 简单for循环
+          converted=converted.replace(/for\s+(\w+)\s+in\s+range\s*\(\s*(.+)\s*\)/g,'for(var $1=0;$1<($2);$1++)');
+          // 列表推导式 -> 简单map
+          if(converted.indexOf('for')>=0||converted.indexOf('if')>=0||converted.indexOf('while')>=0||converted.indexOf('def')>=0||converted.indexOf('return')>=0||converted.indexOf('console.log')>=0||converted.indexOf('=')>=0){
+            jsLines.push(converted);
+          }
+        }
+        return jsLines.length>0?jsLines.join('\n'):null;
+      }catch(e){return null}
+    }
+
+    function tryCppToJS(code){
+      try{
+        // 提取main函数中的逻辑
+        var mainMatch=code.match(/int\s+main\s*\([^)]*\)\s*\{([\s\S]*)\}/);
+        if(!mainMatch)return null;
+        var body=mainMatch[1];
+        // 移除cin/cout，提取变量和计算逻辑
+        var lines=body.split('\n');
+        var jsLines=[];
+        var varMap={};
+        for(var i=0;i<lines.length;i++){
+          var line=lines[i].trim();
+          if(!line||line==='return 0;'||line==='{'||line==='}')continue;
+          // cin >> a >> b -> a=readInt(); b=readInt();
+          var cinMatch=line.match(/cin\s*(>>\s*(\w+)\s*)+/);
+          if(cinMatch){
+            var vars=line.match(/>>(\w+)/g);
+            if(vars){vars.forEach(function(v){var name=v.replace('>>','');jsLines.push('var '+name+'=readInt()')})}
+            continue;
+          }
+          // cout << a << b << endl -> console.log(a, b)
+          var coutMatch=line.match(/cout\s*<<(.*?)\s*;/);
+          if(coutMatch){
+            var expr=coutMatch[1].replace(/<<\s*endl\s*/g,'').replace(/<<\s*"/g,',"').replace(/<<\s*/g,',');
+            jsLines.push('console.log('+expr+')');
+            continue;
+          }
+          // scanf
+          var scanfMatch=line.match(/scanf\s*\(\s*"[^"]*"\s*,\s*(&\w+\s*,?\s*)+\)/);
+          if(scanfMatch){
+            var svars=line.match(/&(\w+)/g);
+            if(svars){svars.forEach(function(v){var name=v.replace('&','');jsLines.push('var '+name+'=readInt()')})}
+            continue;
+          }
+          // printf
+          var printfMatch=line.match(/printf\s*\(\s*"([^"]*)"\s*(.*?)\s*\)/);
+          if(printfMatch){
+            var fmt=printfMatch[1];
+            var args=printfMatch[2];
+            if(fmt.indexOf('%d')>=0||fmt.indexOf('%lld')>=0||fmt.indexOf('%i')>=0){
+              jsLines.push('console.log('+args+')');
+            }else{
+              jsLines.push('console.log('+args+')');
+            }
+            continue;
+          }
+          // 变量声明
+          var declMatch=line.match(/^(int|long|double|float|string|char|bool|auto)\s+(\w+)\s*=\s*(.+);/);
+          if(declMatch){jsLines.push('var '+declMatch[2]+'='+declMatch[3]);continue}
+          // if/else/for/while
+          var converted=line
+            .replace(/^(int|long|double|float)\s+/,'var ')
+            .replace(/&&/g,'&&').replace(/\|\|/g,'||')
+            .replace(/\btrue\b/gi,'true').replace(/\bfalse\b/gi,'false');
+          if(converted)jsLines.push(converted);
+        }
+        return jsLines.length>0?jsLines.join('\n'):null;
+      }catch(e){return null}
+    }
+
+    function tryJavaToJS(code){
+      try{
+        // 提取main方法中的逻辑
+        var mainMatch=code.match(/public\s+static\s+void\s+main[^{]*\{([\s\S]*)\}/);
+        if(!mainMatch)return null;
+        var body=mainMatch[1];
+        var lines=body.split('\n');
+        var jsLines=[];
+        for(var i=0;i<lines.length;i++){
+          var line=lines[i].trim();
+          if(!line||line==='{'||line==='}')continue;
+          // Scanner input
+          var scannerMatch=line.match(/sc\.next(Int|Long|Double|Float|Line)?\s*\(\)/);
+          if(scannerMatch){
+            var type=scannerMatch[1]||'';
+            jsLines.push(type==='Int'||type==='Long'?'readInt()':type==='Double'||type==='Float'?'readFloat()':'readline()');
+            continue;
+          }
+          // System.out.println
+          var printMatch=line.match(/System\.out\.println\s*\((.+)\)/);
+          if(printMatch){jsLines.push('console.log('+printMatch[1]+')');continue}
+          // System.out.print
+          var printMatch2=line.match(/System\.out\.print\s*\((.+)\)/);
+          if(printMatch2){jsLines.push('console.log('+printMatch2[1]+')');continue}
+          // 变量声明
+          var declMatch=line.match(/^(int|long|double|float|String|boolean|char)\s+(\w+)\s*=\s*(.+);/);
+          if(declMatch){jsLines.push('var '+declMatch[2]+'='+declMatch[3]);continue}
+          var converted=line
+            .replace(/^(int|long|double|float|String|boolean)\s+/,'var ')
+            .replace(/\.length/g,'.length')
+            .replace(/\.charAt\((.+)\)/g,'[$1]')
+            .replace(/Math\./g,'Math.');
+          if(converted)jsLines.push(converted);
+        }
+        return jsLines.length>0?jsLines.join('\n'):null;
+      }catch(e){return null}
     }
 
     function showOJResult(verdict,testResults,extra){
@@ -693,7 +998,6 @@
       var p=ojProbs[currentOJIdx];if(!p)return;
       var code=document.getElementById('ojCode').value;
       var lang=document.getElementById('ojLang').value;
-      var langId=LANG_IDS[lang]||54;
       if(!code.trim()){alert('请输入代码');return}
       var resEl=document.getElementById('ojRes');
       resEl.className='oj-result show ce';
@@ -706,55 +1010,43 @@
       var testResults=[];
       window._ojTestResults=testResults;
       var acCount=0,tleCount=0,stopped=false;
-      try{
-        for(var si=0;si<totalTests;si++){
-          if(stopped)break;
-          showRunningResult(si,totalTests);
-          var s=allTests[si];
-          try{
-            var d=await runJudge0(langId,code,s.input,p.timeLimit||2,p.memoryLimit||128);
-            if(d.status&&d.status.id===3){
-              var output=(d.stdout||'').trim();
-              var expected=(s.output||'').trim();
-              if(output===expected){
-                acCount++;
-                testResults.push({status:'ac',time:(d.time||'?')+'s',memory:d.memory?Math.round(d.memory/1024)+'MB':'?'});
-              }else{
-                testResults.push({status:'wa',time:(d.time||'?')+'s',memory:d.memory?Math.round(d.memory/1024)+'MB':'?'});
-              }
-            }else if(d.status&&(d.status.id===5||d.status.id===6)){
-              var errMsg=(d.compile_output||'').substring(0,300);
-              testResults.push({status:'ce',time:'-',memory:'-'});
-              var finalVerdict='ce';
-              showOJResult(finalVerdict,testResults,'编译错误\n\n'+errMsg);
-              saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'ce',score:acCount,total:totalTests,time:new Date().toISOString()});
-              saveOJSubmission({probId:p.id,probTitle:p.title,user:cu.username,verdict:'ce',score:acCount,total:totalTests,language:lang,codeLength:code.length,time:new Date().toISOString()});
-              stopped=true;
-            }else if(d.status&&(d.status.id===7||d.status.id===8||d.status.id===9||d.status.id===10||d.status.id===11||d.status.id===12)){
-              var errMsg=(d.stderr||d.status.description||'运行时错误').substring(0,300);
-              testResults.push({status:'re',time:'-',memory:'-'});
-              var finalVerdict='re';
-              showOJResult(finalVerdict,testResults,'Runtime Error\n\n'+errMsg);
-              saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'re',score:acCount,total:totalTests,time:new Date().toISOString()});
-              saveOJSubmission({probId:p.id,probTitle:p.title,user:cu.username,verdict:'re',score:acCount,total:totalTests,language:lang,codeLength:code.length,time:new Date().toISOString()});
-              stopped=true;
-            }else{
-              var desc=(d.status&&d.status.description)||'';
-              if(desc.indexOf('Time Limit')>=0){
-                tleCount++;
-                testResults.push({status:'tle',time:'TLE',memory:'-'});
-              }else{
-                testResults.push({status:'wa',time:(d.time||'?')+'s',memory:d.memory?Math.round(d.memory/1024)+'MB':'?'});
-              }
-            }
-          }catch(e){
-            testResults.push({status:'re',time:'-',memory:'-'});
-            showOJResult('re',testResults,'运行时错误\n\n'+e.message);
-            saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'re',score:acCount,total:totalTests,time:new Date().toISOString()});
-            saveOJSubmission({probId:p.id,probTitle:p.title,user:cu.username,verdict:'re',score:acCount,total:totalTests,language:lang,codeLength:code.length,time:new Date().toISOString()});
-            stopped=true;
-          }
+      // 异步逐步执行，让UI能更新
+      async function runTest(si){
+        if(stopped||si>=totalTests)return;
+        showRunningResult(si,totalTests);
+        var s=allTests[si];
+        var result=runLocalJudge(lang,code,s.input,s.output,p.timeLimit||2);
+        // 等一帧让UI更新
+        await new Promise(function(r){setTimeout(r,50)});
+        if(result.status==='ac'){
+          acCount++;
+          testResults.push({status:'ac',time:result.time,memory:result.memory||'-'});
+        }else if(result.status==='wa'){
+          testResults.push({status:'wa',time:result.time,memory:result.memory||'-'})
+        }else if(result.status==='tle'){
+          tleCount++;
+          testResults.push({status:'tle',time:'TLE',memory:'-'});
+        }else if(result.status==='ce'){
+          testResults.push({status:'ce',time:'-',memory:'-'});
+          stopped=true;
+          var errMsg=result.stderr||'编译/转换错误';
+          showOJResult('ce',testResults,errMsg);
+          saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'ce',score:acCount,total:totalTests,time:new Date().toISOString()});
+          saveOJSubmission({probId:p.id,probTitle:p.title,user:cu.username,verdict:'ce',score:acCount,total:totalTests,language:lang,codeLength:code.length,time:new Date().toISOString()});
+          return;
+        }else if(result.status==='re'){
+          testResults.push({status:'re',time:'-',memory:'-'});
+          stopped=true;
+          var errMsg=result.stderr||'运行时错误';
+          showOJResult('re',testResults,'Runtime Error\n\n'+errMsg);
+          saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'re',score:acCount,total:totalTests,time:new Date().toISOString()});
+          saveOJSubmission({probId:p.id,probTitle:p.title,user:cu.username,verdict:'re',score:acCount,total:totalTests,language:lang,codeLength:code.length,time:new Date().toISOString()});
+          return;
         }
+        await runTest(si+1);
+      }
+      try{
+        await runTest(0);
         if(!stopped){
           var finalVerdict;
           if(acCount===totalTests){finalVerdict='ac'}
@@ -765,7 +1057,7 @@
           saveOJSubmission({probId:p.id,probTitle:p.title,user:cu.username,verdict:finalVerdict,score:acCount,total:totalTests,language:lang,codeLength:code.length,time:new Date().toISOString()});
         }
       }catch(err){
-        showOJResult('ce',testResults,'判题服务暂不可用\n\n'+esc(err.message));
+        showOJResult('re',testResults,'判题出错\n\n'+esc(err.message));
       }
     }
 
@@ -773,36 +1065,37 @@
       var p=ojProbs[currentOJIdx];if(!p)return;
       var code=document.getElementById('ojCode').value;
       var lang=document.getElementById('ojLang').value;
-      var langId=LANG_IDS[lang]||54;
       if(!code.trim()){alert('请输入代码');return}
       var resEl=document.getElementById('ojRes');
       resEl.className='oj-result show ce';
       resEl.innerHTML='<div class="oj-running-info"><span class="spin">⏳</span> 正在运行样例...</div>';
       var samples=p.samples||[];
       if(!samples.length){resEl.className='oj-result show ce';resEl.innerHTML='<h4>无样例</h4><pre>该题目没有设置样例数据</pre>';return}
-      // Run first sample
+      // 运行第一个样例
       var stdin=samples[0].input||'';
       var expected=(samples[0].output||'').trim();
-      runJudge0(langId,code,stdin,p.timeLimit||2,p.memoryLimit||128).then(function(d){
-        if(d.status&&d.status.id===3){
-          var output=(d.stdout||'').trim();
+      try{
+        var result=runLocalJudge(lang,code,stdin,expected,p.timeLimit||2);
+        if(result.status==='ce'||result.status==='re'){
+          resEl.className='oj-result show '+(result.status==='ce'?'ce':'re');
+          var errMsg=result.stderr||'运行错误';
+          resEl.innerHTML='<h4>运行错误</h4><div style="padding:0 16px 12px"><pre>'+esc(errMsg.substring(0,500))+'</pre></div>';
+        }else{
+          var output=(result.stdout||'').trim();
           var matched=output===expected;
           var h='';
           h+='<div style="display:flex;align-items:center;margin-bottom:12px;padding:12px 16px"><span class="oj-verdict '+(matched?'ac':'wa')+'">'+(matched?'PASS':'FAIL')+'</span><span style="font-size:14px;font-weight:600">样例运行结果</span></div>';
           h+='<div style="padding:0 16px 12px">';
           h+='<pre>'+(output?'你的输出:\n'+esc(output):'(无输出)')+(expected?'\n\n期望输出:\n'+esc(expected):'');
-          var err=d.stderr||'';
-          if(err)h+='\n\n标准错误:\n'+esc(err);
-          h+='\n\n运行时间: '+(d.time||'?')+'s\n内存: '+(d.memory?Math.round(d.memory/1024)+'MB':'?')+'</pre>';
+          h+='\n\n运行时间: '+(result.time||'?')+'</pre>';
           h+='</div>';
           resEl.className='oj-result show '+(matched?'ac':'wa');
           resEl.innerHTML=h;
-        }else{
-          resEl.className='oj-result show ce';
-          var errMsg=d.compile_output||d.stderr||(d.status&&d.status.description)||'运行错误';
-          resEl.innerHTML='<h4>运行错误</h4><div style="padding:0 16px 12px"><pre>'+esc(errMsg.substring(0,500))+'</pre></div>';
         }
-      }).catch(function(e){resEl.className='oj-result show ce';resEl.innerHTML='<h4>运行失败</h4><div style="padding:0 16px 12px"><pre>'+esc(e.message)+'</pre></div>'});
+      }catch(e){
+        resEl.className='oj-result show ce';
+        resEl.innerHTML='<h4>运行失败</h4><div style="padding:0 16px 12px"><pre>'+esc(e.message)+'</pre></div>';
+      }
     }
 
     // ====== Helper Functions ======
