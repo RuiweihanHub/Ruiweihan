@@ -883,10 +883,15 @@
       border-radius: 3px;
       font-weight: 500;
     }
+
+    /* ===== 离线横幅 ===== */
+    .offline-banner{display:none;padding:8px 16px;background:#fef3c7;color:#92400e;font-size:12px;text-align:center;font-weight:500;border-bottom:1px solid #fde68a}
+    .offline-banner.show{display:block}
   </style>
 </head>
 <body>
-  
+  <div class="offline-banner" id="offlineBanner">⚠️ 当前处于离线状态 - 仅可在群聊中发送消息，消息将在恢复连接后自动发送</div>
+
   <!-- 右键菜单 -->
   <div id="ctxMenu" class="ctx-menu" style="display:none"></div>
 
@@ -3136,13 +3141,22 @@ window.getLoggedInUser = getLoggedInUser;
           messagesFileSha = data.sha;
           const content = JSON.parse(fromBase64(data.content));
           renderMessages(content.messages || []);
+          cacheMessages(fileName, content.messages || []);
         } else if (res.status === 404) {
           messagesFileSha = null;
           renderMessages([]);
         }
       } catch (err) {
         console.error('加载消息失败:', err);
-        container.innerHTML = '<div class="text-muted-inline" style="text-align:center;font-size:13px;padding:30px 0">加载失败</div>';
+        // Try cache when offline
+        var cacheFileName = currentChat.status === 'group' ? 'messages.json' : 'chat_' + [currentUser.uid, currentChat.uid].sort().join('_') + '.json';
+        var cached = getCachedMessages(cacheFileName);
+        if (cached) {
+          renderMessages(cached);
+          showToast('离线模式：显示缓存消息');
+        } else {
+          container.innerHTML = '<div class="text-muted-inline" style="text-align:center;font-size:13px;padding:30px 0">加载失败</div>';
+        }
       }
     }
     
@@ -3304,6 +3318,32 @@ window.getLoggedInUser = getLoggedInUser;
     
     async function sendMessage(msgOverrides) {
       if (!currentChat) return;
+      if (!navigator.onLine) {
+        if (currentChat.status !== 'group') {
+          showToast('离线时只能在群聊发送消息', 'error');
+          return;
+        }
+        // For group chat: queue and show optimistically
+        var input = document.getElementById('messageInput');
+        var text = input.value.trim();
+        if (!text && !msgOverrides) return;
+        input.value = ''; input.style.height = 'auto';
+        var chatFileName = 'messages.json';
+        var newMsg = { user: currentUser.username, uid: currentUser.uid, text: text, time: new Date().toISOString(), avatar: currentUser.avatar, type: 'text', ...(msgOverrides || {}) };
+        if (pendingReply && !msgOverrides?.type) {
+          newMsg.replyTo = { user: pendingReply.user, text: pendingReply.text ? pendingReply.text.substring(0, 60) : '', time: pendingReply.time };
+          cancelReply();
+        }
+        queueOfflineMessage(newMsg, chatFileName);
+        // Show optimistically in current view
+        var container = document.getElementById('messagesContainer');
+        var cached = getCachedMessages(chatFileName) || [];
+        cached.push(newMsg);
+        cacheMessages(chatFileName, cached);
+        renderMessages(cached);
+        showToast('消息已暂存，恢复连接后自动发送');
+        return;
+      }
       const input = document.getElementById('messageInput');
       const text = input.value.trim();
       if (!text && !msgOverrides) return;
@@ -4325,6 +4365,83 @@ window.getLoggedInUser = getLoggedInUser;
     // ==================== 启动 ====================
     checkLogin();
     applyChatBg();
+
+    // ====== Offline Chat Support ======
+    var CHAT_CACHE_KEY = 'rui_chat_cache';
+    var OFFLINE_QUEUE_KEY = 'rui_offline_msg_queue';
+
+    // Cache messages for offline access
+    function cacheMessages(fileName, messages) {
+      try {
+        var cache = JSON.parse(localStorage.getItem(CHAT_CACHE_KEY) || '{}');
+        cache[fileName] = { messages: messages, time: Date.now() };
+        localStorage.setItem(CHAT_CACHE_KEY, JSON.stringify(cache));
+      } catch(e) {}
+    }
+
+    // Get cached messages
+    function getCachedMessages(fileName) {
+      try {
+        var cache = JSON.parse(localStorage.getItem(CHAT_CACHE_KEY) || '{}');
+        return cache[fileName] ? cache[fileName].messages : null;
+      } catch(e) { return null; }
+    }
+
+    // Queue message for offline sending
+    function queueOfflineMessage(msg, chatFileName) {
+      try {
+        var queue = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
+        queue.push({ msg: msg, fileName: chatFileName, time: Date.now() });
+        localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(queue));
+      } catch(e) {}
+    }
+
+    // Process offline queue when back online
+    async function processOfflineQueue() {
+      try {
+        var queue = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
+        if (queue.length === 0) return;
+        localStorage.removeItem(OFFLINE_QUEUE_KEY);
+        for (var i = 0; i < queue.length; i++) {
+          var item = queue[i];
+          // Send each queued message
+          try {
+            var token = getToken();
+            var messages = []; var sha = null;
+            var getRes = await fetch('https://api.github.com/repos/' + CHAT_REPO + '/contents/' + item.fileName + '?ref=main&_=' + Date.now(), {
+              headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
+            });
+            if (getRes.ok) { var data = await getRes.json(); sha = data.sha; var content = JSON.parse(fromBase64(data.content)); messages = content.messages || []; }
+            messages.push(item.msg);
+            var body = { message: 'Offline queued: ' + item.msg.user + ' - ' + new Date().toISOString(), content: toBase64(JSON.stringify({ messages: messages }, null, 2)) };
+            if (sha) body.sha = sha;
+            await fetch('https://api.github.com/repos/' + CHAT_REPO + '/contents/' + item.fileName, {
+              method: 'PUT', headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+              body: JSON.stringify(body)
+            });
+          } catch(e) { console.error('Failed to send queued message:', e); }
+        }
+        showToast('离线消息已全部发送');
+        if (currentChat) loadMessages(); // Refresh current chat
+      } catch(e) { console.error('Queue processing error:', e); }
+    }
+
+    // Online/offline detection
+    function updateOnlineStatus() {
+      var banner = document.getElementById('offlineBanner');
+      if (!navigator.onLine) {
+        if (banner) banner.classList.add('show');
+      } else {
+        if (banner) banner.classList.remove('show');
+        processOfflineQueue();
+      }
+    }
+
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+
+    // Initial check
+    updateOnlineStatus();
   </script>
 </body>
 </html>
