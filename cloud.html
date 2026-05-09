@@ -14,6 +14,23 @@
     .file-row.selected { background-color: #eff6ff !important; }
     .file-row:hover { background-color: #f9fafb; }
     .checkbox-col { width: 40px; }
+    /* ===== Mobile Responsive ===== */
+    @media(max-width:640px){
+      nav .max-w-6xl{flex-wrap:nowrap;gap:12px}
+      nav .flex.items-center.gap-8{gap:12px;flex:1;min-width:0}
+      nav .flex.items-center.gap-6{gap:12px;font-size:13px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap!important;scrollbar-width:none}
+      nav .flex.items-center.gap-6::-webkit-scrollbar{display:none}
+      main{padding:24px 12px}
+      main .flex.items-center.justify-between.mb-8{flex-direction:column;align-items:flex-start;gap:12px}
+      main .flex.gap-2{flex-wrap:wrap}
+      main .flex.gap-2 button{flex:1;min-width:0;font-size:13px;padding:10px 12px}
+      .grid.grid-cols-12{grid-template-columns:auto 1fr auto!important;font-size:11px}
+      .grid.grid-cols-12 .col-span-6{display:block}
+      .grid.grid-cols-12 .col-span-2,.grid.grid-cols-12 .col-span-1{display:none}
+      .file-row .grid{grid-template-columns:auto 1fr auto!important}
+      .file-row .grid>div:nth-child(3),.file-row .grid>div:nth-child(4){display:none}
+      footer .max-w-6xl{flex-direction:column;gap:8px;text-align:center}
+    }
   </style>
 </head>
 <body class="min-h-screen bg-white text-gray-900 flex flex-col">
