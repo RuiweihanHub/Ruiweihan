@@ -335,7 +335,7 @@
     var UP=['Administrator','Ruiweihan','Xvjiarui','Wangpengyi','000001','000002'];
     var ADMINS=['Administrator','Ruiweihan','000001'];
     var cu=null,res=[],exams=[],ojProbs=[],curCat='',selFile=null,curTab='res',examTimer=null,currentPvRes=null;
-    var OJ_PER_PAGE=30,ojSearchQ='',ojFilterDiff='',ojFilterCat='',ojPage=1;
+    var OJ_PER_PAGE=30,ojSearchQ='',ojFilterDiff='',ojFilterCat='',ojPage=1,ojLoaded=false;
 
     function isAdmin(){return cu&&(ADMINS.indexOf(cu.username)>=0||ADMINS.indexOf(cu.uid)>=0)}
     function canUpload(){return cu&&(UP.indexOf(cu.username)>=0||UP.indexOf(cu.uid)>=0)}
