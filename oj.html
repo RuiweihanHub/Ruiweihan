@@ -649,15 +649,17 @@
       var langId=JUDGE0_LANG_MAP[lang];
       if(!langId)return{status:'ce',stdout:'',stderr:'不支持的语言: '+lang,time:'-',memory:'-'};
       try{
+        // 使用base64编码避免非UTF-8字符导致422错误
+        var b64Encode=function(s){return btoa(unescape(encodeURIComponent(s||'')))};
         var body={
-          source_code:code,
+          source_code:b64Encode(code),
           language_id:langId,
-          stdin:stdin||'',
+          stdin:b64Encode(stdin||''),
           cpu_time_limit:Number(timeLimit),
           memory_limit:128000,
           wall_time_limit:Number(timeLimit)+2
         };
-        var r=await fetch(JUDGE0_URL+'/submissions/?base64_encoded=false&wait=true',{
+        var r=await fetch(JUDGE0_URL+'/submissions/?base64_encoded=true&wait=true',{
           method:'POST',
           headers:{'Content-Type':'application/json'},
           body:JSON.stringify(body)
@@ -669,8 +671,10 @@
         }
         var data=await r.json();
         var statusId=data.status&&data.status.id;
-        var stdout=data.stdout||'';
-        var stderr=data.stderr||data.compile_output||'';
+        // 解码base64输出
+        var b64Decode=function(s){try{return s?decodeURIComponent(escape(atob(s))):''}catch(e){try{return s?atob(s):''}catch(e2){return s||''}}};
+        var stdout=b64Decode(data.stdout||'');
+        var stderr=b64Decode(data.stderr||'')||b64Decode(data.compile_output||'');
         var time=data.time||'-';
         var memory=data.memory?''+Math.round(data.memory/1024)+'KB':'-';
         // Judge0 status: 1=In Queue, 2=Processing, 3=AC, 4=WA, 5=TLE, 6=MLE, 7=RE, 8=CE, 9-14=other errors
