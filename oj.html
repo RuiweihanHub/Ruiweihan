@@ -807,63 +807,61 @@
       if(!code.trim()){alert('请输入代码');return}
       var resEl=document.getElementById('ojRes');
       resEl.className='oj-result show ce';
-      resEl.innerHTML='<div class="oj-running-info"><span class="spin">⏳</span> 准备判题...</div>';
+      resEl.innerHTML='<div class="oj-running-info"><span class="spin">⏳</span> 正在提交判题...</div>';
       var allTests=[];
       if(p.samples&&p.samples.length){p.samples.forEach(function(s){allTests.push({input:s.input,output:s.output})})}
       if(p.testData&&p.testData.length){p.testData.forEach(function(s){allTests.push({input:s.input,output:s.output})})}
       if(!allTests.length){resEl.className='oj-result show ce';resEl.innerHTML='<h4>无测试数据</h4><pre>该题目没有设置测试数据</pre>';return}
       var totalTests=allTests.length;
-      var testResults=[];
-      window._ojTestResults=testResults;
-      var acCount=0,tleCount=0,stopped=false;
-      // 异步逐步执行，让UI能更新
-      async function runTest(si){
-        if(stopped||si>=totalTests)return;
-        showRunningResult(si,totalTests);
-        var s=allTests[si];
-        var result=await runJudge(lang,code,s.input,s.output,p.timeLimit||2);
-        // 等一帧让UI更新
-        await new Promise(function(r){setTimeout(r,50)});
-        if(result.status==='ac'){
-          acCount++;
-          testResults.push({status:'ac',time:result.time,memory:result.memory||'-'});
-        }else if(result.status==='wa'){
-          testResults.push({status:'wa',time:result.time,memory:result.memory||'-'})
-        }else if(result.status==='tle'){
-          tleCount++;
-          testResults.push({status:'tle',time:'TLE',memory:'-'});
-        }else if(result.status==='ce'){
-          testResults.push({status:'ce',time:'-',memory:'-'});
-          stopped=true;
-          var errMsg=result.stderr||'编译/转换错误';
-          showOJResult('ce',testResults,errMsg);
-          saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'ce',score:acCount,total:totalTests,time:new Date().toISOString()});
-          saveOJSubmission({probId:p.id,probTitle:p.title,user:cu.username,verdict:'ce',score:acCount,total:totalTests,language:lang,codeLength:code.length,time:new Date().toISOString()});
-          return;
-        }else if(result.status==='re'){
-          testResults.push({status:'re',time:'-',memory:'-'});
-          stopped=true;
-          var errMsg=result.stderr||'运行时错误';
-          showOJResult('re',testResults,'Runtime Error\n\n'+errMsg);
-          saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:'re',score:acCount,total:totalTests,time:new Date().toISOString()});
-          saveOJSubmission({probId:p.id,probTitle:p.title,user:cu.username,verdict:'re',score:acCount,total:totalTests,language:lang,codeLength:code.length,time:new Date().toISOString()});
-          return;
-        }
-        await runTest(si+1);
-      }
+      var timeLimit=p.timeLimit||2;
       try{
-        await runTest(0);
-        if(!stopped){
-          var finalVerdict;
-          if(acCount===totalTests){finalVerdict='ac'}
-          else if(tleCount>0){finalVerdict='tle'}
-          else{finalVerdict='wa'}
-          showOJResult(finalVerdict,testResults,'');
-          saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:finalVerdict,score:acCount,total:totalTests,time:new Date().toISOString()});
-          saveOJSubmission({probId:p.id,probTitle:p.title,user:cu.username,verdict:finalVerdict,score:acCount,total:totalTests,language:lang,codeLength:code.length,time:new Date().toISOString()});
-        }
+        // 并行提交所有测试点！
+        var promises=allTests.map(function(s,i){
+          return runJudge(lang,code,s.input,s.output,timeLimit).then(function(result){
+            return{idx:i,result:result};
+          });
+        });
+        var results=await Promise.all(promises);
+        // 按顺序排列结果
+        results.sort(function(a,b){return a.idx-b.idx});
+        var testResults=[];
+        var acCount=0,tleCount=0;
+        var firstCE=null,firstRE=null;
+        results.forEach(function(r){
+          var res=r.result;
+          if(res.status==='ac'){
+            acCount++;
+            testResults.push({status:'ac',time:res.time,memory:res.memory||'-'});
+          }else if(res.status==='wa'){
+            testResults.push({status:'wa',time:res.time,memory:res.memory||'-'});
+          }else if(res.status==='tle'){
+            tleCount++;
+            testResults.push({status:'tle',time:'TLE',memory:'-'});
+          }else if(res.status==='ce'){
+            testResults.push({status:'ce',time:'-',memory:'-'});
+            if(!firstCE)firstCE=res.stderr||'编译错误';
+          }else if(res.status==='re'){
+            testResults.push({status:'re',time:'-',memory:'-'});
+            if(!firstRE)firstRE=res.stderr||'运行时错误';
+          }else{
+            testResults.push({status:res.status,time:res.time||'-',memory:res.memory||'-'});
+          }
+        });
+        // 决定最终结果
+        var finalVerdict;
+        if(firstCE){finalVerdict='ce'}
+        else if(firstRE){finalVerdict='re'}
+        else if(acCount===totalTests){finalVerdict='ac'}
+        else if(tleCount>0){finalVerdict='tle'}
+        else{finalVerdict='wa'}
+        var extraMsg='';
+        if(finalVerdict==='ce')extraMsg=firstCE;
+        else if(finalVerdict==='re')extraMsg=firstRE;
+        showOJResult(finalVerdict,testResults,extraMsg);
+        saveOJRecord({probId:p.id,probTitle:p.title,user:cu.username,status:finalVerdict,score:acCount,total:totalTests,time:new Date().toISOString()});
+        saveOJSubmission({probId:p.id,probTitle:p.title,user:cu.username,verdict:finalVerdict,score:acCount,total:totalTests,language:lang,codeLength:code.length,time:new Date().toISOString()});
       }catch(err){
-        showOJResult('re',testResults,'判题出错\n\n'+esc(err.message));
+        showOJResult('re',[],'判题出错\n\n'+esc(err.message));
       }
     }
 
