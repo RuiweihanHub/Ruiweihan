@@ -653,9 +653,9 @@
           source_code:code,
           language_id:langId,
           stdin:stdin||'',
-          cpu_time_limit:timeLimit,
+          cpu_time_limit:Number(timeLimit),
           memory_limit:128000,
-          wall_time_limit:timeLimit+2
+          wall_time_limit:Number(timeLimit)+2
         };
         var r=await fetch(JUDGE0_URL+'/submissions/?base64_encoded=false&wait=true',{
           method:'POST',
