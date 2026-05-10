@@ -814,10 +814,18 @@
       resEl.innerHTML='<div class="oj-running-info"><span class="spin">⏳</span> 正在提交判题...</div>';
       var allTests=[];
       if(p.samples&&p.samples.length){p.samples.forEach(function(s){allTests.push({input:s.input,output:s.output})})}
-      if(p.testData&&p.testData.length){p.testData.forEach(function(s){allTests.push({input:s.input,output:s.output})})}
+      // 只加入有效的testData（跳过占位假数据）
+      if(p.testData&&p.testData.length){p.testData.forEach(function(s){
+        var si=(s.input||'').trim(),so=(s.output||'').trim();
+        if(si&&so&&si.indexOf('test input')<0&&si.indexOf('Sample input')<0&&so.indexOf('test output')<0&&so.indexOf('Sample output')<0){
+          allTests.push({input:s.input,output:s.output});
+        }
+      })}
+      // 如果没有有效testData，只用samples判题
+      if(!allTests.length&&p.samples&&p.samples.length){p.samples.forEach(function(s){allTests.push({input:s.input,output:s.output})})}
       if(!allTests.length){resEl.className='oj-result show ce';resEl.innerHTML='<h4>无测试数据</h4><pre>该题目没有设置测试数据</pre>';return}
       var totalTests=allTests.length;
-      var timeLimit=p.timeLimit||2;
+      var timeLimit=parseFloat(String(p.timeLimit||'2').replace(/[^0-9.]/g,''))||2;
       try{
         // 并行提交所有测试点！
         var promises=allTests.map(function(s,i){
@@ -883,7 +891,7 @@
       var stdin=samples[0].input||'';
       var expected=(samples[0].output||'').trim();
       try{
-        var result=await runJudge(lang,code,stdin,expected,p.timeLimit||2);
+        var tl=parseFloat(String(p.timeLimit||'2').replace(/[^0-9.]/g,''))||2;var result=await runJudge(lang,code,stdin,expected,tl);
         if(result.status==='ce'||result.status==='re'){
           resEl.className='oj-result show '+(result.status==='ce'?'ce':'re');
           var errMsg=result.stderr||'运行错误';
