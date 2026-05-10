@@ -813,15 +813,8 @@
       resEl.className='oj-result show ce';
       resEl.innerHTML='<div class="oj-running-info"><span class="spin">⏳</span> 正在提交判题...</div>';
       var allTests=[];
-      // 只用samples判题（testData都是假占位数据，不用）
       if(p.samples&&p.samples.length){p.samples.forEach(function(s){allTests.push({input:s.input,output:s.output})})}
-      // 如果有真实testData（非占位），也加入
-      if(p.testData&&p.testData.length){p.testData.forEach(function(s){
-        var si=(s.input||'').trim(),so=(s.output||'').trim();
-        if(si&&so&&si.indexOf('test input')<0&&si.indexOf('Sample input')<0&&so.indexOf('test output')<0&&so.indexOf('Sample output')<0){
-          allTests.push({input:s.input,output:s.output});
-        }
-      })}
+      if(p.testData&&p.testData.length){p.testData.forEach(function(s){allTests.push({input:s.input,output:s.output})})}
       if(!allTests.length){resEl.className='oj-result show ce';resEl.innerHTML='<h4>无测试数据</h4><pre>该题目没有设置测试数据</pre>';return}
       var totalTests=allTests.length;
       var timeLimit=parseFloat(String(p.timeLimit||'2').replace(/[^0-9.]/g,''))||2;
