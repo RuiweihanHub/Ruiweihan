@@ -2603,12 +2603,12 @@ window.getLoggedInUser = getLoggedInUser;
     async function recallMessage(data) {
       if (!data || !data.time || !currentChat) return;
       const token = getToken();
-      const chatFileName = currentChat.status === 'group' ? 'messages.json' : `chat_${[currentUser.uid, currentChat.uid].sort().join('_')}.json`;
+      const msgChatFileName = currentChat.status === 'group' ? 'messages.json' : `chat_${[currentUser.uid, currentChat.uid].sort().join('_')}.json`;
       const myRole = getUserRoleLocal(currentUser.username, currentUser.uid);
       const myLevel = currentUser.level || 0;
       const canManageOthers = myRole === 'su' || myRole === 'ma' || myLevel > 50;
       try {
-        const getRes = await fetch(`https://api.github.com/repos/${CHAT_REPO}/contents/${chatFileName}?ref=main&_=${Date.now()}`, {
+        const getRes = await fetch(`https://api.github.com/repos/${CHAT_REPO}/contents/${msgChatFileName}?ref=main&_=${Date.now()}`, {
           headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
         });
         if (!getRes.ok) { showToast('撤回失败', 'error'); return; }
@@ -2630,7 +2630,7 @@ window.getLoggedInUser = getLoggedInUser;
         }
         const body = { message: `Recall: ${currentUser.username} - ${new Date().toISOString()}`, content: toBase64(JSON.stringify({ messages }, null, 2)) };
         if (getData.sha) body.sha = getData.sha;
-        const saveRes = await fetch(`https://api.github.com/repos/${CHAT_REPO}/contents/${chatFileName}`, {
+        const saveRes = await fetch(`https://api.github.com/repos/${CHAT_REPO}/contents/${msgChatFileName}`, {
           method: 'PUT', headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
           body: JSON.stringify(body)
         });
@@ -2645,13 +2645,13 @@ window.getLoggedInUser = getLoggedInUser;
     async function deleteMessage(data) {
       if (!data || !data.time || !currentChat) return;
       const token = getToken();
-      const chatFileName = currentChat.status === 'group' ? 'messages.json' : `chat_${[currentUser.uid, currentChat.uid].sort().join('_')}.json`;
+      const msgChatFileName = currentChat.status === 'group' ? 'messages.json' : `chat_${[currentUser.uid, currentChat.uid].sort().join('_')}.json`;
       const myRole = getUserRoleLocal(currentUser.username, currentUser.uid);
       const myLevel = currentUser.level || 0;
       const canManageOthers = myRole === 'su' || myRole === 'ma' || myLevel > 50;
       if (!data.isMine && !canManageOthers) { showToast('没有权限删除他人消息', 'error'); return; }
       try {
-        const getRes = await fetch(`https://api.github.com/repos/${CHAT_REPO}/contents/${chatFileName}?ref=main&_=${Date.now()}`, {
+        const getRes = await fetch(`https://api.github.com/repos/${CHAT_REPO}/contents/${msgChatFileName}?ref=main&_=${Date.now()}`, {
           headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
         });
         if (!getRes.ok) { showToast('删除失败', 'error'); return; }
@@ -2666,7 +2666,7 @@ window.getLoggedInUser = getLoggedInUser;
         messages.splice(idx, 1);
         const body = { message: `Delete: ${currentUser.username} - ${new Date().toISOString()}`, content: toBase64(JSON.stringify({ messages }, null, 2)) };
         if (getData.sha) body.sha = getData.sha;
-        const saveRes = await fetch(`https://api.github.com/repos/${CHAT_REPO}/contents/${chatFileName}`, {
+        const saveRes = await fetch(`https://api.github.com/repos/${CHAT_REPO}/contents/${msgChatFileName}`, {
           method: 'PUT', headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
           body: JSON.stringify(body)
         });
@@ -3179,7 +3179,7 @@ window.getLoggedInUser = getLoggedInUser;
         var cacheFileName = currentChat.status === 'group' ? 'messages.json' : 'chat_' + [currentUser.uid, currentChat.uid].sort().join('_') + '.json';
         var cached = getCachedMessages(cacheFileName);
         if (cached) {
-          renderMessages(cached);
+          renderMessages(ol_cached);
           showToast('离线模式：显示缓存消息');
         } else {
           container.innerHTML = '<div class="text-muted-inline" style="text-align:center;font-size:13px;padding:30px 0">加载失败</div>';
@@ -3351,48 +3351,48 @@ window.getLoggedInUser = getLoggedInUser;
           return;
         }
         // For group chat: queue and show optimistically
-        var input = document.getElementById('messageInput');
-        var text = input.value.trim();
-        if (!text && !msgOverrides) return;
-        input.value = ''; input.style.height = 'auto';
-        var chatFileName = 'messages.json';
-        var newMsg = { user: currentUser.username, uid: currentUser.uid, text: text, time: new Date().toISOString(), avatar: currentUser.avatar, type: 'text', ...(msgOverrides || {}) };
+        var ol_input = document.getElementById('messageInput');
+        var ol_text = ol_input.value.trim();
+        if (!ol_text && !msgOverrides) return;
+        ol_input.value = ''; ol_input.style.height = 'auto';
+        var ol_chatFileName = 'messages.json';
+        var ol_newMsg = { user: currentUser.username, uid: currentUser.uid, text: ol_text, time: new Date().toISOString(), avatar: currentUser.avatar, type: 'text', ...(msgOverrides || {}) };
         if (pendingReply && !msgOverrides?.type) {
-          newMsg.replyTo = { user: pendingReply.user, text: pendingReply.text ? pendingReply.text.substring(0, 60) : '', time: pendingReply.time };
+          msgNew.replyTo = { user: pendingReply.user, text: pendingReply.text ? pendingReply.text.substring(0, 60) : '', time: pendingReply.time };
           cancelReply();
         }
-        queueOfflineMessage(newMsg, chatFileName);
+        queueOfflineMessage(ol_newMsg, ol_msgChatFileName);
         // Show optimistically in current view
-        var container = document.getElementById('messagesContainer');
-        var cached = getCachedMessages(chatFileName) || [];
-        cached.push(newMsg);
-        cacheMessages(chatFileName, cached);
-        renderMessages(cached);
+        var ol_container = document.getElementById('messagesContainer');
+        var ol_cached = getCachedMessages(ol_msgChatFileName) || [];
+        ol_cached.push(ol_newMsg);
+        cacheMessages(ol_chatFileName, ol_cached);
+        renderMessages(ol_cached);
         showToast('消息已暂存，恢复连接后自动发送');
         return;
       }
-      const input = document.getElementById('messageInput');
-      const text = input.value.trim();
-      if (!text && !msgOverrides) return;
-      input.value = ''; input.style.height = 'auto';
+      const msgInput = document.getElementById('messageInput');
+      const msgText = msgInput.value.trim();
+      if (!msgText && !msgOverrides) return;
+      msgInput.value = ''; msgInput.style.height = 'auto';
       const token = getToken();
-      const chatFileName = currentChat.status === 'group' ? 'messages.json' : `chat_${[currentUser.uid, currentChat.uid].sort().join('_')}.json`;
+      const msgChatFileName = currentChat.status === 'group' ? 'messages.json' : `chat_${[currentUser.uid, currentChat.uid].sort().join('_')}.json`;
       try {
         let messages = []; let sha = null;
-        const getRes = await fetch(`https://api.github.com/repos/${CHAT_REPO}/contents/${chatFileName}?ref=main&_=${Date.now()}`, {
+        const getRes = await fetch(`https://api.github.com/repos/${CHAT_REPO}/contents/${msgChatFileName}?ref=main&_=${Date.now()}`, {
           headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
         });
         if (getRes.ok) { const data = await getRes.json(); sha = data.sha; const content = JSON.parse(fromBase64(data.content)); messages = content.messages || []; }
-        const newMsg = { user: currentUser.username, uid: currentUser.uid, text: text, time: new Date().toISOString(), avatar: currentUser.avatar, type: 'text', ...(msgOverrides || {}) };
+        const msgNew = { user: currentUser.username, uid: currentUser.uid, text: msgText, time: new Date().toISOString(), avatar: currentUser.avatar, type: 'text', ...(msgOverrides || {}) };
         // Add reply data if pending
         if (pendingReply && !msgOverrides?.type) {
-          newMsg.replyTo = { user: pendingReply.user, text: pendingReply.text ? pendingReply.text.substring(0, 60) : '', time: pendingReply.time };
+          msgNew.replyTo = { user: pendingReply.user, text: pendingReply.text ? pendingReply.text.substring(0, 60) : '', time: pendingReply.time };
           cancelReply();
         }
-        messages.push(newMsg);
+        messages.push(msgNew);
         const body = { message: `Chat: ${currentUser.username} - ${new Date().toISOString()}`, content: toBase64(JSON.stringify({ messages }, null, 2)) };
         if (sha) body.sha = sha;
-        const saveRes = await fetch(`https://api.github.com/repos/${CHAT_REPO}/contents/${chatFileName}`, {
+        const saveRes = await fetch(`https://api.github.com/repos/${CHAT_REPO}/contents/${msgChatFileName}`, {
           method: 'PUT', headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
           body: JSON.stringify(body)
         });
@@ -4006,11 +4006,11 @@ window.getLoggedInUser = getLoggedInUser;
       if (!pendingRedPacket) return;
       const { time, uid, amount, wish, senderName } = pendingRedPacket;
       const token = getToken();
-      const chatFileName = currentChat.status === 'group' ? 'messages.json' : `chat_${[currentUser.uid, currentChat.uid].sort().join('_')}.json`;
+      const msgChatFileName = currentChat.status === 'group' ? 'messages.json' : `chat_${[currentUser.uid, currentChat.uid].sort().join('_')}.json`;
 
       try {
         // 1. 先更新消息为已领取
-        const getRes = await fetch(`https://api.github.com/repos/${CHAT_REPO}/contents/${chatFileName}?ref=main&_=${Date.now()}`, {
+        const getRes = await fetch(`https://api.github.com/repos/${CHAT_REPO}/contents/${msgChatFileName}?ref=main&_=${Date.now()}`, {
           headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
         });
         if (!getRes.ok) { showToast('领取失败', 'error'); return; }
@@ -4027,7 +4027,7 @@ window.getLoggedInUser = getLoggedInUser;
         // 保存消息
         const body = { message: `Red packet claimed by ${currentUser.username}`, content: toBase64(JSON.stringify({ messages }, null, 2)) };
         if (getData.sha) body.sha = getData.sha;
-        const saveMsgRes = await fetch(`https://api.github.com/repos/${CHAT_REPO}/contents/${chatFileName}`, {
+        const saveMsgRes = await fetch(`https://api.github.com/repos/${CHAT_REPO}/contents/${msgChatFileName}`, {
           method: 'PUT', headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
           body: JSON.stringify(body)
         });
@@ -4106,9 +4106,9 @@ window.getLoggedInUser = getLoggedInUser;
     async function toggleReaction(msgTime, emoji) {
       if (!currentChat) return;
       const token = getToken();
-      const chatFileName = currentChat.status === 'group' ? 'messages.json' : `chat_${[currentUser.uid, currentChat.uid].sort().join('_')}.json`;
+      const msgChatFileName = currentChat.status === 'group' ? 'messages.json' : `chat_${[currentUser.uid, currentChat.uid].sort().join('_')}.json`;
       try {
-        const getRes = await fetch(`https://api.github.com/repos/${CHAT_REPO}/contents/${chatFileName}?ref=main&_=${Date.now()}`, {
+        const getRes = await fetch(`https://api.github.com/repos/${CHAT_REPO}/contents/${msgChatFileName}?ref=main&_=${Date.now()}`, {
           headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
         });
         if (!getRes.ok) return;
@@ -4127,7 +4127,7 @@ window.getLoggedInUser = getLoggedInUser;
         }
         const body = { message: `Reaction by ${currentUser.username}`, content: toBase64(JSON.stringify({ messages }, null, 2)) };
         if (getData.sha) body.sha = getData.sha;
-        const saveRes = await fetch(`https://api.github.com/repos/${CHAT_REPO}/contents/${chatFileName}`, {
+        const saveRes = await fetch(`https://api.github.com/repos/${CHAT_REPO}/contents/${msgChatFileName}`, {
           method: 'PUT', headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
           body: JSON.stringify(body)
         });
@@ -4293,7 +4293,7 @@ window.getLoggedInUser = getLoggedInUser;
       const chatFileName = target.status === 'group' ? 'messages.json' : `chat_${[currentUser.uid, target.uid].sort().join('_')}.json`;
       try {
         let messages = []; let sha = null;
-        const getRes = await fetch(`https://api.github.com/repos/${CHAT_REPO}/contents/${chatFileName}?ref=main&_=${Date.now()}`, {
+        const getRes = await fetch(`https://api.github.com/repos/${CHAT_REPO}/contents/${msgChatFileName}?ref=main&_=${Date.now()}`, {
           headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
         });
         if (getRes.ok) { const data = await getRes.json(); sha = data.sha; const content = JSON.parse(fromBase64(data.content)); messages = content.messages || []; }
@@ -4301,7 +4301,7 @@ window.getLoggedInUser = getLoggedInUser;
         messages.push(fwdMsg);
         const body = { message: `Forward by ${currentUser.username}`, content: toBase64(JSON.stringify({ messages }, null, 2)) };
         if (sha) body.sha = sha;
-        const saveRes = await fetch(`https://api.github.com/repos/${CHAT_REPO}/contents/${chatFileName}`, {
+        const saveRes = await fetch(`https://api.github.com/repos/${CHAT_REPO}/contents/${msgChatFileName}`, {
           method: 'PUT', headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
           body: JSON.stringify(body)
         });
@@ -4415,7 +4415,7 @@ window.getLoggedInUser = getLoggedInUser;
     }
 
     // Queue message for offline sending
-    function queueOfflineMessage(msg, chatFileName) {
+    function queueOfflineMessage(msg, msgChatFileName) {
       try {
         var queue = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
         queue.push({ msg: msg, fileName: chatFileName, time: Date.now() });
